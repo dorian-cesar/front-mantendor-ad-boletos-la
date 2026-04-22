@@ -1,0 +1,30 @@
+[build]
+  # Comando para compilar tu código de Next.js
+  command = "npm run build"
+  
+  # Directorio donde Next.js genera la versión de producción
+  publish = ".next"
+
+[[plugins]]
+  # Plugin oficial para garantizar compatibilidad total con la App Router de Next.js
+  package = "@netlify/plugin-nextjs"
+
+# ----------------------------------------------------
+# CONFIGURACIÓN PARA EL COMPRESOR DE VIDEOS (FFMPEG)
+# ----------------------------------------------------
+# FFMPEG (WASM) necesita un entorno de aislamiento para funcionar
+# correctamente en los navegadores sin dar errores de memoria.
+[[headers]]
+  for = "/totems"
+  [headers.values]
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Embedder-Policy = "unsafe-none"
+
+[[headers]]
+  for = "/videos"
+  [headers.values]
+    Cross-Origin-Opener-Policy = "same-origin"
+    # IMPORTANTE: Si FFmpeg falla al "Inicializar conversor" en producción, 
+    # es posible que necesites cambiar 'unsafe-none' por 'require-corp'
+    # pero eso requiere que tu backend externo soporte reglas CORS estrictas.
+    Cross-Origin-Embedder-Policy = "unsafe-none"
