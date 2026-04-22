@@ -24,21 +24,46 @@ async function handleRequest(request: NextRequest, path: string[]) {
   try {
     const API_URL = process.env.API_URL;
     const API_KEY = process.env.API_KEY;
+    const MEDIA_URL = process.env.MEDIA_URL;
 
-    if (!API_URL || !API_KEY) {
+    if (!API_URL || !API_KEY || !MEDIA_URL) {
       return NextResponse.json({ 
         error: "Configuración faltante",
-        debug: { hasUrl: !!API_URL, hasKey: !!API_KEY }
+        debug: { hasApiUrl: !!API_URL, hasKey: !!API_KEY, hasMediaUrl: !!MEDIA_URL }
       }, { status: 500 });
     }
 
     const searchParams = request.nextUrl.searchParams.toString();
     const endpoint = `/${path.join("/")}${searchParams ? `?${searchParams}` : ""}`;
-    const targetUrl = `${API_URL}${endpoint}`;
+    
+    // Lógica para determinar la URL de destino
+    let targetUrl: string;
+    const isVideoAPI = path[0] === "videos";
+    const isUploads = path[0] === "uploads";
 
-    // Forwarding specific headers to ensure clean communication
+    if (isVideoAPI) {
+      // Para la API de videos, usamos la URL especial con /api
+      targetUrl = `${MEDIA_URL}/api${endpoint}`;
+    } else if (isUploads) {
+      // Para los archivos multimedia (mp4), usamos la raíz del servidor
+      targetUrl = `${MEDIA_URL}${endpoint}`;
+    } else {
+      // Para el resto (Tótems, Empresas, Login), usamos el API_URL por defecto
+      targetUrl = `${API_URL}${endpoint}`;
+    }
+
+    // Headers a reenviar del cliente al backend
     const headers = new Headers();
-    ['content-type', 'authorization', 'accept'].forEach(h => {
+    const headersToForward = [
+      'content-type', 
+      'authorization', 
+      'accept', 
+      'range', // CRUCIAL para streaming de videos
+      'if-range',
+      'if-none-match'
+    ];
+
+    headersToForward.forEach(h => {
       const val = request.headers.get(h);
       if (val) headers.set(h, val);
     });
@@ -46,22 +71,47 @@ async function handleRequest(request: NextRequest, path: string[]) {
     // Inyectar API KEY de forma privada
     headers.set("x-api-key", API_KEY);
 
-    // Proxy the request using streaming
+    // Petición al backend con streaming
     const response = await fetch(targetUrl, {
       method: request.method,
       headers,
       body: request.body,
       // @ts-ignore
-      duplex: 'half'
+      duplex: 'half',
+      cache: 'no-store'
     });
 
-    // Return the response as a stream (minimizes TTFB)
+    // Headers a reenviar del backend al cliente (navegador)
+    const responseHeaders = new Headers();
+    const headersToReturn = [
+      'content-type',
+      'content-length',
+      'content-range',
+      'accept-ranges',
+      'cache-control',
+      'etag',
+      'last-modified'
+    ];
+
+    headersToReturn.forEach(h => {
+      const val = response.headers.get(h);
+      if (val) responseHeaders.set(h, val);
+    });
+
+    // Manejo de errores (el status 206 Partial Content es normal en videos)
+    if (!response.ok && response.status !== 206) {
+      const errorText = await response.text();
+      console.error(`Backend Error (${response.status}):`, errorText);
+      return new NextResponse(errorText, {
+        status: response.status,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    // Retorno de la respuesta como stream continuo
     return new NextResponse(response.body, {
       status: response.status,
-      headers: {
-        "Content-Type": response.headers.get("Content-Type") || "application/json",
-        "Cache-Control": "no-store, max-age=0"
-      },
+      headers: responseHeaders,
     });
 
   } catch (error: any) {

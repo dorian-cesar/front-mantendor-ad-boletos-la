@@ -110,7 +110,7 @@ export function VideoDashboard() {
                       <div className="flex flex-col">
                         <span>{vid.nombre}</span>
                         <a 
-                          href={vid.url?.startsWith('http') ? vid.url : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}${vid.url}`} 
+                          href={vid.url?.startsWith('http') ? vid.url : `/api/proxy${vid.url?.startsWith('/') ? '' : '/'}${vid.url}`} 
                           target="_blank" 
                           className="text-[10px] text-blue-500 hover:underline"
                         >
