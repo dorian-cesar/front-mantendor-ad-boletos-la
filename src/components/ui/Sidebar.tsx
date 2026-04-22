@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { LogOut } from "lucide-react";
+import { LogOut, TabletSmartphone, Building, Video } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 interface SidebarItemProps {
   icon: React.ReactNode;
@@ -21,6 +21,7 @@ function SidebarItem({ icon, label, href, active }: SidebarItemProps) {
       }`}
     >
       {React.cloneElement(icon as React.ReactElement, {
+        size: 20,
         className: active ? "text-blue-600" : "text-slate-400",
       })}
       {label}
@@ -32,11 +33,14 @@ export function Sidebar() {
   const [sidebarWidth, setSidebarWidth] = useState(260);
   const [isDragging, setIsDragging] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.push("/login");
+  };
 
   const handleMouseDown = () => setIsDragging(true);
-
-  // Note: Dragging logic would ideally be in a custom hook or global mouse listener
-  // For now, keeping it simple as a component
   
   return (
     <aside
@@ -65,19 +69,19 @@ export function Sidebar() {
 
         <nav className="px-4 space-y-1.5">
           <SidebarItem
-            icon={<span className="lucide-tablet-smartphone" />} 
+            icon={<TabletSmartphone />} 
             label="Totem"
             href="/totems"
             active={pathname === "/totems"}
           />
           <SidebarItem
-            icon={<span className="lucide-building" />}
+            icon={<Building />}
             label="Empresa"
             href="/empresas"
             active={pathname === "/empresas"}
           />
           <SidebarItem
-            icon={<span className="lucide-video" />}
+            icon={<Video />}
             label="Videos"
             href="/videos"
             active={pathname === "/videos"}
@@ -86,7 +90,10 @@ export function Sidebar() {
       </div>
 
       <div className="p-4 border-t border-slate-200 overflow-hidden whitespace-nowrap w-full">
-        <button className="flex items-center gap-3 text-slate-500 hover:text-slate-800 transition-colors w-full px-2 py-2 rounded-md hover:bg-slate-50">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 text-slate-500 hover:text-slate-800 transition-colors w-full px-2 py-2 rounded-md hover:bg-slate-50"
+        >
           <LogOut size={18} />
           <span className="text-sm font-medium">Cerrar sesión</span>
         </button>
