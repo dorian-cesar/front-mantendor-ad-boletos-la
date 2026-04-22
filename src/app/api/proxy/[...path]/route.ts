@@ -98,9 +98,17 @@ async function handleRequest(request: NextRequest, path: string[]) {
       if (val) responseHeaders.set(h, val);
     });
 
+    // Manejo especial para 304 (Not Modified), que NO debe tener body
+    if (response.status === 304) {
+      return new NextResponse(null, {
+        status: 304,
+        headers: responseHeaders,
+      });
+    }
+
     // Manejo de errores (el status 206 Partial Content es normal en videos)
     if (!response.ok && response.status !== 206) {
-      const errorText = await response.text();
+      const errorText = await response.text().catch(() => "");
       console.error(`Backend Error (${response.status}):`, errorText);
       return new NextResponse(errorText, {
         status: response.status,
