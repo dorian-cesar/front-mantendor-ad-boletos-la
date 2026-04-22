@@ -100,7 +100,7 @@ export function UploadVideoModal({ isOpen, onClose, onSuccess }: UploadVideoModa
       await ffmpeg.exec(['-i', 'input.mp4', '-vcodec', 'libx264', '-crf', '28', '-preset', 'ultrafast', 'output.mp4']);
       
       const data = await ffmpeg.readFile('output.mp4');
-      const blob = new Blob([data as Uint8Array], { type: 'video/mp4' });
+      const blob = new Blob([data as unknown as BlobPart], { type: 'video/mp4' });
       
       const formData = new FormData();
       formData.append("video", blob, file.name || "video.mp4");
