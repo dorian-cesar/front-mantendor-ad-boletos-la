@@ -20,10 +20,11 @@ function SidebarItem({ icon, label, href, active }: SidebarItemProps) {
           : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
       }`}
     >
-      {React.cloneElement(icon as React.ReactElement, {
-        size: 20,
-        className: active ? "text-blue-600" : "text-slate-400",
-      })}
+      {React.isValidElement(icon) &&
+        React.cloneElement(icon as React.ReactElement<any>, {
+          size: 20,
+          className: active ? "text-blue-600" : "text-slate-400",
+        })}
       {label}
     </Link>
   );
