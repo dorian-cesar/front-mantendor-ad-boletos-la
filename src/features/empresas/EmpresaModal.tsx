@@ -7,9 +7,10 @@ import { apiFetch } from '@/lib/api';
 interface EmpresaModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export default function EmpresaModal({ isOpen, onClose }: EmpresaModalProps) {
+export function EmpresaModal({ isOpen, onClose, onSuccess }: EmpresaModalProps) {
   const [nombre, setNombre] = useState("");
   const [estado, setEstado] = useState("Activo");
   const [rut, setRut] = useState("");
@@ -43,6 +44,7 @@ export default function EmpresaModal({ isOpen, onClose }: EmpresaModalProps) {
         });
         setIsSaving(false);
         setDone(true);
+        if (onSuccess) onSuccess();
         setTimeout(() => {
             handleClose();
         }, 1500);
@@ -57,7 +59,7 @@ export default function EmpresaModal({ isOpen, onClose }: EmpresaModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity">
       <div 
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all border border-slate-100 mx-4"
+        className="bg-white rounded-3xl shadow-2xl w-full max-md overflow-hidden transform transition-all border border-slate-100 mx-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-slate-50/50">
@@ -84,7 +86,6 @@ export default function EmpresaModal({ isOpen, onClose }: EmpresaModalProps) {
             </div>
           ) : (
             <form className="space-y-6" onSubmit={handleSave}>
-              
               <div className="space-y-4">
                 <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center gap-4 mb-2">
                     <div className="p-2 bg-white rounded-xl shadow-sm text-blue-600">
@@ -103,7 +104,7 @@ export default function EmpresaModal({ isOpen, onClose }: EmpresaModalProps) {
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
                     placeholder="Ej: Transportes Interurbano S.A." 
-                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all"
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
                     required
                     disabled={isSaving}
                   />
@@ -148,7 +149,6 @@ export default function EmpresaModal({ isOpen, onClose }: EmpresaModalProps) {
                 </div>
               </div>
 
-              {/* Botones */}
               <div className="pt-4 flex items-center gap-3">
                 <button 
                   type="button" 

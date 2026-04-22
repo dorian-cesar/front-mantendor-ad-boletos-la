@@ -1,4 +1,4 @@
-import EmpresaDashboard from "./empresas_view";
+import { EmpresaDashboard } from "@/features/empresas/EmpresaDashboard";
 
 export default function EmpresasPage() {
   return <EmpresaDashboard />;
