@@ -61,7 +61,7 @@ export default function LoginView() {
 
                     <form className="space-y-5" onSubmit={handleSubmit}>
                         <div>
-                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Correo Electrónico</label>
+                            <label className="block text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2 px-1">Correo Electrónico</label>
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
                                     <Mail size={18} />
@@ -72,13 +72,13 @@ export default function LoginView() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="admin@ejemplo.com"
-                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all outline-none"
+                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all outline-none"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Contraseña</label>
+                            <label className="block text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2 px-1">Contraseña</label>
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
                                     <Lock size={18} />
@@ -89,7 +89,7 @@ export default function LoginView() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all outline-none"
+                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all outline-none"
                                 />
                             </div>
                         </div>
