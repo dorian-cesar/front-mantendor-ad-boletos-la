@@ -5,6 +5,16 @@ import { LogIn, Mail, Lock, Loader2, AlertCircle } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useRouter } from "next/navigation";
 
+interface LoginResponse {
+    token: string;
+    message?: string;
+    user?: {
+        id: number | string;
+        email: string;
+        rol?: string;
+    };
+}
+
 export default function LoginView() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -12,25 +22,28 @@ export default function LoginView() {
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
 
         try {
-            const data = await apiFetch("/auth/login", {
+            const data = (await apiFetch("/auth/login", {
                 method: "POST",
                 body: JSON.stringify({ email, password }),
-            });
+            })) as LoginResponse;
 
             if (data.token) {
                 localStorage.setItem("token", data.token);
+                // Si el backend provee rol de usuario, podríamos guardarlo aquí:
+                // if (data.user?.rol) localStorage.setItem("rol", data.user.rol);
                 router.push("/totems");
             } else {
-                throw new Error("Token no recibido");
+                throw new Error("Respuesta inválida del servidor: Token no recibido");
             }
-        } catch (err: any) {
-            setError(err.message || "Error al iniciar sesión. Verifique sus credenciales.");
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : "Error al iniciar sesión. Verifique sus credenciales o la conexión al servidor.";
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
