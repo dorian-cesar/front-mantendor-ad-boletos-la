@@ -1,4 +1,4 @@
-const BASE_URL = "https://backend-boletos-publicidad.dev-wit.com/api";
+const BASE_URL = "/api/proxy";
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
