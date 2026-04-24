@@ -4,14 +4,18 @@ import { apiFetch } from "@/lib/api";
 export function useEmpresas() {
   const [empresas, setEmpresas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchEmpresas = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await apiFetch("/empresas");
       setEmpresas(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Error fetching empresas:", error);
+    } catch (err: any) {
+      console.error("Error fetching empresas:", err);
+      setError(err.message || "Error al cargar empresas");
+      setEmpresas([]);
     } finally {
       setLoading(false);
     }
@@ -25,12 +29,8 @@ export function useEmpresas() {
     try {
       await apiFetch(`/empresas/${id}`, {
         method: "PUT",
-        body: JSON.stringify({
-          nombre: form.nombre,
-          rut: form.rut,
-          direccion: form.direccion,
-          status: form.status,
-        }),
+        // Enviamos todo el form completo por si el backend necesita otros campos
+        body: JSON.stringify(form),
       });
       await fetchEmpresas();
       return true;
@@ -55,6 +55,7 @@ export function useEmpresas() {
   return {
     empresas,
     loading,
+    error,
     fetchEmpresas,
     handleUpdate,
     handleDelete,

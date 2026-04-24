@@ -1,6 +1,8 @@
-import React from "react";
-import { Edit, Trash2, ChevronDown, ChevronUp, Hash, DollarSign, Terminal, Loader2 } from "lucide-react";
+import React, { useState } from "react";
+import { Edit, Trash2, ChevronDown, ChevronUp, Hash, DollarSign, Terminal, Loader2, Film, Video, Building, Save } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { VideosListDisplay } from "./VideosListDisplay";
+import { VideoSelector } from "./VideoSelector";
 
 interface TotemListProps {
   totems: any[];
@@ -15,6 +17,9 @@ interface TotemListProps {
   onDelete: (id: string) => void;
   isSaving: boolean;
   onCancelEdit: () => void;
+  allVideos: any[];
+  availableVideos: any[];
+  empresas: any[];
 }
 
 export function TotemList({
@@ -29,12 +34,27 @@ export function TotemList({
   onSave,
   onDelete,
   isSaving,
-  onCancelEdit
+  onCancelEdit,
+  allVideos,
+  availableVideos,
+  empresas,
 }: TotemListProps) {
+  
+  const handleVideoChange = (selectedIds: string[]) => {
+    const selectedVideos = allVideos.filter(v => selectedIds.includes(String(v.id)));
+    const uniqueEmpresaIds = Array.from(new Set(selectedVideos.map(v => v.empresa_id)));
+    
+    setEditForm({
+      ...editForm,
+      video_ids: selectedIds,
+      empresa_ids: uniqueEmpresaIds
+    });
+  };
+
   if (loading) {
     return (
       <div className="py-20 text-center">
-        <Loader2 size={32} className="animate-spin mx-auto text-blue-500 mb-2" />
+        <Loader2 size={32} className="animate-spin mx-auto text-slate-900 mb-2" />
         Cargando equipos...
       </div>
     );
@@ -63,14 +83,14 @@ export function TotemList({
               <tr
                 onClick={() => toggleExpand(t.id)}
                 className={`border-b transition-colors cursor-pointer group select-none ${
-                  expandedId === t.id ? "bg-blue-50/40 border-blue-100" : "border-slate-100 hover:bg-slate-50"
+                  expandedId === t.id ? "bg-slate-50 border-slate-200" : "border-slate-100 hover:bg-slate-50"
                 }`}
               >
-                <td className="py-3.5 px-5 text-slate-400 group-hover:text-blue-500 transition-colors">
+                <td className="py-3.5 px-5 text-slate-400 group-hover:text-slate-900 transition-colors">
                   {expandedId === t.id ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </td>
-                <td className="py-3.5 px-5 font-medium text-slate-600 flex items-center gap-2 text-xs">
-                  <Hash size={10} className="text-slate-400" />
+                <td className="py-3.5 px-5 font-bold text-slate-950 flex items-center gap-2 text-xs">
+                  <Hash size={10} className="text-slate-900" />
                   {t.id.toString().substring(0, 8)}
                 </td>
                 <td className="py-3.5 px-5">
@@ -94,9 +114,9 @@ export function TotemList({
                   <td colSpan={6} className="p-0">
                     {editingId === t.id ? (
                       <div className="px-16 py-8 animate-in slide-in-from-top-2 duration-200 fade-in">
-                        <div className="bg-white rounded-2xl border border-blue-200 shadow-lg p-6 max-w-4xl mx-auto flex flex-col gap-6">
+                        <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 max-w-4xl mx-auto flex flex-col gap-6">
                           <div className="flex justify-between items-center border-b border-slate-100 pb-4">
-                            <h3 className="font-bold text-blue-600 flex items-center gap-2 text-lg">
+                            <h3 className="font-bold text-slate-900 flex items-center gap-2 text-lg">
                               <Edit size={20} /> Editando Configuración: {t.id}
                             </h3>
                             <StatusBadge status={editForm.status} />
@@ -109,7 +129,7 @@ export function TotemList({
                               <input
                                 value={editForm.identificador}
                                 onChange={(e) => setEditForm({ ...editForm, identificador: e.target.value })}
-                                className="w-full text-sm font-medium border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50 focus:bg-white transition-all shadow-sm"
+                                className="w-full text-sm font-medium border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 outline-none bg-slate-50 focus:bg-white transition-all shadow-sm"
                               />
                             </div>
                             <div>
@@ -117,7 +137,7 @@ export function TotemList({
                                 <select 
                                     value={editForm.status}
                                     onChange={e => setEditForm({...editForm, status: e.target.value})}
-                                    className="w-full text-sm font-medium border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-all shadow-sm cursor-pointer"
+                                    className="w-full text-sm font-medium border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-slate-900/10 bg-slate-50 focus:bg-white transition-all shadow-sm cursor-pointer"
                                 >
                                     <option value="Activo">Activo</option>
                                     <option value="Inactivo">Inactivo</option>
@@ -130,11 +150,31 @@ export function TotemList({
                               <input
                                 value={editForm.direccion}
                                 onChange={(e) => setEditForm({ ...editForm, direccion: e.target.value })}
-                                className="w-full text-sm font-medium border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-all shadow-sm"
+                                className="w-full text-sm font-medium border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-slate-900/10 bg-slate-50 focus:bg-white transition-all shadow-sm"
                               />
                             </div>
+                            <div className="md:col-span-3">
+                              <VideosListDisplay
+                                videos={allVideos}
+                                empresas={empresas}
+                                videoIds={editForm.video_ids || []}
+                              />
+                            </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    (window as any).openVideoPicker(t.id, editForm.video_ids);
+                                  }}
+                                  className="w-full py-5 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-2 text-slate-600 hover:bg-slate-100/50 hover:border-slate-300 transition-all group"
+                                >
+                                  <div className="p-3 bg-white rounded-xl shadow-sm text-slate-800 group-hover:scale-110 transition-transform">
+                                    <Film size={28} />
+                                  </div>
+                                  <span className="text-xs font-black uppercase tracking-widest leading-none">Asignar Contenido Multimedia</span>
+                                  <span className="text-[10px] text-slate-400 font-medium">Click para abrir el selector rápido por empresa</span>
+                                </button>
                           </div>
-                          <div className="flex gap-3 mt-2 border-t border-slate-100 pt-6">
+                          <div className="flex gap-3 mt-6 border-t border-slate-100 pt-6">
                             <button
                               onClick={onCancelEdit}
                               className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-bold flex justify-center items-center gap-2 hover:bg-slate-50 transition-colors shadow-sm"
@@ -144,9 +184,9 @@ export function TotemList({
                             <button
                               onClick={() => onSave(t.id)}
                               disabled={isSaving}
-                              className="flex-1 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold flex justify-center items-center gap-2 hover:bg-blue-700 transition-transform active:scale-[0.98] shadow-md shadow-blue-200 disabled:opacity-50"
+                              className="flex-1 py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition-all active:scale-[0.98] shadow-md shadow-slate-900/20 disabled:opacity-50"
                             >
-                              {isSaving ? <Loader2 size={18} className="animate-spin" /> : <SaveIcon />}
+                              {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
                               Guardar Cambios
                             </button>
                           </div>
@@ -155,7 +195,7 @@ export function TotemList({
                     ) : (
                       <div className="px-16 py-6 flex flex-col md:flex-row gap-10 md:items-start animate-in slide-in-from-top-2 duration-200 fade-in">
                         <div className="flex items-start gap-3 w-1/4">
-                          <div className="bg-white p-2 rounded-xl border border-slate-200 shadow-sm text-blue-500 mt-1">
+                          <div className="bg-white p-2 rounded-xl border border-slate-200 shadow-sm text-slate-700 mt-1">
                             <Terminal size={18} strokeWidth={2.5} />
                           </div>
                           <div>
@@ -167,7 +207,7 @@ export function TotemList({
                           </div>
                         </div>
                         <div className="flex items-start gap-3 w-1/4">
-                            <div className="bg-white p-2 rounded-xl border border-slate-200 shadow-sm text-emerald-500 mt-1">
+                            <div className="bg-white p-2 rounded-xl border border-slate-200 shadow-sm text-slate-700 mt-1">
                                 <DollarSign size={18} strokeWidth={2.5}/>
                             </div>
                             <div>
@@ -175,16 +215,24 @@ export function TotemList({
                                 <p className="text-sm text-slate-800 font-medium">Recaudado: ${(t.revenue || 0).toLocaleString('es-CL')}</p>
                             </div>
                         </div>
+                        {/* Videos assigned section */}
+                        <div className="flex-1 flex flex-col gap-3 min-w-[300px]">
+                            <VideosListDisplay 
+                              videos={allVideos} 
+                              empresas={empresas} 
+                              videoIds={t.video_ids || t.videos?.map((v: any) => v.id) || []} 
+                            />
+                        </div>
                         <div className="ml-auto w-1/4 flex flex-col gap-2">
                           <button
                             onClick={() => onEdit(t)}
-                            className="text-xs font-semibold px-4 py-2.5 border border-slate-200 bg-white hover:bg-blue-50 hover:text-blue-600 text-slate-700 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
+                            className="text-xs font-semibold px-4 py-2.5 border border-slate-200 bg-white hover:bg-slate-50 hover:text-slate-900 text-slate-700 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
                           >
                             <Edit size={14} /> Modificar Tótem
                           </button>
                           <button
                             onClick={() => onDelete(t.id)}
-                            className="text-xs font-semibold px-4 py-2.5 text-rose-600 bg-rose-50 border border-rose-100 hover:bg-rose-100 rounded-lg transition-colors flex items-center justify-center gap-2"
+                            className="text-xs font-semibold px-4 py-2.5 text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center gap-2"
                           >
                             <Trash2 size={14} /> Eliminar
                           </button>
@@ -202,6 +250,4 @@ export function TotemList({
   );
 }
 
-function SaveIcon() {
-    return <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><circle cx="12" cy="13" r="3"/><path d="M7 3v5h10V3"/></svg>;
-}
+

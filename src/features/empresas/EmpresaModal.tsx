@@ -13,16 +13,12 @@ interface EmpresaModalProps {
 export function EmpresaModal({ isOpen, onClose, onSuccess }: EmpresaModalProps) {
   const [nombre, setNombre] = useState("");
   const [estado, setEstado] = useState("Activo");
-  const [rut, setRut] = useState("");
-  const [direccion, setDireccion] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [done, setDone] = useState(false);
 
   const handleClose = () => {
     if (isSaving) return;
     setNombre("");
-    setRut("");
-    setDireccion("");
     setEstado("Activo");
     setDone(false);
     onClose();
@@ -37,9 +33,7 @@ export function EmpresaModal({ isOpen, onClose, onSuccess }: EmpresaModalProps) 
             method: 'POST',
             body: JSON.stringify({
                 nombre,
-                rut,
-                direccion,
-                status: estado
+                status: estado === "Activo" ? true : false
             })
         });
         setIsSaving(false);
@@ -110,18 +104,7 @@ export function EmpresaModal({ isOpen, onClose, onSuccess }: EmpresaModalProps) 
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">RUT</label>
-                        <input 
-                            type="text" 
-                            value={rut}
-                            onChange={(e) => setRut(e.target.value)}
-                            placeholder="76.000.000-0" 
-                            className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
-                            disabled={isSaving}
-                        />
-                    </div>
+                <div className="grid grid-cols-1 gap-4">
                     <div>
                         <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Estado Inicial</label>
                         <select 
@@ -134,18 +117,6 @@ export function EmpresaModal({ isOpen, onClose, onSuccess }: EmpresaModalProps) 
                             <option value="Inactivo">Inactivo</option>
                         </select>
                     </div>
-                </div>
-
-                <div>
-                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Dirección</label>
-                    <input 
-                        type="text" 
-                        value={direccion}
-                        onChange={(e) => setDireccion(e.target.value)}
-                        placeholder="Av. Libertador 123, Oficina 402" 
-                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
-                        disabled={isSaving}
-                    />
                 </div>
               </div>
 

@@ -42,15 +42,16 @@ async function handleRequest(request: NextRequest, path: string[]) {
     const isUploads = path[0] === "uploads";
 
     if (isVideoAPI) {
-      // Para la API de videos, usamos la URL especial con /api
       targetUrl = `${MEDIA_URL}/api${endpoint}`;
     } else if (isUploads) {
-      // Para los archivos multimedia (mp4), usamos la raíz del servidor
       targetUrl = `${MEDIA_URL}${endpoint}`;
     } else {
-      // Para el resto (Tótems, Empresas, Login), usamos el API_URL por defecto
-      targetUrl = `${API_URL}${endpoint}`;
+      targetUrl = `${API_URL}/api${endpoint}`;
     }
+
+    // Normalizar URL (quitar posibles dobles slashes excepto el inicial)
+    targetUrl = targetUrl.replace(/([^:]\/)\/+/g, "$1");
+    (global as any).lastTargetUrl = targetUrl; // Para el log del catch
 
     // Headers a reenviar del cliente al backend
     const headers = new Headers();
@@ -72,14 +73,58 @@ async function handleRequest(request: NextRequest, path: string[]) {
     headers.set("x-api-key", API_KEY);
 
     // Petición al backend con streaming
-    const response = await fetch(targetUrl, {
+    const fetchOptions: RequestInit = {
       method: request.method,
       headers,
-      body: request.body,
-      // @ts-ignore
-      duplex: 'half',
       cache: 'no-store'
-    });
+    };
+
+    // Manejo del Body para POST/PUT/PATCH
+    if (['POST', 'PUT', 'PATCH'].includes(request.method)) {
+      try {
+        const bodyBuffer = await request.arrayBuffer();
+        if (bodyBuffer.byteLength > 0) {
+          fetchOptions.body = bodyBuffer;
+          // @ts-ignore
+          fetchOptions.duplex = 'half';
+        }
+      } catch (e) {
+        console.warn("[Proxy] No se pudo leer el body de la petición");
+      }
+    };
+
+    // Implementar un timeout de 60 segundos
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+    fetchOptions.signal = controller.signal;
+
+    let response: Response | null = null;
+    let retries = 2;
+    
+    while (retries >= 0) {
+      try {
+        response = await fetch(targetUrl, fetchOptions);
+        clearTimeout(timeoutId);
+        break;
+      } catch (err: any) {
+        if (err.name === 'AbortError') {
+          console.error(`[Proxy] TIMEOUT tras 60s en: ${targetUrl}`);
+          throw new Error("El servidor backend tardó demasiado en responder (Timeout).");
+        }
+        if (err.name === 'AggregateError' && retries > 0) {
+          console.warn(`[Proxy] Reintentando... ${targetUrl}`);
+          await new Promise(r => setTimeout(r, 200));
+          retries--;
+        } else {
+          clearTimeout(timeoutId);
+          throw err;
+        }
+      }
+    }
+    
+    if (!response) {
+       throw new Error("Falló el fetch inesperadamente tras reintentos.");
+    }
 
     // Headers a reenviar del backend al cliente (navegador)
     const responseHeaders = new Headers();
@@ -123,10 +168,19 @@ async function handleRequest(request: NextRequest, path: string[]) {
     });
 
   } catch (error: any) {
-    console.error("Proxy Critical Error:", error);
+    console.error("Proxy Critical Error:", {
+      message: error.message,
+      cause: error.cause,
+      code: error.code,
+      targetUrl: (global as any).lastTargetUrl
+    });
+    
     return NextResponse.json({ 
-      error: "Error en la comunicación con la API",
-      message: error.message
+      error: "Error en la comunicación con la API al obtener recurso",
+      message: error.message,
+      cause: error.cause ? String(error.cause) : undefined,
+      code: error.code,
+      targetUrl: (global as any).lastTargetUrl
     }, { status: 502 });
   }
 }

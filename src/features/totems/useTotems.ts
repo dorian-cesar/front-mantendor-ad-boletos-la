@@ -4,15 +4,19 @@ import { apiFetch } from "@/lib/api";
 export function useTotems() {
   const [totems, setTotems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchTotems = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await apiFetch("/totems");
-      setTotems(data);
-    } catch (error) {
-      console.error("Error fetching totems:", error);
+      setTotems(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      console.error("Error fetching totems:", err);
+      setError(err.message || "Error al cargar equipos");
+      setTotems([]);
     } finally {
       setLoading(false);
     }
@@ -25,14 +29,24 @@ export function useTotems() {
   const handleSave = async (id: string, editForm: any) => {
     try {
       setIsSaving(true);
+
+      const payload = {
+        identificador: editForm.identificador,
+        direccion: editForm.direccion,
+        latitud: editForm.latitud || 0,
+        longitud: editForm.longitud || 0,
+        video_ids: editForm.video_ids || [],
+        empresa_ids: editForm.empresa_ids || [],
+        status: editForm.status
+      };
+
+      console.log(">>> ENVIANDO PAYLOAD FINAL AL BACKEND:", payload);
+
       await apiFetch(`/totems/${id}`, {
         method: "PUT",
-        body: JSON.stringify({
-          identificador: editForm.identificador,
-          direccion: editForm.direccion,
-          video_ids: editForm.video_ids || [],
-        }),
+        body: JSON.stringify(payload),
       });
+
       await fetchTotems();
       return true;
     } catch (error) {
@@ -46,14 +60,19 @@ export function useTotems() {
   const handleCreate = async (createForm: any) => {
     try {
       setIsSaving(true);
+
       await apiFetch("/totems", {
         method: "POST",
         body: JSON.stringify({
           identificador: createForm.identificador,
           direccion: createForm.direccion,
-          video_ids: [],
+          latitud: createForm.latitud || 0,
+          longitud: createForm.longitud || 0,
+          video_ids: createForm.video_ids || [],
+          empresa_ids: createForm.empresa_ids || [],
         }),
       });
+
       await fetchTotems();
       return true;
     } catch (error) {
@@ -78,6 +97,7 @@ export function useTotems() {
   return {
     totems,
     loading,
+    error,
     isSaving,
     fetchTotems,
     handleSave,

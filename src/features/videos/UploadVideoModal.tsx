@@ -21,6 +21,7 @@ export function UploadVideoModal({ isOpen, onClose, onSuccess }: UploadVideoModa
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("Inicializando conversor...");
   const ffmpegRef = useRef<FFmpeg | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const [empresas, setEmpresas] = useState<any[]>([]);
   const [selectedEmpresa, setSelectedEmpresa] = useState("");
@@ -33,9 +34,15 @@ export function UploadVideoModal({ isOpen, onClose, onSuccess }: UploadVideoModa
       if (Array.isArray(data) && data.length > 0) {
         setEmpresas(data);
         setSelectedEmpresa(data[0].id.toString());
+      } else {
+        setEmpresas([]);
       }
-    } catch (error) {
-      console.error("Error fetching empresas:", error);
+    } catch (error: any) {
+      // Silently handle if connection failed
+      if (error?.message !== "fetch failed") {
+        console.error("Error fetching empresas in modal:", error);
+      }
+      setEmpresas([]);
     }
   };
 
@@ -72,7 +79,25 @@ export function UploadVideoModal({ isOpen, onClose, onSuccess }: UploadVideoModa
   }, [isOpen, loaded]);
 
   const handleClose = () => {
-    if (isCompressing) return;
+    // Si se está comprimiendo o subiendo, cancelamos todo
+    if (isCompressing) {
+      if (ffmpegRef.current) {
+        try {
+          // Terminamos el proceso de ffmpeg
+          ffmpegRef.current.terminate();
+          ffmpegRef.current = null; // Forzamos nueva carga la próxima vez
+          setLoaded(false);
+        } catch (e) {
+          console.error("Error terminando FFmpeg:", e);
+        }
+      }
+
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    }
+
     setFile(null);
     setProgress(0);
     setIsCompressing(false);
@@ -108,9 +133,12 @@ export function UploadVideoModal({ isOpen, onClose, onSuccess }: UploadVideoModa
       formData.append("descripcion", description);
       formData.append("empresa_id", selectedEmpresa);
 
+      abortControllerRef.current = new AbortController();
+
       await apiFetch('/videos', {
         method: 'POST',
-        body: formData
+        body: formData,
+        signal: abortControllerRef.current.signal
       });
 
       if (onSuccess) onSuccess();
@@ -129,7 +157,7 @@ export function UploadVideoModal({ isOpen, onClose, onSuccess }: UploadVideoModa
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden font-sans border border-slate-100 mx-4">
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50">
           <h3 className="text-xl font-bold text-slate-800">Subir Nuevo Video</h3>
-          <button onClick={handleClose} disabled={isCompressing} className="p-2 hover:bg-slate-100 rounded-full">
+          <button onClick={handleClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -188,7 +216,7 @@ export function UploadVideoModal({ isOpen, onClose, onSuccess }: UploadVideoModa
             )}
 
             <div className="flex justify-end gap-3 pt-4">
-              <button type="button" onClick={handleClose} disabled={isCompressing} className="px-5 py-2.5 border rounded-xl">Cancelar</button>
+              <button type="button" onClick={handleClose} className="px-5 py-2.5 border rounded-xl hover:bg-slate-50 transition-colors">Cancelar</button>
               <button type="submit" disabled={isCompressing || !loaded} className="px-5 py-2.5 bg-blue-600 text-white rounded-xl">
                 {!loaded ? "Cargando motor..." : isCompressing ? "Procesando..." : "Comprimir y Subir"}
               </button>

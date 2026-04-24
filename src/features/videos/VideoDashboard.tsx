@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Plus, XCircle, Loader2 } from "lucide-react";
+import { Search, Plus, XCircle, Loader2, Edit, Save, X } from "lucide-react";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useVideos } from "./useVideos";
+import { useEmpresas } from "../empresas/useEmpresas";
 import { UploadVideoModal } from "./UploadVideoModal";
 
 export function VideoDashboard() {
@@ -12,18 +13,66 @@ export function VideoDashboard() {
     videos,
     loading,
     fetchVideos,
-    handleDelete
+    handleUpdate,
+    getVideoById
   } = useVideos();
+  
+  const { empresas } = useEmpresas();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("Todos");
+  const [empresaFilter, setEmpresaFilter] = useState("Todas");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  
+  // Estados para edición inline
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ nombre: "", descripcion: "", status: true });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const startEditing = async (vid: any) => {
+    try {
+      // Usar get para obtener la información más fresca desde el backend
+      const freshVid = await getVideoById(vid.id);
+      
+      setEditingId(freshVid.id);
+      setEditForm({
+        nombre: freshVid.nombre || "",
+        descripcion: freshVid.descripcion || "",
+        status: freshVid.status === true
+      });
+    } catch (error) {
+      // Fallback si el fetch individual falla
+      setEditingId(vid.id);
+      setEditForm({
+        nombre: vid.nombre || "",
+        descripcion: vid.descripcion || "",
+        status: vid.status === true
+      });
+    }
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+  };
+
+  const saveEdit = async (id: string) => {
+    try {
+      setIsSaving(true);
+      await handleUpdate(id, editForm);
+      setEditingId(null);
+    } catch (error) {
+      alert("Error al actualizar el video");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const filteredVideos = videos.filter(v => {
     const matchesSearch = v.nombre?.toLowerCase().includes(searchTerm.toLowerCase());
     const currentStatus = v.status === true ? "Activo" : "Inactivo";
     const matchesStatus = statusFilter === "Todos" || currentStatus === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesEmpresa = empresaFilter === "Todas" || String(v.empresa_id) === String(empresaFilter);
+    return matchesSearch && matchesStatus && matchesEmpresa;
   });
 
   return (
@@ -38,7 +87,7 @@ export function VideoDashboard() {
             <span className="text-slate-800 font-medium">Videos</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold bg-blue-50 border border-blue-100 text-blue-700 px-3 py-1.5 rounded-full">ROL: SUPER_ADMIN</span>
+            <span className="text-xs font-semibold bg-slate-100 border border-slate-200 text-slate-900 px-3 py-1.5 rounded-full">ROL: SUPER_ADMIN</span>
           </div>
         </header>
 
@@ -56,7 +105,7 @@ export function VideoDashboard() {
             </div>
             <button 
               onClick={() => setIsUploadModalOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm shadow-blue-600/20 transition-all flex items-center gap-2 transform active:scale-95"
+              className="bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-semibold shadow-xl shadow-slate-900/20 transition-all flex items-center gap-2 transform active:scale-95"
             >
               <Plus size={18} strokeWidth={2.5} />
               Subir Video
@@ -71,17 +120,46 @@ export function VideoDashboard() {
               <input
                 type="text"
                 placeholder="Buscar por nombre..."
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm"
+                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all shadow-sm"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-slate-600">Empresa:</span>
+                <select 
+                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer outline-none"
+                  value={empresaFilter}
+                  onChange={(e) => setEmpresaFilter(e.target.value)}
+                >
+                  <option value="Todas">Todas las Empresas</option>
+                  {empresas.map(emp => (
+                    <option key={emp.id} value={String(emp.id)}>{emp.nombre}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-slate-600">Estado:</span>
+                <select 
+                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer outline-none"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="Todos">Todos</option>
+                  <option value="Activo">Activos</option>
+                  <option value="Inactivo">Inactivos</option>
+                </select>
+              </div>
+            </div>
+
             <div className="flex gap-3">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-sm font-medium">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-700 border border-slate-200 rounded-md text-sm font-medium">
                 <span>Activos: {videos.filter(v => v.status === true).length}</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-md text-sm font-medium">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-600 border border-slate-200 rounded-md text-sm font-medium">
                 <span>Inactivos: {videos.filter(v => v.status === false).length}</span>
               </div>
             </div>
@@ -95,44 +173,109 @@ export function VideoDashboard() {
                   <th className="py-3 px-5 font-semibold">TÍTULO</th>
                   <th className="py-3 px-5 font-semibold">DESCRIPCIÓN</th>
                   <th className="py-3 px-5 font-semibold w-40">FECHA DE SUBIDA</th>
-                  <th className="py-3 px-5 font-semibold text-center w-32">STATUS</th>
+                  <th className="py-3 px-5 font-semibold text-center w-40">ACCIONES / STATUS</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={5} className="py-20 text-center"><Loader2 size={32} className="animate-spin mx-auto text-blue-500 mb-2"/> Cargando videos...</td></tr>
+                  <tr><td colSpan={5} className="py-20 text-center"><Loader2 size={32} className="animate-spin mx-auto text-slate-900 mb-2"/> Cargando videos...</td></tr>
                 ) : filteredVideos.length === 0 ? (
                   <tr><td colSpan={5} className="py-20 text-center text-slate-400 font-medium">No se encontraron videos.</td></tr>
-                ) : filteredVideos.map((vid) => (
-                  <tr key={vid.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors group">
-                    <td className="py-3.5 px-5 text-slate-600 font-mono text-xs">{vid.id?.toString().substring(0, 8)}</td>
-                    <td className="py-3.5 px-5 font-bold text-slate-800">
-                      <div className="flex flex-col">
-                        <span>{vid.nombre}</span>
-                        <a 
-                          href={vid.url?.startsWith('http') ? vid.url : `/api/proxy${vid.url?.startsWith('/') ? '' : '/'}${vid.url}`} 
-                          target="_blank" 
-                          className="text-[10px] text-blue-500 hover:underline"
-                        >
-                          Ver video original
-                        </a>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-5 text-slate-500 truncate max-w-[200px]">{vid.descripcion || 'Sin descripción'}</td>
-                    <td className="py-3.5 px-5 text-slate-500">{new Date(vid.createdAt || Date.now()).toLocaleDateString()}</td>
-                    <td className="py-3.5 px-5">
-                      <div className="flex items-center justify-between">
-                        <StatusBadge status={vid.status === true ? 'Activo' : 'Inactivo'} />
-                        <button 
-                          onClick={() => handleDelete(vid.id)}
-                          className="p-1.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                        >
-                          <XCircle size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                ) : filteredVideos.map((vid) => {
+                  const isEditing = editingId === vid.id;
+
+                  return (
+                    <tr key={vid.id} className={`border-b border-slate-100 hover:bg-slate-50 transition-colors group ${isEditing ? 'bg-slate-50' : ''}`}>
+                      <td className="py-3.5 px-5 text-slate-600 font-mono text-xs">{vid.id?.toString().substring(0, 8)}</td>
+                      <td className="py-3.5 px-5">
+                        {isEditing ? (
+                          <input 
+                            type="text" 
+                            value={editForm.nombre}
+                            onChange={(e) => setEditForm({ ...editForm, nombre: e.target.value })}
+                            className="w-full px-2 py-1 border border-slate-300 rounded focus:ring-1 focus:ring-slate-900 text-sm font-bold"
+                          />
+                        ) : (
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-800">{vid.nombre}</span>
+                            <a 
+                              href={vid.url?.startsWith('http') ? vid.url : `/api/proxy${vid.url?.startsWith('/') ? '' : '/'}${vid.url}`} 
+                              target="_blank" 
+                              className="text-[10px] text-slate-900 hover:underline font-bold"
+                            >
+                              Ver video original
+                            </a>
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-5">
+                        {isEditing ? (
+                          <textarea 
+                            value={editForm.descripcion}
+                            onChange={(e) => setEditForm({ ...editForm, descripcion: e.target.value })}
+                            className="w-full px-2 py-1 border border-slate-300 rounded focus:ring-1 focus:ring-slate-900 text-xs text-slate-500 min-h-[40px]"
+                          />
+                        ) : (
+                          <p className="text-slate-500 truncate max-w-[250px]">{vid.descripcion || 'Sin descripción'}</p>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-5 text-slate-500">{new Date(vid.createdAt || Date.now()).toLocaleDateString()}</td>
+                      <td className="py-3.5 px-5">
+                        <div className="flex items-center justify-end gap-2">
+                          {isEditing ? (
+                            <>
+                              <button 
+                                onClick={() => saveEdit(vid.id)}
+                                disabled={isSaving}
+                                className="p-1.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors shadow-sm"
+                                title="Guardar cambios"
+                              >
+                                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                              </button>
+                              <button 
+                                onClick={cancelEditing}
+                                className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors shadow-sm"
+                                title="Cancelar"
+                              >
+                                <X size={16} />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <div className="mr-auto">
+                                <StatusBadge status={vid.status === true ? 'Activo' : 'Inactivo'} />
+                              </div>
+                              <button 
+                                onClick={() => startEditing(vid)}
+                                className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-white rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                title="Editar video"
+                              >
+                                <Edit size={16} />
+                              </button>
+                              
+                              {/* Toggle rápido de status (checkbox simplificado) */}
+                              <button 
+                                onClick={() => handleUpdate(vid.id, { status: !vid.status })}
+                                className={`w-8 h-4 rounded-full relative transition-colors ${vid.status ? 'bg-slate-900' : 'bg-slate-300'}`}
+                                title={vid.status ? "Desactivar" : "Activar"}
+                              >
+                                <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${vid.status ? 'left-4.5' : 'left-0.5'}`} />
+                              </button>
+
+                              <button 
+                                onClick={() => handleDelete(vid.id)}
+                                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all opacity-0 group-hover:opacity-100 ml-1"
+                                title="Eliminar video"
+                              >
+                                <XCircle size={16} />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

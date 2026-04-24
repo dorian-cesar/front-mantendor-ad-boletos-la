@@ -27,8 +27,17 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   }
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: "Unknown error" }));
-    throw new Error(error.message || "API Error");
+    const text = await response.text().catch(() => "No response body");
+    console.error(`[API Error] ${response.status} ${endpoint}:`, text);
+    
+    let message = "API Error";
+    try {
+        const json = JSON.parse(text);
+        message = json.message || json.error || message;
+    } catch {
+        message = `Error ${response.status}: ${text.substring(0, 50)}...`;
+    }
+    throw new Error(message);
   }
 
   return response.json();

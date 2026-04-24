@@ -14,16 +14,16 @@ function SidebarItem({ icon, label, href, active }: SidebarItemProps) {
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[15px] font-medium transition-colors ${
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[15px] font-medium transition-all ${
         active
-          ? "bg-blue-50 text-blue-700"
+          ? "bg-slate-900 text-white shadow-md shadow-slate-900/10"
           : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
       }`}
     >
       {React.isValidElement(icon) &&
         React.cloneElement(icon as React.ReactElement<any>, {
           size: 20,
-          className: active ? "text-blue-600" : "text-slate-400",
+          className: active ? "text-white" : "text-slate-400",
         })}
       {label}
     </Link>
@@ -56,16 +56,18 @@ export function Sidebar() {
       >
         <div
           className={`w-[3px] h-full transition-colors ${
-            isDragging ? "bg-blue-500" : "bg-transparent group-hover:bg-blue-300"
+            isDragging ? "bg-slate-400" : "bg-transparent group-hover:bg-slate-200"
           }`}
         />
       </div>
 
       <div className="overflow-hidden whitespace-nowrap w-full">
         <div className="h-16 flex items-center px-6 border-b border-slate-100 mb-6">
-          <span className="font-bold text-xl tracking-tight">
-            Panel<span className="text-blue-500">Admin</span>
-          </span>
+          <img 
+            src="/assets/logo-wit-mini-dark.png" 
+            alt="WIT Logo" 
+            className="h-8 w-auto object-contain"
+          />
         </div>
 
         <nav className="px-4 space-y-1.5">
