@@ -207,7 +207,7 @@ export function VideoDashboard() {
                   const isEditing = editingId === vid.id;
 
                   return (
-                    <tr key={vid.id} className={`border-b border-slate-100 hover:bg-slate-50 transition-colors group ${isEditing ? 'bg-slate-50' : ''}`}>
+                    <tr key={vid.id} className={`border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group ${isEditing ? 'bg-slate-50 dark:bg-slate-800' : ''}`}>
                       <td className="py-3.5 px-5 text-slate-600 font-mono text-xs">{vid.id?.toString().substring(0, 8)}</td>
                       <td className="py-3.5 px-5">
                         {isEditing ? (
@@ -219,7 +219,7 @@ export function VideoDashboard() {
                           />
                         ) : (
                           <div className="flex flex-col">
-                            <span className="font-bold text-slate-800">{vid.nombre}</span>
+                            <span className="font-bold text-slate-800 dark:text-white">{vid.nombre}</span>
                             <a 
                               href={vid.url?.startsWith('http') ? vid.url : `/api/proxy${vid.url?.startsWith('/') ? '' : '/'}${vid.url}`} 
                               target="_blank" 
@@ -238,7 +238,7 @@ export function VideoDashboard() {
                             className="w-full px-2 py-1 border border-slate-300 rounded focus:ring-1 focus:ring-slate-900 text-xs text-slate-500 min-h-[40px]"
                           />
                         ) : (
-                          <p className="text-slate-500 truncate max-w-[250px]">{vid.descripcion || 'Sin descripción'}</p>
+                          <p className="text-slate-500 dark:text-slate-400 truncate max-w-[250px]">{vid.descripcion || 'Sin descripción'}</p>
                         )}
                       </td>
                       <td className="py-3.5 px-5 text-slate-500">{new Date(vid.createdAt || Date.now()).toLocaleDateString()}</td>
