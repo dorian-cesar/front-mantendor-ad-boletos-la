@@ -59,6 +59,8 @@ export function TotemDashboard() {
   const [editForm, setEditForm] = useState({ 
     identificador: "", 
     direccion: "", 
+    latitud: 0,
+    longitud: 0,
     status: "Activo", 
     video_ids: [] as string[], 
     empresa_ids: [] as string[]
