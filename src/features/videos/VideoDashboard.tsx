@@ -120,8 +120,8 @@ export function VideoDashboard() {
 
           <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-bold text-slate-800 tracking-tight mb-2">Videos Subidos</h2>
-              <p className="text-slate-500 text-sm">Listado de videos gestionados y procesados por el backend.</p>
+              <h2 className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight mb-2">Videos Subidos</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">Listado de videos gestionados y procesados por el backend.</p>
             </div>
             <div className="flex items-center">
               <button 

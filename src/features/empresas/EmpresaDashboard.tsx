@@ -68,18 +68,18 @@ export function EmpresaDashboard() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#f8f9fc] text-slate-800 font-sans">
+    <div className="flex h-screen w-full bg-[#f8f9fc] dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
       <Sidebar />
 
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 flex-shrink-0">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
+        <header className="h-16 flex items-center justify-between px-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 transition-colors duration-300">
+          <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             <span>Inicio</span>
             <span>/</span>
-            <span className="text-slate-800 font-medium">Empresas</span>
+            <span className="text-slate-800 dark:text-slate-100 font-medium transition-colors">Empresas</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold bg-slate-100 border border-slate-200 text-slate-900 px-3 py-1.5 rounded-full">ROL: SUPER_ADMIN</span>
+            <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-3 py-1.5 rounded-full">ROL: SUPER_ADMIN</span>
           </div>
         </header>
 
@@ -92,8 +92,8 @@ export function EmpresaDashboard() {
           
           <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-bold text-slate-800 tracking-tight mb-2">Empresas Registradas</h2>
-              <p className="text-slate-500 text-sm">Gestión de empresas colaboradoras, RUTs y contactos administrativos.</p>
+              <h2 className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight mb-2 transition-colors">Empresas Registradas</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">Gestión de empresas colaboradoras, RUTs y contactos administrativos.</p>
             </div>
             <button 
               onClick={() => setIsModalOpen(true)}
@@ -104,7 +104,7 @@ export function EmpresaDashboard() {
             </button>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-6">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-5 mb-6 transition-colors duration-300">
             <div className="relative mb-5">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search size={18} className="text-slate-400" />
@@ -112,7 +112,7 @@ export function EmpresaDashboard() {
               <input
                 type="text"
                 placeholder="Buscar empresa por nombre, RUT o dirección..."
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all shadow-sm"
+                className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all shadow-sm dark:text-white"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -144,10 +144,10 @@ export function EmpresaDashboard() {
           </div>
 
           {/* TABLE SECTION */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors duration-300">
             <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-200 text-slate-400">
+                <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500">
                   <th className="py-4 px-6 font-black text-[10px] uppercase tracking-widest w-24">ID</th>
                   <th className="py-4 px-6 font-black text-[10px] uppercase tracking-widest text-center w-28">Videos</th>
                   <th className="py-4 px-6 font-black text-[10px] uppercase tracking-widest">Nombre de la Empresa</th>
@@ -229,7 +229,7 @@ export function EmpresaDashboard() {
                           </div>
                         </td>
                         <td className="py-4 px-6">
-                          <span className="font-black text-slate-800 text-[15px] group-hover:text-slate-900 transition-colors uppercase tracking-tight">{comp.nombre}</span>
+                          <span className="font-black text-slate-800 dark:text-slate-100 text-[15px] group-hover:text-slate-900 dark:group-hover:text-white transition-colors uppercase tracking-tight">{comp.nombre}</span>
                         </td>
                         <td className="py-4 px-6 text-center">
                           <div className="flex justify-center">

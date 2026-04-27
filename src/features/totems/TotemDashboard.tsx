@@ -181,8 +181,8 @@ export function TotemDashboard() {
 
           <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-bold text-slate-800 tracking-tight mb-2">Tótems de Venta</h2>
-              <p className="text-slate-500 text-sm">Monitoreo en tiempo real de terminales físicos y métricas.</p>
+              <h2 className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight mb-2">Tótems de Venta</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">Monitoreo en tiempo real de terminales físicos y métricas.</p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -192,12 +192,12 @@ export function TotemDashboard() {
                 <Plus size={18} strokeWidth={2.5} />
                 Nuevo Tótem
               </button>
-              <div className="flex items-center gap-1 bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
+              <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl shadow-sm">
                 <button
                   onClick={() => setViewMode("list")}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === "list"
-                      ? "bg-slate-900 text-white shadow-md border border-slate-900/10"
-                      : "text-slate-500 hover:text-slate-700 border border-transparent"
+                      ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md border border-slate-900/10"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white border border-transparent"
                     }`}
                 >
                   <LayoutList size={18} />
@@ -206,8 +206,8 @@ export function TotemDashboard() {
                 <button
                   onClick={() => setViewMode("grid")}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === "grid"
-                      ? "bg-slate-900 text-white shadow-md border border-slate-900/10"
-                      : "text-slate-500 hover:text-slate-700 border border-transparent"
+                      ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md border border-slate-900/10"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white border border-transparent"
                     }`}
                 >
                   <LayoutGrid size={18} />
