@@ -36,17 +36,21 @@ async function handleRequest(request: NextRequest, path: string[]) {
     const searchParams = request.nextUrl.searchParams.toString();
     const endpoint = `/${path.join("/")}${searchParams ? `?${searchParams}` : ""}`;
     
-    // Lógica para determinar la URL de destino
+    // Lógica para determinar la URL de destino de forma resiliente
     let targetUrl: string;
     const isVideoAPI = path[0] === "videos";
     const isUploads = path[0] === "uploads";
 
+    // Si la URL ya contiene /api al final, no lo agregamos de nuevo
+    const apiUrlBase = API_URL.replace(/\/api\/?$/, "");
+    const mediaUrlBase = MEDIA_URL.replace(/\/api\/?$/, "");
+
     if (isVideoAPI) {
-      targetUrl = `${MEDIA_URL}/api${endpoint}`;
+      targetUrl = `${mediaUrlBase}/api${endpoint}`;
     } else if (isUploads) {
-      targetUrl = `${MEDIA_URL}${endpoint}`;
+      targetUrl = `${mediaUrlBase}${endpoint}`;
     } else {
-      targetUrl = `${API_URL}/api${endpoint}`;
+      targetUrl = `${apiUrlBase}/api${endpoint}`;
     }
 
     // Normalizar URL (quitar posibles dobles slashes excepto el inicial)
