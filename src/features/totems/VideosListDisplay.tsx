@@ -15,8 +15,8 @@ export function VideosListDisplay({ videos, empresas, videoIds = [] }: VideosLis
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
-        <label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5 transition-colors">
-          <PlayCircle size={12} className="text-slate-900 dark:text-white" />
+        <label className="text-[11px] font-black text-slate-400  uppercase tracking-widest flex items-center gap-1.5 transition-colors">
+          <PlayCircle size={12} className="text-slate-900 " />
           Lista de Reproducción
         </label>
         <div className="flex items-center gap-2">
@@ -25,7 +25,7 @@ export function VideosListDisplay({ videos, empresas, videoIds = [] }: VideosLis
                <AlertTriangle size={8} /> Contenido Deshabilitado
              </span>
            )}
-           <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2.5 py-0.5 rounded-full transition-colors">
+           <span className="text-[10px] font-bold text-slate-500  bg-slate-100  border border-slate-200  px-2.5 py-0.5 rounded-full transition-colors">
             {selectedVideos.length} Video{selectedVideos.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -47,7 +47,7 @@ export function VideosListDisplay({ videos, empresas, videoIds = [] }: VideosLis
             return (
               <div 
                 key={v.id}
-                className={`flex items-center justify-between p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl hover:border-slate-900 dark:hover:border-white transition-all group ${isInactive ? "opacity-75 grayscale-[0.5]" : ""}`}
+                className={`flex items-center justify-between p-3 bg-white  border border-slate-100  rounded-xl hover:border-slate-900  transition-all group ${isInactive ? "opacity-75 grayscale-[0.5]" : ""}`}
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isInactive ? "bg-slate-100 text-slate-400" : "bg-slate-50 text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-900"}`}>
@@ -55,7 +55,7 @@ export function VideosListDisplay({ videos, empresas, videoIds = [] }: VideosLis
                   </div>
                   <div className="flex flex-col">
                     <div className="flex items-center gap-2">
-                       <span className={`text-xs font-bold transition-colors ${isInactive ? "text-slate-500 dark:text-slate-600" : "text-slate-800 dark:text-white"}`}>
+                       <span className={`text-xs font-bold transition-colors ${isInactive ? "text-slate-500 " : "text-slate-800 "}`}>
                         {v.nombre}
                        </span>
                        {isInactive && (
@@ -71,7 +71,7 @@ export function VideosListDisplay({ videos, empresas, videoIds = [] }: VideosLis
                     )}
                   </div>
                 </div>
-                <div className={`w-1.5 h-1.5 rounded-full transition-all ${isInactive ? "bg-slate-200 dark:bg-slate-800" : "bg-slate-900 dark:bg-white shadow-[0_0_8px_rgba(255,255,255,0.2)]"}`} />
+                <div className={`w-1.5 h-1.5 rounded-full transition-all ${isInactive ? "bg-slate-200 " : "bg-slate-900  shadow-[0_0_8px_rgba(255,255,255,0.2)]"}`} />
               </div>
             );
           })}

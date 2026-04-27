@@ -87,18 +87,18 @@ export function VideoDashboard() {
   });
 
   return (
-    <div className="flex h-screen w-full bg-[#f8f9fc] dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
+    <div className="flex h-screen w-full bg-[#f8f9fc] text-slate-800 font-sans">
       <Sidebar />
 
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 flex items-center justify-between px-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 transition-colors duration-300">
-          <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+        <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 flex-shrink-0">
+          <div className="flex items-center gap-2 text-sm text-slate-500">
             <span>Inicio</span>
             <span>/</span>
-            <span className="text-slate-800 dark:text-slate-100 font-medium">Videos</span>
+            <span className="text-slate-800 font-medium">Videos</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-3 py-1.5 rounded-full">ROL: SUPER_ADMIN</span>
+            <span className="text-xs font-semibold bg-slate-100 border border-slate-200 text-slate-900 px-3 py-1.5 rounded-full">ROL: SUPER_ADMIN</span>
           </div>
         </header>
 
@@ -120,8 +120,8 @@ export function VideoDashboard() {
 
           <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight mb-2">Videos Subidos</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-sm">Listado de videos gestionados y procesados por el backend.</p>
+              <h2 className="text-3xl font-bold text-slate-800  tracking-tight mb-2">Videos Subidos</h2>
+              <p className="text-slate-500  text-sm">Listado de videos gestionados y procesados por el backend.</p>
             </div>
             <div className="flex items-center">
               <button 
@@ -134,7 +134,7 @@ export function VideoDashboard() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-5 mb-6 transition-colors duration-300">
+          <div className="bg-white  rounded-xl shadow-sm border border-slate-200  p-5 mb-6 transition-colors duration-300">
             <div className="relative mb-5">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search size={18} className="text-slate-400" />
@@ -142,7 +142,7 @@ export function VideoDashboard() {
               <input
                 type="text"
                 placeholder="Buscar por nombre..."
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all shadow-sm dark:text-white"
+                className="w-full pl-10 pr-4 py-2 border border-slate-200  bg-white  rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all shadow-sm "
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -187,10 +187,10 @@ export function VideoDashboard() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors duration-300">
+          <div className="bg-white  rounded-xl shadow-sm border border-slate-200  overflow-hidden transition-colors duration-300">
             <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
+                <tr className="bg-slate-50  border-b border-slate-200  text-slate-600 ">
                   <th className="py-3 px-5 font-semibold w-24">ID</th>
                   <th className="py-3 px-5 font-semibold">TÍTULO</th>
                   <th className="py-3 px-5 font-semibold">DESCRIPCIÓN</th>
@@ -207,8 +207,8 @@ export function VideoDashboard() {
                   const isEditing = editingId === vid.id;
 
                   return (
-                    <tr key={vid.id} className={`border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group ${isEditing ? 'bg-slate-50 dark:bg-slate-800' : ''}`}>
-                      <td className="py-3.5 px-5 text-slate-600 dark:text-slate-500 font-mono text-xs">{vid.id?.toString().substring(0, 8)}</td>
+                    <tr key={vid.id} className={`border-b border-slate-100 hover:bg-slate-50 transition-colors group ${isEditing ? 'bg-slate-50' : ''}`}>
+                      <td className="py-3.5 px-5 text-slate-600  font-mono text-xs">{vid.id?.toString().substring(0, 8)}</td>
                       <td className="py-3.5 px-5">
                         {isEditing ? (
                           <input 
@@ -219,11 +219,11 @@ export function VideoDashboard() {
                           />
                         ) : (
                           <div className="flex flex-col">
-                            <span className="font-bold text-slate-800 dark:text-white">{vid.nombre}</span>
+                            <span className="font-bold text-slate-800 ">{vid.nombre}</span>
                             <a 
                               href={vid.url?.startsWith('http') ? vid.url : `/api/proxy${vid.url?.startsWith('/') ? '' : '/'}${vid.url}`} 
                               target="_blank" 
-                              className="text-[10px] text-slate-900 dark:text-slate-200 hover:underline font-bold"
+                              className="text-[10px] text-slate-900  hover:underline font-bold"
                             >
                               Ver video original
                             </a>
@@ -238,10 +238,10 @@ export function VideoDashboard() {
                             className="w-full px-2 py-1 border border-slate-300 rounded focus:ring-1 focus:ring-slate-900 text-xs text-slate-500 min-h-[40px]"
                           />
                         ) : (
-                          <p className="text-slate-500 dark:text-slate-400 truncate max-w-[250px]">{vid.descripcion || 'Sin descripción'}</p>
+                          <p className="text-slate-500  truncate max-w-[250px]">{vid.descripcion || 'Sin descripción'}</p>
                         )}
                       </td>
-                      <td className="py-3.5 px-5 text-slate-500 dark:text-slate-400">{new Date(vid.createdAt || Date.now()).toLocaleDateString()}</td>
+                      <td className="py-3.5 px-5 text-slate-500 ">{new Date(vid.createdAt || Date.now()).toLocaleDateString()}</td>
                       <td className="py-3.5 px-5">
                         <div className="flex items-center justify-end gap-2">
                           {isEditing ? (

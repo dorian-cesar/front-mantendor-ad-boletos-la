@@ -138,18 +138,18 @@ export function TotemDashboard() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#f8f9fc] dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
+    <div className="flex h-screen w-full bg-[#f8f9fc] text-slate-800 font-sans">
       <Sidebar />
 
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 flex items-center justify-between px-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 transition-colors duration-300">
-          <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+        <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 flex-shrink-0">
+          <div className="flex items-center gap-2 text-sm text-slate-500">
             <span>Inicio</span>
             <span>/</span>
-            <span className="text-slate-800 dark:text-slate-100 font-medium">Tótems</span>
+            <span className="text-slate-800 font-medium">Tótems</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-3 py-1.5 rounded-full">
+            <span className="text-xs font-semibold bg-slate-100 border border-slate-200 text-slate-900 px-3 py-1.5 rounded-full">
               ROL: SUPER_ADMIN
             </span>
           </div>
@@ -181,8 +181,8 @@ export function TotemDashboard() {
 
           <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight mb-2">Tótems de Venta</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-sm">Monitoreo en tiempo real de terminales físicos y métricas.</p>
+              <h2 className="text-3xl font-bold text-slate-800 tracking-tight mb-2">Tótems de Venta</h2>
+              <p className="text-slate-500 text-sm">Monitoreo en tiempo real de terminales físicos y métricas.</p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -192,12 +192,12 @@ export function TotemDashboard() {
                 <Plus size={18} strokeWidth={2.5} />
                 Nuevo Tótem
               </button>
-              <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl shadow-sm">
+              <div className="flex items-center gap-1 bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
                 <button
                   onClick={() => setViewMode("list")}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === "list"
-                      ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md border border-slate-900/10"
-                      : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white border border-transparent"
+                      ? "bg-slate-900 text-white shadow-md border border-slate-900/10"
+                      : "text-slate-500 hover:text-slate-700 border border-transparent"
                     }`}
                 >
                   <LayoutList size={18} />
@@ -206,8 +206,8 @@ export function TotemDashboard() {
                 <button
                   onClick={() => setViewMode("grid")}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === "grid"
-                      ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md border border-slate-900/10"
-                      : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white border border-transparent"
+                      ? "bg-slate-900  text-white  shadow-md border border-slate-900/10"
+                      : "text-slate-500  hover:text-slate-700  border border-transparent"
                     }`}
                 >
                   <LayoutGrid size={18} />
@@ -217,7 +217,7 @@ export function TotemDashboard() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-5 mb-6 transition-colors duration-300">
+          <div className="bg-white  rounded-xl shadow-sm border border-slate-200  p-5 mb-6 transition-colors duration-300">
             <div className="relative mb-5">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search size={18} className="text-slate-400" />
@@ -225,23 +225,23 @@ export function TotemDashboard() {
               <input
                 type="text"
                 placeholder="Buscar equipo..."
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 dark:focus:border-white transition-all shadow-sm dark:text-white"
+                className="w-full pl-10 pr-4 py-2 border border-slate-200  bg-white  rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900  transition-all shadow-sm "
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-md text-sm font-bold shadow-sm">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50  text-slate-900  border border-slate-200  rounded-md text-sm font-bold shadow-sm">
                 <CheckCircle2 size={16} />
                 <span>Tótems: {totems.length}</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 border border-slate-900 dark:border-white rounded-md text-sm font-bold shadow-sm transition-all dark:hover:bg-slate-100">
-                <Video size={16} className="text-white dark:text-slate-900" />
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900  text-white  border border-slate-900  rounded-md text-sm font-bold shadow-sm transition-all ">
+                <Video size={16} className="text-white " />
                 <span>Videos Activos: {videos.filter(v => v.status === true).length}</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-md text-sm font-medium">
-                <XCircle size={16} className="text-slate-400 dark:text-slate-500" />
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white  text-slate-500  border border-slate-200  rounded-md text-sm font-medium">
+                <XCircle size={16} className="text-slate-400 " />
                 <span>Videos Inactivos: {videos.filter(v => v.status === false).length}</span>
               </div>
             </div>

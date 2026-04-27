@@ -65,10 +65,10 @@ export function TotemList({
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden animate-in fade-in duration-300 transition-colors">
+    <div className="bg-white  rounded-xl shadow-sm border border-slate-200  overflow-hidden animate-in fade-in duration-300 transition-colors">
       <table className="w-full text-left text-sm border-collapse">
         <thead>
-          <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
+          <tr className="bg-slate-50  border-b border-slate-200  text-slate-600 ">
             <th className="py-3 px-5 font-semibold w-12 text-center"></th>
             <th className="py-3 px-5 font-semibold w-24">ID</th>
             <th className="py-3 px-5 font-semibold">TERMINAL / UBICACIÓN</th>
@@ -84,25 +84,25 @@ export function TotemList({
                 onClick={() => toggleExpand(t.id)}
                 className={`border-b transition-colors cursor-pointer group select-none ${
                   expandedId === t.id 
-                    ? "bg-slate-50 dark:bg-slate-800/20 border-slate-200 dark:border-slate-800" 
-                    : "border-slate-100 dark:border-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900"
+                    ? "bg-slate-50  border-slate-200 " 
+                    : "border-slate-100  hover:bg-slate-50 "
                 }`}
               >
                 <td className="py-3.5 px-5 text-slate-400 group-hover:text-slate-900 transition-colors">
                   {expandedId === t.id ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </td>
-                <td className="py-3.5 px-5 font-bold text-slate-950 dark:text-white flex items-center gap-2 text-xs">
-                  <Hash size={10} className="text-slate-900 dark:text-white" />
+                <td className="py-3.5 px-5 font-bold text-slate-950  flex items-center gap-2 text-xs">
+                  <Hash size={10} className="text-slate-900 " />
                   {t.id.toString().substring(0, 8)}
                 </td>
                 <td className="py-3.5 px-5">
                   <div className="flex flex-col">
-                    <span className="font-bold text-slate-800 dark:text-white">{t.identificador}</span>
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">{t.direccion}</span>
+                    <span className="font-bold text-slate-800 ">{t.identificador}</span>
+                    <span className="text-[10px] text-slate-400  font-bold uppercase">{t.direccion}</span>
                   </div>
                 </td>
-                <td className="py-3.5 px-5 font-semibold text-slate-600 dark:text-slate-400 text-right pr-6 transition-colors">
-                  {t.sales || 0} <span className="text-xs text-slate-400 dark:text-slate-500 font-normal ml-0.5">uni.</span>
+                <td className="py-3.5 px-5 font-semibold text-slate-600  text-right pr-6 transition-colors">
+                  {t.sales || 0} <span className="text-xs text-slate-400  font-normal ml-0.5">uni.</span>
                 </td>
                 <td className="py-3.5 px-5 font-semibold text-emerald-600 text-right pr-6">
                   ${(t.revenue || 0).toLocaleString("es-CL")}
