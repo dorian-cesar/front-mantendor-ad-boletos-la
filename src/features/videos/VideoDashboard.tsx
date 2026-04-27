@@ -208,7 +208,7 @@ export function VideoDashboard() {
 
                   return (
                     <tr key={vid.id} className={`border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group ${isEditing ? 'bg-slate-50 dark:bg-slate-800' : ''}`}>
-                      <td className="py-3.5 px-5 text-slate-600 font-mono text-xs">{vid.id?.toString().substring(0, 8)}</td>
+                      <td className="py-3.5 px-5 text-slate-600 dark:text-slate-500 font-mono text-xs">{vid.id?.toString().substring(0, 8)}</td>
                       <td className="py-3.5 px-5">
                         {isEditing ? (
                           <input 
@@ -223,7 +223,7 @@ export function VideoDashboard() {
                             <a 
                               href={vid.url?.startsWith('http') ? vid.url : `/api/proxy${vid.url?.startsWith('/') ? '' : '/'}${vid.url}`} 
                               target="_blank" 
-                              className="text-[10px] text-slate-900 hover:underline font-bold"
+                              className="text-[10px] text-slate-900 dark:text-slate-200 hover:underline font-bold"
                             >
                               Ver video original
                             </a>
@@ -241,7 +241,7 @@ export function VideoDashboard() {
                           <p className="text-slate-500 dark:text-slate-400 truncate max-w-[250px]">{vid.descripcion || 'Sin descripción'}</p>
                         )}
                       </td>
-                      <td className="py-3.5 px-5 text-slate-500">{new Date(vid.createdAt || Date.now()).toLocaleDateString()}</td>
+                      <td className="py-3.5 px-5 text-slate-500 dark:text-slate-400">{new Date(vid.createdAt || Date.now()).toLocaleDateString()}</td>
                       <td className="py-3.5 px-5">
                         <div className="flex items-center justify-end gap-2">
                           {isEditing ? (

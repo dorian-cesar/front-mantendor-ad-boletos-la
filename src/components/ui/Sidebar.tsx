@@ -43,30 +43,37 @@ export function Sidebar() {
 
   const handleMouseDown = () => setIsDragging(true);
 
-  // Theme logic
+  // Theme logic - Default to Light Mode
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Initialize theme from localStorage on mount
+  // Initialize theme: Default to Light, check localStorage only once
   React.useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
-    const isDark = savedTheme === "dark";
-    setIsDarkMode(isDark);
-    if (isDark) {
+    if (savedTheme === "dark") {
+      setIsDarkMode(true);
       document.documentElement.classList.add("dark");
     } else {
+      setIsDarkMode(false);
       document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     }
   }, []);
 
-  const toggleDarkMode = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
-    if (newDarkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
+  const toggleDarkMode = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Check real DOM state instead of relying purely on React state for the decision
+    const currentlyDark = document.documentElement.classList.contains("dark");
+    
+    if (currentlyDark) {
       document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "light");
+      setIsDarkMode(false);
+    } else {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+      setIsDarkMode(true);
     }
   };
   
