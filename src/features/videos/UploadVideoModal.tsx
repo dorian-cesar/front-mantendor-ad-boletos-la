@@ -8,11 +8,12 @@ import { apiFetch } from '@/lib/api';
 
 interface UploadVideoModalProps {
   isOpen: boolean;
+  initialFile?: File | null;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
-export function UploadVideoModal({ isOpen, onClose, onSuccess }: UploadVideoModalProps) {
+export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSuccess }: UploadVideoModalProps) {
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   
@@ -47,8 +48,20 @@ export function UploadVideoModal({ isOpen, onClose, onSuccess }: UploadVideoModa
   };
 
   useEffect(() => {
-    if (isOpen) fetchEmpresas();
-  }, [isOpen]);
+    if (isOpen) {
+      fetchEmpresas();
+      if (initialFile) {
+        setFile(initialFile);
+        // Auto-title from filename (remove extension)
+        const nameWithoutExt = initialFile.name.split('.').slice(0, -1).join('.');
+        setTitle(nameWithoutExt);
+      } else {
+        setFile(null);
+        setTitle("");
+        setDescription("");
+      }
+    }
+  }, [isOpen, initialFile]);
 
   const loadFFmpeg = async () => {
     if (typeof window === 'undefined') return;
@@ -166,14 +179,14 @@ export function UploadVideoModal({ isOpen, onClose, onSuccess }: UploadVideoModa
           <form className="space-y-4" onSubmit={compressAndUpload}>
             <input 
               type="text" placeholder="Título del Video" required
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900/10 outline-none transition-all"
               value={title} onChange={e => setTitle(e.target.value)}
               disabled={isCompressing}
             />
 
             <div className="grid grid-cols-2 gap-4">
                 <select 
-                    className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-slate-900/10 transition-all font-medium"
                     value={selectedEmpresa} onChange={e => setSelectedEmpresa(e.target.value)}
                     required disabled={isCompressing}
                 >
@@ -181,22 +194,22 @@ export function UploadVideoModal({ isOpen, onClose, onSuccess }: UploadVideoModa
                 </select>
                 <input 
                     type="text" placeholder="Descripción..."
-                    className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-slate-900/10 transition-all"
                     value={description} onChange={e => setDescription(e.target.value)}
                     disabled={isCompressing}
                 />
             </div>
 
             <div 
-              className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${dragActive ? 'border-blue-500 bg-blue-50' : 'border-slate-300 bg-slate-50'}`}
+              className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${dragActive ? 'border-slate-900 bg-slate-50' : 'border-slate-300 bg-slate-50'}`}
               onDragOver={e => { e.preventDefault(); setDragActive(true); }}
               onDragLeave={() => setDragActive(false)}
               onDrop={handleDrop}
             >
               <div className="space-y-2">
-                <UploadCloud className="mx-auto text-blue-600" size={32} />
-                <div className="text-sm font-semibold text-blue-600">
-                    {file ? file.name : "Selecciona un video"}
+                <UploadCloud className="mx-auto text-slate-400 group-hover:text-slate-900" size={32} />
+                <div className="text-sm font-black text-slate-900 uppercase tracking-widest bg-white border border-slate-200 py-2 px-4 rounded-lg inline-block cursor-pointer hover:bg-slate-50 transition-all">
+                    {file ? file.name : "Seleccionar Archivo"}
                     <input type="file" className="sr-only" accept="video/*" onChange={e => setFile(e.target.files?.[0] || null)} />
                 </div>
                 {file && <p className="text-xs text-slate-500">{(file.size / (1024 * 1024)).toFixed(1)} MB</p>}
@@ -210,15 +223,15 @@ export function UploadVideoModal({ isOpen, onClose, onSuccess }: UploadVideoModa
                         <span>{progress}%</span>
                     </div>
                     <div className="w-full bg-slate-200 rounded-full h-2">
-                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${progress}%` }} />
+                        <div className="bg-slate-900 h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
                     </div>
                 </div>
             )}
 
             <div className="flex justify-end gap-3 pt-4">
               <button type="button" onClick={handleClose} className="px-5 py-2.5 border rounded-xl hover:bg-slate-50 transition-colors">Cancelar</button>
-              <button type="submit" disabled={isCompressing || !loaded} className="px-5 py-2.5 bg-blue-600 text-white rounded-xl">
-                {!loaded ? "Cargando motor..." : isCompressing ? "Procesando..." : "Comprimir y Subir"}
+              <button type="submit" disabled={isCompressing || !loaded || !file} className="px-8 py-2.5 bg-slate-900 text-white rounded-xl font-black uppercase tracking-widest text-xs shadow-lg shadow-slate-900/20 active:scale-95 transition-all disabled:opacity-30">
+                {!loaded ? "Cargando motor..." : isCompressing ? "Procesando..." : "Subir Ahora"}
               </button>
             </div>
           </form>

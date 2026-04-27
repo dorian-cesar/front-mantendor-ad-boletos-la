@@ -14,6 +14,7 @@ export function VideoDashboard() {
     loading,
     fetchVideos,
     handleUpdate,
+    handleDelete,
     getVideoById
   } = useVideos();
   
@@ -23,11 +24,21 @@ export function VideoDashboard() {
   const [statusFilter, setStatusFilter] = useState("Todos");
   const [empresaFilter, setEmpresaFilter] = useState("Todas");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [initialFile, setInitialFile] = useState<File | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   
   // Estados para edición inline
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ nombre: "", descripcion: "", status: true });
   const [isSaving, setIsSaving] = useState(false);
+
+  const handleQuickUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      setInitialFile(selectedFile);
+      setIsUploadModalOpen(true);
+    }
+  };
 
   const startEditing = async (vid: any) => {
     try {
@@ -94,8 +105,17 @@ export function VideoDashboard() {
         <div className="flex-1 overflow-auto p-8 relative">
           <UploadVideoModal 
             isOpen={isUploadModalOpen} 
+            initialFile={initialFile}
             onClose={() => setIsUploadModalOpen(false)} 
             onSuccess={fetchVideos}
+          />
+
+          <input 
+            type="file" 
+            ref={fileInputRef}
+            className="hidden" 
+            accept="video/*"
+            onChange={handleQuickUpload}
           />
 
           <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -103,13 +123,15 @@ export function VideoDashboard() {
               <h2 className="text-3xl font-bold text-slate-800 tracking-tight mb-2">Videos Subidos</h2>
               <p className="text-slate-500 text-sm">Listado de videos gestionados y procesados por el backend.</p>
             </div>
-            <button 
-              onClick={() => setIsUploadModalOpen(true)}
-              className="bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-semibold shadow-xl shadow-slate-900/20 transition-all flex items-center gap-2 transform active:scale-95"
-            >
-              <Plus size={18} strokeWidth={2.5} />
-              Subir Video
-            </button>
+            <div className="flex items-center">
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-slate-900 hover:bg-black text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] shadow-xl shadow-slate-900/20 transition-all flex items-center gap-2 transform active:scale-95 border-2 border-slate-900"
+              >
+                <Plus size={18} strokeWidth={2.5} />
+                Subir Video
+              </button>
+            </div>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-6">
