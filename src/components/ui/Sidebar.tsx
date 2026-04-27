@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { LogOut, TabletSmartphone, Building, Video } from "lucide-react";
+import { LogOut, TabletSmartphone, Building, Video, Sun, Moon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -16,14 +16,14 @@ function SidebarItem({ icon, label, href, active }: SidebarItemProps) {
       href={href}
       className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[15px] font-medium transition-all ${
         active
-          ? "bg-slate-900 text-white shadow-md shadow-slate-900/10"
-          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+          ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md shadow-slate-900/10 dark:shadow-white/5"
+          : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
       }`}
     >
       {React.isValidElement(icon) &&
         React.cloneElement(icon as React.ReactElement<any>, {
           size: 20,
-          className: active ? "text-white" : "text-slate-400",
+          className: active ? "text-white dark:text-slate-900" : "text-slate-400 dark:text-slate-500",
         })}
       {label}
     </Link>
@@ -42,11 +42,34 @@ export function Sidebar() {
   };
 
   const handleMouseDown = () => setIsDragging(true);
+
+  // Theme logic
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  React.useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      setIsDarkMode(true);
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    if (newMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
   
   return (
     <aside
       style={{ width: `${sidebarWidth}px` }}
-      className={`relative bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 ${
+      className={`relative bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-shrink-0 ${
         isDragging ? "transition-none select-none" : "transition-none"
       }`}
     >
@@ -56,7 +79,7 @@ export function Sidebar() {
       >
         <div
           className={`w-[3px] h-full transition-colors ${
-            isDragging ? "bg-slate-400" : "bg-transparent group-hover:bg-slate-200"
+            isDragging ? "bg-slate-400 dark:bg-slate-600" : "bg-transparent group-hover:bg-slate-200 dark:group-hover:bg-slate-800"
           }`}
         />
       </div>
@@ -64,9 +87,9 @@ export function Sidebar() {
       <div className="overflow-hidden whitespace-nowrap w-full">
         <div className="h-16 flex items-center px-6 border-b border-slate-100 mb-6">
           <img 
-            src="/assets/logo-wit-mini-dark.png" 
+            src={isDarkMode ? "/assets/logo-wit-mini-dark.png" : "/assets/logo-wit-mini-dark.png"} 
             alt="WIT Logo" 
-            className="h-8 w-auto object-contain"
+            className="h-8 w-auto object-contain invert dark:invert-0"
           />
         </div>
 
@@ -92,10 +115,18 @@ export function Sidebar() {
         </nav>
       </div>
 
-      <div className="p-4 border-t border-slate-200 overflow-hidden whitespace-nowrap w-full">
+      <div className="p-4 border-t border-slate-200 dark:border-slate-800 overflow-hidden whitespace-nowrap w-full space-y-2">
+        <button 
+          onClick={toggleDarkMode}
+          className="flex items-center gap-3 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors w-full px-2 py-2 rounded-md hover:bg-slate-50 dark:hover:bg-slate-800"
+        >
+          {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+          <span className="text-sm font-medium">{isDarkMode ? "Modo Claro" : "Modo Oscuro"}</span>
+        </button>
+
         <button 
           onClick={handleLogout}
-          className="flex items-center gap-3 text-slate-500 hover:text-slate-800 transition-colors w-full px-2 py-2 rounded-md hover:bg-slate-50"
+          className="flex items-center gap-3 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors w-full px-2 py-2 rounded-md hover:bg-slate-50 dark:hover:bg-slate-800"
         >
           <LogOut size={18} />
           <span className="text-sm font-medium">Cerrar sesión</span>

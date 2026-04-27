@@ -71,6 +71,8 @@ export function TotemDashboard() {
   const [createForm, setCreateForm] = useState({ 
     identificador: "", 
     direccion: "", 
+    latitud: 0,
+    longitud: 0,
     empresa_ids: [] as string[],
     video_ids: [] as string[]
   });
@@ -128,7 +130,7 @@ export function TotemDashboard() {
       const success = await handleCreate(createForm);
       if (success) {
         setIsCreateModalOpen(false);
-        setCreateForm({ identificador: "", direccion: "", empresa_ids: [], video_ids: [] });
+        setCreateForm({ identificador: "", direccion: "", latitud: 0, longitud: 0, empresa_ids: [], video_ids: [] });
       }
     } catch (error) {
       alert("Error al crear");
@@ -136,18 +138,18 @@ export function TotemDashboard() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#f8f9fc] text-slate-800 font-sans">
+    <div className="flex h-screen w-full bg-[#f8f9fc] dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
       <Sidebar />
 
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 flex-shrink-0">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
+        <header className="h-16 flex items-center justify-between px-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 transition-colors duration-300">
+          <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             <span>Inicio</span>
             <span>/</span>
-            <span className="text-slate-800 font-medium">Tótems</span>
+            <span className="text-slate-800 dark:text-slate-100 font-medium">Tótems</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold bg-slate-100 border border-slate-200 text-slate-900 px-3 py-1.5 rounded-full">
+            <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white px-3 py-1.5 rounded-full">
               ROL: SUPER_ADMIN
             </span>
           </div>
@@ -215,7 +217,7 @@ export function TotemDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-6">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-5 mb-6 transition-colors duration-300">
             <div className="relative mb-5">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search size={18} className="text-slate-400" />
@@ -223,23 +225,23 @@ export function TotemDashboard() {
               <input
                 type="text"
                 placeholder="Buscar equipo..."
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all shadow-sm"
+                className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 dark:focus:border-white transition-all shadow-sm dark:text-white"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-900 border border-slate-200 rounded-md text-sm font-bold shadow-sm">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-md text-sm font-bold shadow-sm">
                 <CheckCircle2 size={16} />
                 <span>Tótems: {totems.length}</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white border border-slate-900 rounded-md text-sm font-bold shadow-sm transition-all hover:bg-black">
-                <Video size={16} className="text-white" />
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 border border-slate-900 dark:border-white rounded-md text-sm font-bold shadow-sm transition-all dark:hover:bg-slate-100">
+                <Video size={16} className="text-white dark:text-slate-900" />
                 <span>Videos Activos: {videos.filter(v => v.status === true).length}</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-500 border border-slate-200 rounded-md text-sm font-medium">
-                <XCircle size={16} className="text-slate-400" />
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-md text-sm font-medium">
+                <XCircle size={16} className="text-slate-400 dark:text-slate-500" />
                 <span>Videos Inactivos: {videos.filter(v => v.status === false).length}</span>
               </div>
             </div>
