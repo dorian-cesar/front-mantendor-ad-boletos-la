@@ -119,6 +119,7 @@ export function VideoSelector({ videos, empresas, selectedIds, onChange }: Video
                 filtered.map((v: any) => {
                   const isSelected = selectedIds.some(sid => String(sid) === String(v.id));
                   const empresa = empresas.find(e => String(e.id) === String(v.empresa_id));
+                  const isInactive = v.status === false || v.status === 0 || v.status === "Inactivo";
                   
                   return (
                     <div
@@ -159,7 +160,7 @@ export function VideoSelector({ videos, empresas, selectedIds, onChange }: Video
                           )}
                         </div>
                       </div>
-                      <div className={`w-1.5 h-1.5 rounded-full ${v.status === true ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'bg-slate-300'}`} />
+                      <div className={`w-1.5 h-1.5 rounded-full ${!isInactive ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'bg-red-400 shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`} />
                     </div>
                   );
                 })
@@ -178,25 +179,46 @@ export function VideoSelector({ videos, empresas, selectedIds, onChange }: Video
           <div className="space-y-2">
             {selectedVideos.map((v: any) => {
               const empresa = empresas.find((e) => String(e.id) === String(v.empresa_id));
+              const isInactive = v.status === false || v.status === 0 || v.status === "Inactivo";
+              
               return (
                 <div
                   key={v.id}
-                  className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-300 transition-all group"
+                  className={`flex items-center justify-between p-3 bg-white border transition-all group ${
+                    isInactive 
+                      ? "border-red-200 bg-red-50/50 hover:border-red-400" 
+                      : "border-slate-200 rounded-xl shadow-sm hover:border-blue-300"
+                  }`}
+                  style={isInactive ? { borderRadius: '12px' } : {}}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                      isInactive ? "bg-red-100 text-red-600" : "bg-blue-50 text-blue-600"
+                    }`}>
                       <Video size={14} />
                     </div>
                     <div className="flex flex-col min-w-0 pr-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-slate-800 truncate">{v.nombre}</span>
-                        {empresa && (
+                        <span className={`text-sm font-bold truncate ${isInactive ? "text-red-900" : "text-slate-800"}`}>
+                          {v.nombre}
+                        </span>
+                        {isInactive && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-[8px] font-black bg-red-600 text-white px-1.5 py-0.5 rounded-sm uppercase tracking-tighter shrink-0">
+                              INACTIVO
+                            </span>
+                            <span className="text-[8px] font-bold text-red-500 uppercase tracking-tighter shrink-0 animate-pulse">
+                              (No se reproducirá)
+                            </span>
+                          </div>
+                        )}
+                        {empresa && !isInactive && (
                           <span className="text-[8px] font-black text-indigo-500 bg-indigo-50 px-1 py-0.5 rounded-sm uppercase tracking-tighter shrink-0 border border-indigo-100/50">
                             {empresa.nombre}
                           </span>
                         )}
                       </div>
-                      <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
+                      <span className={`text-[10px] font-medium flex items-center gap-1 mt-0.5 ${isInactive ? "text-red-300" : "text-slate-400"}`}>
                         <Hash size={10} /> {v.id.toString().substring(0, 8)}
                       </span>
                     </div>
@@ -214,7 +236,11 @@ export function VideoSelector({ videos, empresas, selectedIds, onChange }: Video
                             onChange(newIds);
                           }
                         }}
-                        className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-blue-600 transition-colors"
+                        className={`p-1 rounded transition-colors ${
+                          isInactive 
+                            ? "hover:bg-red-100 text-red-300 hover:text-red-600" 
+                            : "hover:bg-slate-100 text-slate-400 hover:text-blue-600"
+                        }`}
                         title="Subir en el orden"
                       >
                         <ChevronUp size={14} strokeWidth={3} />
@@ -230,7 +256,11 @@ export function VideoSelector({ videos, empresas, selectedIds, onChange }: Video
                             onChange(newIds);
                           }
                         }}
-                        className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-blue-600 transition-colors"
+                        className={`p-1 rounded transition-colors ${
+                          isInactive 
+                            ? "hover:bg-red-100 text-red-300 hover:text-red-600" 
+                            : "hover:bg-slate-100 text-slate-400 hover:text-blue-600"
+                        }`}
                         title="Bajar en el orden"
                       >
                         <ChevronDown size={14} strokeWidth={3} />

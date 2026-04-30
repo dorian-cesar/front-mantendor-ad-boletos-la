@@ -84,7 +84,7 @@ export function VideoDashboard() {
     const matchesStatus = statusFilter === "Todos" || currentStatus === statusFilter;
     const matchesEmpresa = empresaFilter === "Todas" || String(v.empresa_id) === String(empresaFilter);
     return matchesSearch && matchesStatus && matchesEmpresa;
-  });
+  }).sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime());
 
   return (
     <div className="flex h-screen w-full bg-[#f8f9fc] text-slate-800 font-sans">

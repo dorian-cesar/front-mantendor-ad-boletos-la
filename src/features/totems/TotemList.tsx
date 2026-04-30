@@ -160,6 +160,13 @@ export function TotemList({
                                 videos={allVideos}
                                 empresas={empresas}
                                 videoIds={editForm.video_ids || []}
+                                onReorder={(newOrder) => setEditForm(prev => ({ ...prev, video_ids: newOrder }))}
+                                onRemove={(videoId) => {
+                                  const newIds = (editForm.video_ids || []).filter((id: string) => String(id) !== String(videoId));
+                                  const remainingVideos = allVideos.filter(v => newIds.includes(String(v.id)));
+                                  const newEmpresaIds = Array.from(new Set(remainingVideos.map(v => String(v.empresa_id))));
+                                  setEditForm(prev => ({ ...prev, video_ids: newIds, empresa_ids: newEmpresaIds }));
+                                }}
                               />
                             </div>
                                 <button
@@ -222,7 +229,7 @@ export function TotemList({
                             <VideosListDisplay 
                               videos={allVideos} 
                               empresas={empresas} 
-                              videoIds={t.video_ids || t.videos?.map((v: any) => v.id) || []} 
+                              videoIds={t.playlist && t.playlist.length > 0 ? t.playlist.map((p: any) => p.id || p.video_id) : (t.video_ids && t.video_ids.length > 0 ? t.video_ids : (t.videos?.map((v: any) => v.id) || []))} 
                             />
                         </div>
                         <div className="ml-auto w-1/4 flex flex-col gap-2">

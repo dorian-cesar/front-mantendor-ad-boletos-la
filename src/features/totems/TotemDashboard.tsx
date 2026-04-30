@@ -25,6 +25,7 @@ export function TotemDashboard() {
     error: totemsError,
     isSaving,
     fetchTotems,
+    fetchPlaylist,
     handleSave,
     handleCreate,
     handleDelete
@@ -88,21 +89,32 @@ export function TotemDashboard() {
 
     const takenByOthers = new Set<string>();
     totems.forEach((t) => {
-      if (t.id !== editingId) {
+      if (String(t.id) !== String(editingId)) {
         const ids = t.video_ids || t.videos?.map((v: any) => v.id) || [];
-        ids.forEach((id: string) => takenByOthers.add(id));
+        ids.forEach((id: any) => takenByOthers.add(String(id)));
       }
     });
 
-    // Mostrar videos no asignados + los ya asignados al tótem actual
+    // Mostrar videos no asignados + los ya asignados al tótem actual (usando strings para evitar fallos de tipo)
     return videos.filter(
-      (v: any) => !takenByOthers.has(v.id) || editForm.video_ids?.includes(v.id)
+      (v: any) => !takenByOthers.has(String(v.id)) || editForm.video_ids?.some(vid => String(vid) === String(v.id))
     );
   }, [videos, totems, editingId, editForm.video_ids]);
 
-  const onEditClick = (t: any) => {
-    const activeVideoIds = t.video_ids?.map(String) || t.videos?.map((v: any) => String(v.id)) || [];
+  const onEditClick = async (t: any) => {
     const backendEmpresaIds = t.empresa_ids?.map(String) || t.empresas?.map((e: any) => String(e.id)) || [];
+
+    // Intentar obtener la playlist ordenada del servidor
+    const playlist = await fetchPlaylist(String(t.id));
+    
+    let activeVideoIds: string[];
+    if (playlist.length > 0) {
+      // Ordenar por el campo 'orden' y extraer los IDs
+      const sorted = [...playlist].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+      activeVideoIds = sorted.map((p: any) => String(p.id || p.video_id));
+    } else {
+      activeVideoIds = t.video_ids?.map(String) || t.videos?.map((v: any) => String(v.id)) || [];
+    }
 
     setEditingId(t.id);
     setEditForm({

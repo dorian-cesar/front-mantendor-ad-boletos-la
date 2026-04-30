@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, Plus, Loader2, Building, Film } from "lucide-react";
 import { useEmpresas } from '@/features/empresas/useEmpresas';
 import { VideoSelector } from "./VideoSelector";
+import { VideosListDisplay } from "./VideosListDisplay";
 
 interface TotemModalProps {
   isOpen: boolean;
@@ -87,13 +88,30 @@ export function TotemModal({
             />
           </div>
 
-          <div className="pt-2">
+          <div className="pt-2 space-y-4">
             <VideoSelector 
               videos={videos}
               empresas={empresas}
               selectedIds={form.video_ids || []}
               onChange={handleVideoChange}
             />
+            
+            {form.video_ids && form.video_ids.length > 0 && (
+              <div className="border-t border-slate-100 pt-4">
+                <VideosListDisplay
+                  videos={videos}
+                  empresas={empresas}
+                  videoIds={form.video_ids}
+                  onReorder={(newOrder) => setForm(prev => ({ ...prev, video_ids: newOrder }))}
+                  onRemove={(videoId) => {
+                    const newIds = (form.video_ids || []).filter((id: string) => String(id) !== String(videoId));
+                    const remainingVideos = videos.filter(v => newIds.includes(String(v.id)));
+                    const newEmpresaIds = Array.from(new Set(remainingVideos.map(v => String(v.empresa_id))));
+                    setForm(prev => ({ ...prev, video_ids: newIds, empresa_ids: newEmpresaIds }));
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex gap-4 pt-4">

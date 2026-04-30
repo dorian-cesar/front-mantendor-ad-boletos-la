@@ -20,6 +20,11 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   return handleRequest(request, path);
 }
 
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  const { path } = await params;
+  return handleRequest(request, path);
+}
+
 async function handleRequest(request: NextRequest, path: string[]) {
   try {
     const API_URL = process.env.API_URL;
