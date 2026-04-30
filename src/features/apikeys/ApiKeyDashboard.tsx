@@ -171,94 +171,108 @@ export function ApiKeyDashboard() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              {filteredKeys.map((k) => (
-                <div 
-                  key={k.id}
-                  className={`bg-white border-2 border-transparent hover:border-slate-900 rounded-[32px] p-6 transition-all shadow-sm group relative overflow-hidden ${!k.status ? 'opacity-60 grayscale' : ''}`}
-                >
-                  {/* Status Indicator */}
-                  <div className={`absolute top-0 right-0 w-24 h-24 -mr-12 -mt-12 rounded-full blur-3xl opacity-10 transition-colors ${k.tipo === 'PLATAFORMA' ? 'bg-blue-500' : 'bg-emerald-500'}`} />
-                  
-                  <div className="flex items-start justify-between mb-8 relative">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner transition-colors ${k.tipo === 'PLATAFORMA' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                        {k.tipo === 'PLATAFORMA' ? <Shield size={24} strokeWidth={2.5} /> : <TabletSmartphone size={24} strokeWidth={2.5} />}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-black text-slate-900 tracking-tight leading-none">{k.description}</h3>
-                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-tighter ${k.tipo === 'PLATAFORMA' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
+            <div className="bg-white border border-slate-200 rounded-[32px] shadow-sm overflow-hidden transition-all">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50/50 border-b border-slate-100">
+                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Descripción / Nombre</th>
+                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tipo</th>
+                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Valor de la Key</th>
+                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Asociación</th>
+                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Estado</th>
+                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {filteredKeys.map((k) => (
+                      <tr 
+                        key={k.id} 
+                        className={`group hover:bg-slate-50/80 transition-all duration-200 ${!k.status ? 'opacity-50 grayscale-[0.5]' : ''}`}
+                      >
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${k.tipo === 'PLATAFORMA' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                              {k.tipo === 'PLATAFORMA' ? <Shield size={18} /> : <TabletSmartphone size={18} />}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 leading-tight">{k.description}</p>
+                              <p className="text-[10px] font-medium text-slate-400 mt-0.5">
+                                Creada: {format(new Date(k.createdAt), "d MMM, yyyy", { locale: es })}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-lg tracking-tighter ${
+                            k.tipo === 'PLATAFORMA' 
+                              ? 'bg-blue-100/50 text-blue-700' 
+                              : 'bg-emerald-100/50 text-emerald-700'
+                          }`}>
                             {k.tipo}
                           </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
-                          <Calendar size={12} />
-                          {format(new Date(k.createdAt), "d MMM, yyyy", { locale: es })}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                       <button
-                        onClick={() => handleToggleStatus(k.id, k.status)}
-                        className={`p-2 rounded-xl transition-all ${k.status ? 'text-slate-900 bg-slate-50' : 'text-slate-300'}`}
-                        title={k.status ? "Desactivar" : "Activar"}
-                      >
-                        {k.status ? <ToggleRight size={28} /> : <ToggleLeft size={28} />}
-                      </button>
-                      <button 
-                        onClick={() => handleOpenModal(k)}
-                        className="p-2.5 rounded-xl text-slate-300 hover:text-slate-900 hover:bg-slate-100 transition-all opacity-0 group-hover:opacity-100"
-                        title="Editar"
-                      >
-                        <Pencil size={20} />
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteKey(k.id)}
-                        className="p-2.5 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
-                        title="Eliminar"
-                      >
-                        <Trash2 size={20} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-50/80 rounded-2xl p-4 flex items-center justify-between border border-slate-100 group-hover:bg-slate-900 group-hover:border-slate-900 transition-all duration-300">
-                    <div className="flex flex-col overflow-hidden pr-4">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 group-hover:text-slate-500">Valor de la Key</span>
-                      <code className="text-sm font-black text-slate-900 font-mono truncate group-hover:text-white transition-colors">
-                        {k.key}
-                      </code>
-                    </div>
-                    <button 
-                      onClick={() => copyToClipboard(k.key, k.id)}
-                      className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
-                        copiedId === k.id 
-                          ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
-                          : 'bg-white text-slate-900 shadow-sm hover:scale-105 active:scale-95'
-                      }`}
-                    >
-                      {copiedId === k.id ? <Check size={18} strokeWidth={3} /> : <Copy size={18} strokeWidth={2.5} />}
-                    </button>
-                  </div>
-
-                  {k.tipo === 'TOTEM' && k.totem && (
-                    <div className="mt-6 flex items-center gap-3 px-1">
-                      <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500">
-                        <TabletSmartphone size={14} />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter leading-none mb-1">Tótem Asociado</span>
-                        <span className="text-xs font-bold text-slate-900 leading-none">
-                          {k.totem.identificador} 
-                          <span className="text-slate-400 font-medium ml-1.5">— {k.totem.direccion}</span>
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <code className="bg-slate-100 px-2 py-1 rounded text-xs font-mono text-slate-600 max-w-[120px] truncate">
+                              {k.key}
+                            </code>
+                            <button 
+                              onClick={() => copyToClipboard(k.key, k.id)}
+                              className={`p-1.5 rounded-lg transition-all ${
+                                copiedId === k.id 
+                                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-110' 
+                                  : 'text-slate-400 hover:bg-white hover:text-slate-900 hover:shadow-sm active:scale-95'
+                              }`}
+                            >
+                              {copiedId === k.id ? <Check size={14} strokeWidth={3} /> : <Copy size={14} />}
+                            </button>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {k.tipo === 'TOTEM' && k.totem ? (
+                            <div className="flex flex-col">
+                              <span className="text-xs font-bold text-slate-800 leading-tight">{k.totem.identificador}</span>
+                              <span className="text-[10px] text-slate-400 font-medium truncate max-w-[150px]">{k.totem.direccion}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs font-medium text-slate-300 italic">Global / Admin</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center">
+                            <button
+                              onClick={() => handleToggleStatus(k.id, k.status)}
+                              className={`p-1 rounded-lg transition-all ${k.status ? 'text-slate-900 hover:bg-white hover:shadow-sm' : 'text-slate-200'}`}
+                              title={k.status ? "Desactivar" : "Activar"}
+                            >
+                              {k.status ? <ToggleRight size={24} /> : <ToggleLeft size={24} />}
+                            </button>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-1">
+                            <button 
+                              onClick={() => handleOpenModal(k)}
+                              className="p-2 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-white hover:shadow-sm transition-all"
+                              title="Editar"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteKey(k.id)}
+                              className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                              title="Eliminar"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

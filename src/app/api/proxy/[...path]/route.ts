@@ -79,6 +79,7 @@ async function handleRequest(request: NextRequest, path: string[]) {
     });
 
     // Inyectar API KEY de forma privada
+    console.log(`[Proxy] Solicitando ${request.method} ${endpoint} usando Key: ${API_KEY.substring(0, 8)}...`);
     headers.set("x-api-key", API_KEY);
 
     // Petición al backend con streaming
