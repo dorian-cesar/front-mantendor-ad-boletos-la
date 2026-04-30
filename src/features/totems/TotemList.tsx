@@ -160,12 +160,12 @@ export function TotemList({
                                 videos={allVideos}
                                 empresas={empresas}
                                 videoIds={editForm.video_ids || []}
-                                onReorder={(newOrder) => setEditForm(prev => ({ ...prev, video_ids: newOrder }))}
+                                onReorder={(newOrder) => setEditForm((prev: any) => ({ ...prev, video_ids: newOrder }))}
                                 onRemove={(videoId) => {
                                   const newIds = (editForm.video_ids || []).filter((id: string) => String(id) !== String(videoId));
                                   const remainingVideos = allVideos.filter(v => newIds.includes(String(v.id)));
                                   const newEmpresaIds = Array.from(new Set(remainingVideos.map(v => String(v.empresa_id))));
-                                  setEditForm(prev => ({ ...prev, video_ids: newIds, empresa_ids: newEmpresaIds }));
+                                  setEditForm((prev: any) => ({ ...prev, video_ids: newIds, empresa_ids: newEmpresaIds }));
                                 }}
                               />
                             </div>

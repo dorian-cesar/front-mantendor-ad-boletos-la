@@ -1,4 +1,4 @@
-import { LogOut, TabletSmartphone, Building, Video } from "lucide-react";
+import { LogOut, TabletSmartphone, Building, Video, Key } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -88,6 +88,12 @@ export function Sidebar() {
             label="Videos"
             href="/videos"
             active={pathname === "/videos"}
+          />
+          <SidebarItem
+            icon={<Key />}
+            label="API Keys"
+            href="/api-keys"
+            active={pathname === "/api-keys"}
           />
         </nav>
       </div>

@@ -102,12 +102,12 @@ export function TotemModal({
                   videos={videos}
                   empresas={empresas}
                   videoIds={form.video_ids}
-                  onReorder={(newOrder) => setForm(prev => ({ ...prev, video_ids: newOrder }))}
+                  onReorder={(newOrder) => setForm((prev: any) => ({ ...prev, video_ids: newOrder }))}
                   onRemove={(videoId) => {
                     const newIds = (form.video_ids || []).filter((id: string) => String(id) !== String(videoId));
                     const remainingVideos = videos.filter(v => newIds.includes(String(v.id)));
                     const newEmpresaIds = Array.from(new Set(remainingVideos.map(v => String(v.empresa_id))));
-                    setForm(prev => ({ ...prev, video_ids: newIds, empresa_ids: newEmpresaIds }));
+                    setForm((prev: any) => ({ ...prev, video_ids: newIds, empresa_ids: newEmpresaIds }));
                   }}
                 />
               </div>
