@@ -81,6 +81,7 @@ export function TotemGrid({
                   <h3 className="font-bold text-slate-900 flex items-center gap-2">
                     <Edit size={16} /> Editando Equipo
                   </h3>
+                  <StatusBadge status={editForm.status === true || editForm.status === "Activo" ? "Activo" : "Inactivo"} />
                 </div>
 
                 <div>
@@ -163,10 +164,25 @@ export function TotemGrid({
                 <div className="flex-1 p-5 flex flex-col justify-between bg-white">
                   <div>
                     <div className="flex justify-between items-start mb-3">
-                      <StatusBadge status={t.status || "Activo"} />
-                      <span className="text-[10px] font-black text-slate-900 tracking-widest whitespace-nowrap ml-2">
-                        ID: {t.id.toString().substring(0, 6)}
-                      </span>
+                      <div className="flex flex-col gap-1.5">
+                        <StatusBadge status={t.status === true || t.status === "Activo" ? "Activo" : "Inactivo"} />
+                        <div className="flex items-center gap-1.5 ml-1">
+                          <div className={`w-2 h-2 rounded-full ${t.is_online ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-red-400'}`} />
+                          <span className={`text-[9px] font-black uppercase tracking-tighter ${t.is_online ? 'text-emerald-600' : 'text-red-500'}`}>
+                            {t.is_online ? 'Online' : 'Offline'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-[10px] font-black text-slate-900 tracking-widest whitespace-nowrap">
+                          ID: {t.id.toString().substring(0, 6)}
+                        </span>
+                        {t.ultimo_login && !t.is_online && (
+                          <span className="text-[8px] text-slate-400 font-bold uppercase mt-1">
+                            Visto: {new Date(t.ultimo_login).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <h3 className="font-bold text-slate-800 text-[16px] leading-tight mb-4 group-hover:text-slate-900 transition-colors line-clamp-2">
                       {t.identificador}

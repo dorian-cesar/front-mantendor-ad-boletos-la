@@ -219,6 +219,38 @@ export function useTotems() {
     }
   };
 
+  // Efecto para auto-refrescar el estado de conexión cada 30 segundos
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        // Hacemos un fetch ligero (solo /totems)
+        const data = await apiFetch("/totems");
+        const totemList = Array.isArray(data) ? data : [];
+        
+        // Actualizamos solo los campos de conexión en el estado actual
+        // para evitar recargar playlists pesadas
+        setTotems(currentTotems => 
+          currentTotems.map(t => {
+            const updated = totemList.find((u: any) => String(u.id) === String(t.id));
+            if (updated) {
+              return { 
+                ...t, 
+                is_online: updated.is_online,
+                ultimo_login: updated.ultimo_login,
+                status: updated.status
+              };
+            }
+            return t;
+          })
+        );
+      } catch (err) {
+        console.warn("Error en el refresco automático de conexión:", err);
+      }
+    }, 20000); // 20 segundos
+
+    return () => clearInterval(interval);
+  }, []);
+
   return {
     totems,
     loading,

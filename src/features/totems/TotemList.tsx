@@ -72,6 +72,7 @@ export function TotemList({
             <th className="py-3 px-5 font-semibold w-12 text-center"></th>
             <th className="py-3 px-5 font-semibold w-24">ID</th>
             <th className="py-3 px-5 font-semibold">TERMINAL / UBICACIÓN</th>
+            <th className="py-3 px-5 font-semibold w-40 text-center">CONEXIÓN</th>
             <th className="py-3 px-5 font-semibold w-40 text-right pr-6">TICKETS HOY</th>
             <th className="py-3 px-5 font-semibold w-40 text-right pr-6">RECAUDACIÓN</th>
             <th className="py-3 px-5 font-semibold w-32 text-center">STATUS</th>
@@ -101,6 +102,21 @@ export function TotemList({
                     <span className="text-[10px] text-slate-400  font-bold uppercase">{t.direccion}</span>
                   </div>
                 </td>
+                <td className="py-3.5 px-5">
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${t.is_online ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-slate-300'}`} />
+                      <span className={`text-[10px] font-black uppercase tracking-tighter ${t.is_online ? 'text-emerald-600' : 'text-slate-400'}`}>
+                        {t.is_online ? 'Online' : 'Offline'}
+                      </span>
+                    </div>
+                    {t.ultimo_login && !t.is_online && (
+                      <span className="text-[9px] text-slate-400 font-medium">
+                        {new Date(t.ultimo_login).toLocaleDateString()} {new Date(t.ultimo_login).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </span>
+                    )}
+                  </div>
+                </td>
                 <td className="py-3.5 px-5 font-semibold text-slate-600  text-right pr-6 transition-colors">
                   {t.sales || 0} <span className="text-xs text-slate-400  font-normal ml-0.5">uni.</span>
                 </td>
@@ -108,12 +124,12 @@ export function TotemList({
                   ${(t.revenue || 0).toLocaleString("es-CL")}
                 </td>
                 <td className="py-3.5 px-5 flex justify-center">
-                  <StatusBadge status={t.status || "Activo"} />
+                  <StatusBadge status={t.status === true || t.status === "Activo" ? "Activo" : "Inactivo"} />
                 </td>
               </tr>
               {expandedId === t.id && (
                 <tr className="bg-slate-50/50 border-b border-slate-200">
-                  <td colSpan={6} className="p-0">
+                  <td colSpan={7} className="p-0">
                     {editingId === t.id ? (
                       <div className="px-16 py-8 animate-in slide-in-from-top-2 duration-200 fade-in">
                         <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 max-w-4xl mx-auto flex flex-col gap-6">
@@ -121,7 +137,7 @@ export function TotemList({
                             <h3 className="font-bold text-slate-900 flex items-center gap-2 text-lg">
                               <Edit size={20} /> Editando Configuración: {t.id}
                             </h3>
-                            <StatusBadge status={editForm.status} />
+                            <StatusBadge status={editForm.status === true || editForm.status === "Activo" ? "Activo" : "Inactivo"} />
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="md:col-span-2">
