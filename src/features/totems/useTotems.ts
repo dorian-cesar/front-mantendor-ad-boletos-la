@@ -14,10 +14,21 @@ export function useTotems() {
       const data = await apiFetch("/totems");
       const totemList = Array.isArray(data) ? data : [];
 
-      // Obtener playlist ordenada de cada tótem (silencioso, sin errores en consola)
+      // 2. Obtener datos de ventas para calcular recaudación real
+      let salesData: any[] = [];
+      try {
+        const salesResponse = await apiFetch("/ventas/auditoria");
+        salesData = salesResponse.ventas || [];
+      } catch (salesErr) {
+        console.warn("No se pudieron cargar las ventas para el dashboard de tótems", salesErr);
+      }
+
+      // 3. Obtener playlist ordenada de cada tótem y cruzar con ventas
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const totemsWithPlaylist = await Promise.all(
+      const totemsWithData = await Promise.all(
         totemList.map(async (totem: any) => {
+          // Playlist
+          let playlist: any[] = [];
           try {
             const res = await fetch(`/api/proxy/totems/${totem.id}/playlist`, {
               headers: {
@@ -27,19 +38,27 @@ export function useTotems() {
             });
             if (res.ok) {
               const playlistData = await res.json();
-              const sorted = [...(playlistData.playlist || [])].sort(
+              playlist = [...(playlistData.playlist || [])].sort(
                 (a: any, b: any) => (a.orden ?? 0) - (b.orden ?? 0)
               );
-              return { ...totem, playlist: sorted };
             }
-          } catch {
-            // Silencioso
-          }
-          return { ...totem, playlist: [] };
+          } catch { /* silencioso */ }
+
+          // Calcular ventas y recaudación para este tótem específico
+          const mySales = salesData.filter((s: any) => String(s.totem_id) === String(totem.id));
+          const totalRevenue = mySales.reduce((acc: number, curr: any) => acc + (Number(curr.total_amount) || 0), 0);
+          const totalTickets = mySales.reduce((acc: number, curr: any) => acc + (curr.ticket_numbers?.length || 0), 0);
+
+          return { 
+            ...totem, 
+            playlist,
+            revenue: totalRevenue,
+            sales: totalTickets
+          };
         })
       );
 
-      setTotems(totemsWithPlaylist);
+      setTotems(totemsWithData);
     } catch (err: any) {
       console.error("Error fetching totems:", err);
       setError(err.message || "Error al cargar equipos");

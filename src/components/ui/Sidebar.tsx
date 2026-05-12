@@ -1,4 +1,4 @@
-import { LogOut, TabletSmartphone, Building, Video, Key } from "lucide-react";
+import { LogOut, TabletSmartphone, Building, Video, Key, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -122,6 +122,12 @@ export function Sidebar() {
             label="Videos"
             href="/videos"
             active={pathname === "/videos"}
+          />
+          <SidebarItem
+            icon={<ShoppingCart />}
+            label="Ventas"
+            href="/ventas"
+            active={pathname === "/ventas"}
           />
           <SidebarItem
             icon={<Key />}
