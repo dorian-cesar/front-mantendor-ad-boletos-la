@@ -120,29 +120,50 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
         message: "Preparando motor de compresión...",
       });
 
+      let fileToUpload: Blob = file; // fallback: archivo original
+
       try {
-        // 1. Cargar FFmpeg si no está listo
-        await loadFFmpeg();
-        if (!ffmpegRef.current) throw new Error("FFmpeg no disponible");
+        // 1. Intentar cargar FFmpeg con timeout de 15s
+        console.log("[Upload] Intentando cargar FFmpeg...");
+        const ffmpegLoaded = await Promise.race([
+          loadFFmpeg().then(() => ffmpegLoadedRef.current),
+          new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 15000)),
+        ]);
 
-        const ffmpeg = ffmpegRef.current;
+        if (ffmpegLoaded && ffmpegRef.current) {
+          // 2. Comprimir con FFmpeg
+          console.log("[Upload] FFmpeg disponible, comprimiendo...");
+          const ffmpeg = ffmpegRef.current;
 
-        // 2. Comprimir
-        setJob({
-          fileName: file.name,
-          stage: "compressing",
-          progress: 0,
-          message: "Comprimiendo y optimizando video...",
-        });
+          setJob({
+            fileName: file.name,
+            stage: "compressing",
+            progress: 0,
+            message: "Comprimiendo y optimizando video...",
+          });
 
-        await ffmpeg.writeFile("input.mp4", await fetchFile(file));
-        await ffmpeg.exec(["-i", "input.mp4", "-vcodec", "libx264", "-crf", "28", "-preset", "ultrafast", "output.mp4"]);
-        const data = await ffmpeg.readFile("output.mp4");
-        const blob = new Blob([data as unknown as BlobPart], { type: "video/mp4" });
+          try {
+            await ffmpeg.writeFile("input.mp4", await fetchFile(file));
+            await ffmpeg.exec(["-i", "input.mp4", "-vcodec", "libx264", "-crf", "28", "-preset", "ultrafast", "output.mp4"]);
+            const data = await ffmpeg.readFile("output.mp4");
+            fileToUpload = new Blob([data as unknown as BlobPart], { type: "video/mp4" });
+            console.log(`[Upload] Compresión exitosa: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(fileToUpload.size / 1024 / 1024).toFixed(1)}MB`);
+          } catch (compressErr) {
+            console.warn("[Upload] Compresión falló, subiendo archivo original:", compressErr);
+            fileToUpload = file;
+          }
+        } else {
+          console.warn("[Upload] FFmpeg no disponible (timeout o error), subiendo archivo original sin compresión");
+        }
+      } catch (ffmpegErr) {
+        console.warn("[Upload] Error en pipeline FFmpeg, continuando sin compresión:", ffmpegErr);
+        fileToUpload = file;
+      }
 
-        // 3. Subir
+      // 3. Subir (ya sea comprimido o el original)
+      try {
         const formData = new FormData();
-        formData.append("video", blob, file.name || "video.mp4");
+        formData.append("video", fileToUpload, file.name || "video.mp4");
         formData.append("nombre", title);
         formData.append("descripcion", description);
         formData.append("empresa_id", empresaId);
@@ -151,9 +172,10 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
           fileName: file.name,
           stage: "uploading",
           progress: 0,
-          message: "Subiendo archivo al servidor...",
+          message: `Subiendo ${(fileToUpload.size / 1024 / 1024).toFixed(1)}MB al servidor...`,
         });
 
+        console.log(`[Upload] Iniciando subida: ${(fileToUpload.size / 1024 / 1024).toFixed(1)}MB`);
         await uploadWithProgress("/videos", formData);
 
         // 4. Éxito
@@ -164,6 +186,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
           message: "¡Video subido exitosamente!",
         });
 
+        console.log("[Upload] ✅ Subida completada");
         if (onSuccessRef.current) onSuccessRef.current();
 
         // Auto-dismiss after 4s
@@ -171,13 +194,13 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
           setJob(null);
           setIsMinimized(false);
         }, 4000);
-      } catch (err: any) {
-        console.error("Upload pipeline error:", err);
+      } catch (uploadErr: any) {
+        console.error("[Upload] ❌ Error en subida:", uploadErr);
         setJob({
           fileName: file.name,
           stage: "error",
           progress: 0,
-          message: err.message || "Error al procesar el video",
+          message: uploadErr.message || "Error al subir el video",
         });
       }
     },
