@@ -1,0 +1,248 @@
+"use client";
+
+import React, { createContext, useContext, useState, useRef, useCallback } from "react";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile, toBlobURL } from "@ffmpeg/util";
+
+export interface UploadJob {
+  fileName: string;
+  stage: "loading" | "compressing" | "uploading" | "done" | "error";
+  progress: number;
+  message: string;
+}
+
+interface UploadContextType {
+  job: UploadJob | null;
+  isModalOpen: boolean;
+  isMinimized: boolean;
+  startUpload: (file: File, title: string, description: string, empresaId: string, onSuccess?: () => void) => void;
+  cancelUpload: () => void;
+  minimizeModal: () => void;
+  restoreModal: () => void;
+  openModal: (initialFile?: File | null) => void;
+  closeModal: () => void;
+  dismissJob: () => void;
+}
+
+const UploadContext = createContext<UploadContextType | null>(null);
+
+export function useUpload() {
+  const ctx = useContext(UploadContext);
+  if (!ctx) throw new Error("useUpload must be inside UploadProvider");
+  return ctx;
+}
+
+export function UploadProvider({ children }: { children: React.ReactNode }) {
+  const [job, setJob] = useState<UploadJob | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+
+  const ffmpegRef = useRef<FFmpeg | null>(null);
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
+  const ffmpegLoadedRef = useRef(false);
+  const onSuccessRef = useRef<(() => void) | undefined>(undefined);
+
+  const loadFFmpeg = useCallback(async () => {
+    if (typeof window === "undefined") return;
+    if (ffmpegLoadedRef.current && ffmpegRef.current?.loaded) return;
+
+    if (!ffmpegRef.current) ffmpegRef.current = new FFmpeg();
+    const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd";
+    const ffmpeg = ffmpegRef.current;
+
+    ffmpeg.on("progress", ({ progress }) => {
+      setJob((prev) =>
+        prev && prev.stage === "compressing"
+          ? { ...prev, progress: Math.round(progress * 100) }
+          : prev
+      );
+    });
+
+    try {
+      await ffmpeg.load({
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
+      });
+      ffmpegLoadedRef.current = true;
+    } catch (e) {
+      console.error("Error loading FFmpeg", e);
+    }
+  }, []);
+
+  const uploadWithProgress = useCallback(
+    (endpoint: string, formData: FormData): Promise<any> => {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhrRef.current = xhr;
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+        xhr.open("POST", `/api/proxy${endpoint}`, true);
+        if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const pct = Math.round((event.loaded / event.total) * 100);
+            setJob((prev) => (prev ? { ...prev, progress: pct } : prev));
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              resolve(JSON.parse(xhr.responseText));
+            } catch {
+              resolve(xhr.responseText);
+            }
+          } else {
+            reject(new Error(`Error ${xhr.status}: ${xhr.statusText}`));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error("Error de red en la subida"));
+        xhr.send(formData);
+      });
+    },
+    []
+  );
+
+  const startUpload = useCallback(
+    async (file: File, title: string, description: string, empresaId: string, onSuccess?: () => void) => {
+      onSuccessRef.current = onSuccess;
+
+      // Minimizar el modal al iniciar
+      setIsMinimized(true);
+      setIsModalOpen(false);
+
+      setJob({
+        fileName: file.name,
+        stage: "loading",
+        progress: 0,
+        message: "Preparando motor de compresión...",
+      });
+
+      try {
+        // 1. Cargar FFmpeg si no está listo
+        await loadFFmpeg();
+        if (!ffmpegRef.current) throw new Error("FFmpeg no disponible");
+
+        const ffmpeg = ffmpegRef.current;
+
+        // 2. Comprimir
+        setJob({
+          fileName: file.name,
+          stage: "compressing",
+          progress: 0,
+          message: "Comprimiendo y optimizando video...",
+        });
+
+        await ffmpeg.writeFile("input.mp4", await fetchFile(file));
+        await ffmpeg.exec(["-i", "input.mp4", "-vcodec", "libx264", "-crf", "28", "-preset", "ultrafast", "output.mp4"]);
+        const data = await ffmpeg.readFile("output.mp4");
+        const blob = new Blob([data as unknown as BlobPart], { type: "video/mp4" });
+
+        // 3. Subir
+        const formData = new FormData();
+        formData.append("video", blob, file.name || "video.mp4");
+        formData.append("nombre", title);
+        formData.append("descripcion", description);
+        formData.append("empresa_id", empresaId);
+
+        setJob({
+          fileName: file.name,
+          stage: "uploading",
+          progress: 0,
+          message: "Subiendo archivo al servidor...",
+        });
+
+        await uploadWithProgress("/videos", formData);
+
+        // 4. Éxito
+        setJob({
+          fileName: file.name,
+          stage: "done",
+          progress: 100,
+          message: "¡Video subido exitosamente!",
+        });
+
+        if (onSuccessRef.current) onSuccessRef.current();
+
+        // Auto-dismiss after 4s
+        setTimeout(() => {
+          setJob(null);
+          setIsMinimized(false);
+        }, 4000);
+      } catch (err: any) {
+        console.error("Upload pipeline error:", err);
+        setJob({
+          fileName: file.name,
+          stage: "error",
+          progress: 0,
+          message: err.message || "Error al procesar el video",
+        });
+      }
+    },
+    [loadFFmpeg, uploadWithProgress]
+  );
+
+  const cancelUpload = useCallback(() => {
+    if (ffmpegRef.current) {
+      try {
+        ffmpegRef.current.terminate();
+        ffmpegRef.current = null;
+        ffmpegLoadedRef.current = false;
+      } catch (e) {
+        console.error("Error terminando FFmpeg:", e);
+      }
+    }
+    if (xhrRef.current) {
+      xhrRef.current.abort();
+      xhrRef.current = null;
+    }
+    setJob(null);
+    setIsMinimized(false);
+    setIsModalOpen(false);
+  }, []);
+
+  const minimizeModal = useCallback(() => {
+    setIsMinimized(true);
+    setIsModalOpen(false);
+  }, []);
+
+  const restoreModal = useCallback(() => {
+    setIsMinimized(false);
+    setIsModalOpen(true);
+  }, []);
+
+  const openModal = useCallback((initialFile?: File | null) => {
+    setIsModalOpen(true);
+    setIsMinimized(false);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
+
+  const dismissJob = useCallback(() => {
+    setJob(null);
+    setIsMinimized(false);
+  }, []);
+
+  return (
+    <UploadContext.Provider
+      value={{
+        job,
+        isModalOpen,
+        isMinimized,
+        startUpload,
+        cancelUpload,
+        minimizeModal,
+        restoreModal,
+        openModal,
+        closeModal,
+        dismissJob,
+      }}
+    >
+      {children}
+    </UploadContext.Provider>
+  );
+}

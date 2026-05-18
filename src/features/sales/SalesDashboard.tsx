@@ -278,7 +278,7 @@ function KpiCard({ title, value, subtitle, icon, color, textColor }: any) {
     <div className={`${color} rounded-[24px] p-5 shadow-md shadow-slate-200/50 transition-all hover:scale-[1.02] duration-300 group`}>
       <div className="flex justify-between items-start mb-3">
         <div className={`p-2 rounded-xl ${color === 'bg-white' ? 'bg-slate-50 text-slate-900' : 'bg-white/10 text-white'}`}>
-          {React.cloneElement(icon as React.ReactElement, { size: 18 })}
+          {React.cloneElement(icon as React.ReactElement<any>, { size: 18 })}
         </div>
         <ArrowRight size={16} className={`${textColor} opacity-20 group-hover:opacity-100 transition-opacity`} />
       </div>
