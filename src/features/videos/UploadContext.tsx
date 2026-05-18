@@ -113,14 +113,20 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
       setIsMinimized(true);
       setIsModalOpen(false);
 
-      setJob({
-        fileName: file.name,
-        stage: "loading",
-        progress: 0,
-        message: "Preparando motor de compresión...",
-      });
+      const MAX_SIZE_NO_COMPRESS = 9 * 1024 * 1024; // 9MB
+      let fileToUpload: Blob = file;
 
-      let fileToUpload: Blob = file; // fallback: archivo original
+      if (file.size <= MAX_SIZE_NO_COMPRESS) {
+        // Archivo pequeño: subir directamente sin comprimir
+        console.log(`[Upload] Archivo de ${(file.size / 1024 / 1024).toFixed(1)}MB (≤9MB), subiendo directo sin compresión`);
+      } else {
+        // Archivo grande: intentar comprimir
+        setJob({
+          fileName: file.name,
+          stage: "loading",
+          progress: 0,
+          message: "Preparando motor de compresión...",
+        });
 
       try {
         // 1. Intentar cargar FFmpeg con timeout de 15s
@@ -155,10 +161,11 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
         } else {
           console.warn("[Upload] FFmpeg no disponible (timeout o error), subiendo archivo original sin compresión");
         }
-      } catch (ffmpegErr) {
+       } catch (ffmpegErr) {
         console.warn("[Upload] Error en pipeline FFmpeg, continuando sin compresión:", ffmpegErr);
         fileToUpload = file;
-      }
+       }
+      } // fin del else (archivo > 9MB)
 
       // 3. Subir (ya sea comprimido o el original)
       try {
