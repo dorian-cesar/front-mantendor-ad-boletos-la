@@ -71,35 +71,52 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
   const uploadWithProgress = useCallback(
     (endpoint: string, formData: FormData): Promise<any> => {
-      return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhrRef.current = xhr;
-        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-        xhr.open("POST", `/api/proxy${endpoint}`, true);
-        if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const pct = Math.round((event.loaded / event.total) * 100);
-            setJob((prev) => (prev ? { ...prev, progress: pct } : prev));
+      return new Promise(async (resolve, reject) => {
+        try {
+          // 1. Obtener la URL de subida directa y API key desde el servidor
+          const configRes = await fetch("/api/upload-config");
+          if (!configRes.ok) {
+            throw new Error("No se pudo obtener la configuración de subida");
           }
-        };
+          const config = await configRes.json();
 
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              resolve(JSON.parse(xhr.responseText));
-            } catch {
-              resolve(xhr.responseText);
+          const xhr = new XMLHttpRequest();
+          xhrRef.current = xhr;
+          const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+          // 2. Subir directamente al backend (sin pasar por el proxy de Netlify)
+          xhr.open("POST", config.uploadUrl, true);
+          
+          // Headers de autenticación
+          xhr.setRequestHeader("x-api-key", config.apiKey);
+          if (token) {
+            xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+          }
+
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const pct = Math.round((event.loaded / event.total) * 100);
+              setJob((prev) => (prev ? { ...prev, progress: pct } : prev));
             }
-          } else {
-            reject(new Error(`Error ${xhr.status}: ${xhr.statusText}`));
-          }
-        };
+          };
 
-        xhr.onerror = () => reject(new Error("Error de red en la subida"));
-        xhr.send(formData);
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try {
+                resolve(JSON.parse(xhr.responseText));
+              } catch {
+                resolve(xhr.responseText);
+              }
+            } else {
+              reject(new Error(`Error ${xhr.status}: ${xhr.responseText || xhr.statusText}`));
+            }
+          };
+
+          xhr.onerror = () => reject(new Error("Error de red en la subida"));
+          xhr.send(formData);
+        } catch (err) {
+          reject(err);
+        }
       });
     },
     []
