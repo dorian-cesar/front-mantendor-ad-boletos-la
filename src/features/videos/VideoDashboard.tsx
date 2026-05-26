@@ -23,6 +23,7 @@ export function VideoDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("Todos");
   const [empresaFilter, setEmpresaFilter] = useState("Todas");
+  const [sortOrder, setSortOrder] = useState("newest");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [initialFile, setInitialFile] = useState<File | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -84,7 +85,18 @@ export function VideoDashboard() {
     const matchesStatus = statusFilter === "Todos" || currentStatus === statusFilter;
     const matchesEmpresa = empresaFilter === "Todas" || String(v.empresa_id) === String(empresaFilter);
     return matchesSearch && matchesStatus && matchesEmpresa;
-  }).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+  }).sort((a, b) => {
+    if (sortOrder === "newest") {
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+    } else if (sortOrder === "oldest") {
+      return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+    } else if (sortOrder === "az") {
+      return (a.nombre || "").localeCompare(b.nombre || "");
+    } else if (sortOrder === "za") {
+      return (b.nombre || "").localeCompare(a.nombre || "");
+    }
+    return 0;
+  });
 
   return (
     <div className="flex h-screen w-full bg-[#f8f9fc] text-slate-800 font-sans">
@@ -148,7 +160,7 @@ export function VideoDashboard() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium text-slate-600">Empresa:</span>
                 <select 
@@ -173,6 +185,20 @@ export function VideoDashboard() {
                   <option value="Todos">Todos</option>
                   <option value="Activo">Activos</option>
                   <option value="Inactivo">Inactivos</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-slate-600">Ordenar por:</span>
+                <select 
+                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer outline-none"
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                >
+                  <option value="newest">Más recientes</option>
+                  <option value="oldest">Más antiguos</option>
+                  <option value="az">Nombre (A-Z)</option>
+                  <option value="za">Nombre (Z-A)</option>
                 </select>
               </div>
             </div>
