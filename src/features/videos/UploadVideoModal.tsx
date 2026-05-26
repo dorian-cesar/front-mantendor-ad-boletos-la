@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, UploadCloud, Loader2, Minimize2 } from 'lucide-react';
+import { X, UploadCloud, Loader2, Minimize2, RotateCcw } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { useUpload } from './UploadContext';
 
@@ -13,7 +13,7 @@ interface UploadVideoModalProps {
 }
 
 export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSuccess }: UploadVideoModalProps) {
-  const { job, startUpload, minimizeModal, cancelUpload } = useUpload();
+  const { job, startUpload, retryUpload, minimizeModal, cancelUpload } = useUpload();
   
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -137,6 +137,9 @@ export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSucces
                 </div>
                 <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest">{job.message}</h4>
                 <p className="text-xs text-slate-400 mt-1">{job.fileName}</p>
+                {job.chunkDetail && (
+                  <p className="text-[10px] text-slate-500 font-medium mt-1 bg-slate-50 px-3 py-1 rounded-lg inline-block">{job.chunkDetail}</p>
+                )}
               </div>
 
               <div>

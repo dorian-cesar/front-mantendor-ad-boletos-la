@@ -2,10 +2,10 @@
 
 import React from "react";
 import { useUpload } from "@/features/videos/UploadContext";
-import { Loader2, CheckCircle2, XCircle, X, Maximize2, FileVideo } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, X, Maximize2, FileVideo, RotateCcw } from "lucide-react";
 
 export function BackgroundUploadBar() {
-  const { job, isMinimized, restoreModal, cancelUpload, dismissJob } = useUpload();
+  const { job, isMinimized, restoreModal, cancelUpload, dismissJob, retryUpload } = useUpload();
 
   // Solo mostrar cuando hay un job activo y el modal está minimizado
   if (!job || !isMinimized) return null;
@@ -66,6 +66,10 @@ export function BackgroundUploadBar() {
               <p className="text-xs font-bold text-slate-900 truncate">{job.fileName}</p>
             </div>
             <p className="text-[10px] text-slate-500 font-medium mt-0.5">{job.message}</p>
+            {/* Detalle de chunks */}
+            {job.chunkDetail && (
+              <p className="text-[9px] text-slate-400 font-medium mt-0.5 truncate">{job.chunkDetail}</p>
+            )}
             {(job.stage === "compressing" || job.stage === "uploading") && (
               <p className={`text-[11px] font-black mt-0.5 ${
                 job.stage === "uploading" ? "text-emerald-600" : "text-slate-800"
@@ -95,7 +99,27 @@ export function BackgroundUploadBar() {
                 </button>
               </>
             )}
-            {(job.stage === "done" || job.stage === "error") && (
+            {job.stage === "error" && (
+              <div className="flex items-center gap-1">
+                {job.canRetry && (
+                  <button
+                    onClick={retryUpload}
+                    className="p-1.5 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors text-emerald-600"
+                    title="Reintentar subida"
+                  >
+                    <RotateCcw size={14} />
+                  </button>
+                )}
+                <button
+                  onClick={dismissJob}
+                  className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-700"
+                  title="Cerrar"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
+            {job.stage === "done" && (
               <button
                 onClick={dismissJob}
                 className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-700"
