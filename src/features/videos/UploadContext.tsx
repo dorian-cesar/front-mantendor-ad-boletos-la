@@ -39,6 +39,8 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
   const ffmpegRef = useRef<FFmpeg | null>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
+  const uploadIdRef = useRef<string | null>(null);
+  const configUrlRef = useRef<string | null>(null);
   const ffmpegLoadedRef = useRef(false);
   const onSuccessRef = useRef<(() => void) | undefined>(undefined);
 
@@ -75,13 +77,40 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
       if (!configRes.ok) throw new Error("No se pudo obtener la configuración de subida");
       const config = await configRes.json();
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      
+      const baseApiUrl = config.uploadUrl.replace(/\/videos\/?$/, "");
+      configUrlRef.current = baseApiUrl;
 
-      const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB por chunk
+      const headers: Record<string, string> = {
+        ...(config.apiKey && { "x-api-key": config.apiKey }),
+        ...(token && { Authorization: `Bearer ${token}` }),
+      };
+
+      // 1. Inicializar subida
+      const initRes = await fetch(`${baseApiUrl}/videos/upload/init`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: originalName,
+          total_size: file.size,
+          empresa_id: Number(empresaId),
+          nombre: title,
+          descripcion: description
+        })
+      });
+
+      if (!initRes.ok) {
+        throw new Error("Fallo al inicializar la subida en el servidor");
+      }
+
+      const initData = await initRes.json();
+      const uploadId = initData.upload_id;
+      uploadIdRef.current = uploadId;
+      
+      const CHUNK_SIZE = initData.chunk_size || 2 * 1024 * 1024; // Por defecto 2MB
       const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-      const identifier = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-      let finalResult = null;
-
+      // 2. Subir fragmentos
       for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
         const start = chunkIndex * CHUNK_SIZE;
         const end = Math.min(start + CHUNK_SIZE, file.size);
@@ -89,17 +118,6 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
         const formData = new FormData();
         formData.append("chunk", chunk, "chunk.blob");
-        formData.append("chunkIndex", chunkIndex.toString());
-        formData.append("totalChunks", totalChunks.toString());
-        formData.append("identifier", identifier);
-        formData.append("originalName", originalName);
-
-        // Si es el último chunk, mandamos los metadatos de creación
-        if (chunkIndex === totalChunks - 1) {
-          formData.append("nombre", title);
-          formData.append("descripcion", description);
-          formData.append("empresa_id", empresaId);
-        }
 
         let chunkSuccess = false;
         let attempts = 0;
@@ -107,11 +125,12 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
         while (!chunkSuccess && attempts < maxAttempts) {
           try {
-            finalResult = await new Promise((resolve, reject) => {
+            await new Promise((resolve, reject) => {
               const xhr = new XMLHttpRequest();
               xhrRef.current = xhr;
-              xhr.open("POST", `${config.uploadUrl}/chunk`, true);
-              xhr.setRequestHeader("x-api-key", config.apiKey);
+              xhr.open("PUT", `${baseApiUrl}/videos/upload/${uploadId}/chunk/${chunkIndex}`, true);
+              
+              if (config.apiKey) xhr.setRequestHeader("x-api-key", config.apiKey);
               if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
 
               xhr.upload.onprogress = (event) => {
@@ -124,11 +143,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
               xhr.onload = () => {
                 if (xhr.status >= 200 && xhr.status < 300) {
-                  try {
-                    resolve(JSON.parse(xhr.responseText));
-                  } catch {
-                    resolve(xhr.responseText);
-                  }
+                  resolve(true);
                 } else {
                   reject(new Error(`Error ${xhr.status}: ${xhr.responseText}`));
                 }
@@ -145,13 +160,26 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
             if (attempts >= maxAttempts) {
               throw new Error(`Fallo definitivo al subir el fragmento ${chunkIndex + 1} tras ${maxAttempts} intentos.`);
             }
-            // Retraso exponencial: 2s, 4s, 8s...
+            // Retraso exponencial
             await new Promise((r) => setTimeout(r, Math.pow(2, attempts) * 1000));
           }
         }
       }
 
-      return finalResult;
+      // 3. Completar y ensamblar
+      setJob((prev) => (prev ? { ...prev, progress: 100, message: "Ensamblando video en el servidor..." } : prev));
+      
+      const completeRes = await fetch(`${baseApiUrl}/videos/upload/${uploadId}/complete`, {
+        method: "POST",
+        headers
+      });
+
+      if (!completeRes.ok) {
+        throw new Error("Fallo al ensamblar el video en el servidor");
+      }
+
+      uploadIdRef.current = null;
+      return await completeRes.json();
     },
     []
   );
@@ -288,6 +316,17 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
       xhrRef.current.abort();
       xhrRef.current = null;
     }
+    
+    // Abortar en el servidor si hay sesión iniciada
+    if (uploadIdRef.current && configUrlRef.current) {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      fetch(`${configUrlRef.current}/videos/upload/${uploadIdRef.current}`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      }).catch(err => console.error("Error abortando subida en servidor", err));
+      uploadIdRef.current = null;
+    }
+
     setJob(null);
     setIsMinimized(false);
     setIsModalOpen(false);
