@@ -69,55 +69,89 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const uploadWithProgress = useCallback(
-    (endpoint: string, formData: FormData): Promise<any> => {
-      return new Promise(async (resolve, reject) => {
-        try {
-          // 1. Obtener la URL de subida directa y API key desde el servidor
-          const configRes = await fetch("/api/upload-config");
-          if (!configRes.ok) {
-            throw new Error("No se pudo obtener la configuración de subida");
-          }
-          const config = await configRes.json();
+  const uploadChunksWithProgress = useCallback(
+    async (file: Blob, title: string, description: string, empresaId: string, originalName: string): Promise<any> => {
+      const configRes = await fetch("/api/upload-config");
+      if (!configRes.ok) throw new Error("No se pudo obtener la configuración de subida");
+      const config = await configRes.json();
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-          const xhr = new XMLHttpRequest();
-          xhrRef.current = xhr;
-          const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB por chunk
+      const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+      const identifier = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-          // 2. Subir directamente al backend (sin pasar por el proxy de Netlify)
-          xhr.open("POST", config.uploadUrl, true);
-          
-          // Headers de autenticación
-          xhr.setRequestHeader("x-api-key", config.apiKey);
-          if (token) {
-            xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-          }
+      let finalResult = null;
 
-          xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
-              const pct = Math.round((event.loaded / event.total) * 100);
-              setJob((prev) => (prev ? { ...prev, progress: pct } : prev));
-            }
-          };
+      for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+        const start = chunkIndex * CHUNK_SIZE;
+        const end = Math.min(start + CHUNK_SIZE, file.size);
+        const chunk = file.slice(start, end);
 
-          xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              try {
-                resolve(JSON.parse(xhr.responseText));
-              } catch {
-                resolve(xhr.responseText);
-              }
-            } else {
-              reject(new Error(`Error ${xhr.status}: ${xhr.responseText || xhr.statusText}`));
-            }
-          };
+        const formData = new FormData();
+        formData.append("chunk", chunk, "chunk.blob");
+        formData.append("chunkIndex", chunkIndex.toString());
+        formData.append("totalChunks", totalChunks.toString());
+        formData.append("identifier", identifier);
+        formData.append("originalName", originalName);
 
-          xhr.onerror = () => reject(new Error("Error de red en la subida"));
-          xhr.send(formData);
-        } catch (err) {
-          reject(err);
+        // Si es el último chunk, mandamos los metadatos de creación
+        if (chunkIndex === totalChunks - 1) {
+          formData.append("nombre", title);
+          formData.append("descripcion", description);
+          formData.append("empresa_id", empresaId);
         }
-      });
+
+        let chunkSuccess = false;
+        let attempts = 0;
+        const maxAttempts = 5;
+
+        while (!chunkSuccess && attempts < maxAttempts) {
+          try {
+            finalResult = await new Promise((resolve, reject) => {
+              const xhr = new XMLHttpRequest();
+              xhrRef.current = xhr;
+              xhr.open("POST", `${config.uploadUrl}/chunk`, true);
+              xhr.setRequestHeader("x-api-key", config.apiKey);
+              if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+
+              xhr.upload.onprogress = (event) => {
+                if (event.lengthComputable) {
+                  const chunkProgress = event.loaded / event.total;
+                  const globalPct = Math.round(((chunkIndex + chunkProgress) / totalChunks) * 100);
+                  setJob((prev) => (prev ? { ...prev, progress: globalPct } : prev));
+                }
+              };
+
+              xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                  try {
+                    resolve(JSON.parse(xhr.responseText));
+                  } catch {
+                    resolve(xhr.responseText);
+                  }
+                } else {
+                  reject(new Error(`Error ${xhr.status}: ${xhr.responseText}`));
+                }
+              };
+
+              xhr.onerror = () => reject(new Error("Error de red en la subida"));
+              xhr.send(formData);
+            });
+            
+            chunkSuccess = true;
+          } catch (err) {
+            attempts++;
+            console.warn(`[Upload] Fragmento ${chunkIndex + 1}/${totalChunks} falló. Reintento ${attempts}/${maxAttempts}...`);
+            if (attempts >= maxAttempts) {
+              throw new Error(`Fallo definitivo al subir el fragmento ${chunkIndex + 1} tras ${maxAttempts} intentos.`);
+            }
+            // Retraso exponencial: 2s, 4s, 8s...
+            await new Promise((r) => setTimeout(r, Math.pow(2, attempts) * 1000));
+          }
+        }
+      }
+
+      return finalResult;
     },
     []
   );
@@ -170,10 +204,25 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
             await ffmpeg.exec(["-i", "input.mp4", "-vcodec", "libx264", "-crf", "28", "-preset", "ultrafast", "output.mp4"]);
             const data = await ffmpeg.readFile("output.mp4");
             fileToUpload = new Blob([data as unknown as BlobPart], { type: "video/mp4" });
+            
+            // ¡CRÍTICO PARA LA MEMORIA! Limpiar el sistema de archivos virtual de WebAssembly
+            try {
+              await ffmpeg.deleteFile("input.mp4");
+              await ffmpeg.deleteFile("output.mp4");
+              console.log("[Upload] Caché de FFmpeg limpiada correctamente.");
+            } catch (cleanupErr) {
+              console.warn("[Upload] Error limpiando caché de FFmpeg:", cleanupErr);
+            }
+            
             console.log(`[Upload] Compresión exitosa: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(fileToUpload.size / 1024 / 1024).toFixed(1)}MB`);
           } catch (compressErr) {
             console.warn("[Upload] Compresión falló, subiendo archivo original:", compressErr);
             fileToUpload = file;
+            // Intentar limpiar en caso de error
+            try {
+              await ffmpeg.deleteFile("input.mp4");
+              await ffmpeg.deleteFile("output.mp4");
+            } catch (e) {}
           }
         } else {
           console.warn("[Upload] FFmpeg no disponible (timeout o error), subiendo archivo original sin compresión");
@@ -184,14 +233,8 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
        }
       } // fin del else (archivo > 9MB)
 
-      // 3. Subir (ya sea comprimido o el original)
+      // 3. Subir (ya sea comprimido o el original) usando fragmentos (chunks)
       try {
-        const formData = new FormData();
-        formData.append("video", fileToUpload, file.name || "video.mp4");
-        formData.append("nombre", title);
-        formData.append("descripcion", description);
-        formData.append("empresa_id", empresaId);
-
         setJob({
           fileName: file.name,
           stage: "uploading",
@@ -199,8 +242,8 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
           message: `Subiendo ${(fileToUpload.size / 1024 / 1024).toFixed(1)}MB al servidor...`,
         });
 
-        console.log(`[Upload] Iniciando subida: ${(fileToUpload.size / 1024 / 1024).toFixed(1)}MB`);
-        await uploadWithProgress("/videos", formData);
+        console.log(`[Upload] Iniciando subida fragmentada: ${(fileToUpload.size / 1024 / 1024).toFixed(1)}MB`);
+        await uploadChunksWithProgress(fileToUpload, title, description, empresaId, file.name || "video.mp4");
 
         // 4. Éxito
         setJob({
@@ -228,7 +271,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    [loadFFmpeg, uploadWithProgress]
+    [loadFFmpeg, uploadChunksWithProgress]
   );
 
   const cancelUpload = useCallback(() => {
