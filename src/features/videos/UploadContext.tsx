@@ -125,35 +125,26 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
         while (!chunkSuccess && attempts < maxAttempts) {
           try {
-            await new Promise((resolve, reject) => {
-              const xhr = new XMLHttpRequest();
-              xhrRef.current = xhr;
-              xhr.open("PUT", `${baseApiUrl}/videos/upload/${uploadId}/chunk/${chunkIndex}`, true);
-              
-              if (config.apiKey) xhr.setRequestHeader("x-api-key", config.apiKey);
-              if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+            const chunkRes = await fetch(
+              `${baseApiUrl}/videos/upload/${uploadId}/chunk/${chunkIndex}`,
+              {
+                method: "PUT",
+                headers: {
+                  ...(config.apiKey && { "x-api-key": config.apiKey }),
+                  ...(token && { Authorization: `Bearer ${token}` }),
+                },
+                body: formData,
+              }
+            );
 
-              xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable) {
-                  const chunkProgress = event.loaded / event.total;
-                  const globalPct = Math.round(((chunkIndex + chunkProgress) / totalChunks) * 100);
-                  setJob((prev) => (prev ? { ...prev, progress: globalPct } : prev));
-                }
-              };
-
-              xhr.onload = () => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                  resolve(true);
-                } else {
-                  reject(new Error(`Error ${xhr.status}: ${xhr.responseText}`));
-                }
-              };
-
-              xhr.onerror = () => reject(new Error("Error de red en la subida"));
-              xhr.send(formData);
-            });
+            if (!chunkRes.ok) {
+              const errText = await chunkRes.text().catch(() => "sin detalle");
+              throw new Error(`HTTP ${chunkRes.status}: ${errText}`);
+            }
             
             chunkSuccess = true;
+            const globalPct = Math.round(((chunkIndex + 1) / totalChunks) * 100);
+            setJob((prev) => (prev ? { ...prev, progress: globalPct } : prev));
           } catch (err: any) {
             attempts++;
             console.warn(`[Upload] Fragmento ${chunkIndex + 1}/${totalChunks} falló (intento ${attempts}/${maxAttempts}):`, err?.message || err);
