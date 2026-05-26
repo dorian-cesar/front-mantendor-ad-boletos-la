@@ -3,6 +3,7 @@ import { apiFetch } from "@/lib/api";
 
 export function useTotems() {
   const [totems, setTotems] = useState<any[]>([]);
+  const [resumenGlobal, setResumenGlobal] = useState<any>({ total_transacciones: 0, boletos_vendidos: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -12,7 +13,13 @@ export function useTotems() {
       setLoading(true);
       setError(null);
       const data = await apiFetch("/totems");
-      const totemList = Array.isArray(data) ? data : [];
+      // El backend ahora devuelve { totems: [...], resumen_global: {...} }
+      const totemList = Array.isArray(data) ? data : (data.totems || []);
+      
+      // Guardar resumen global si viene
+      if (data.resumen_global) {
+        setResumenGlobal(data.resumen_global);
+      }
 
       // 2. Obtener datos de ventas para calcular recaudación real
       let salesData: any[] = [];
@@ -267,7 +274,13 @@ export function useTotems() {
       try {
         // Hacemos un fetch ligero (solo /totems)
         const data = await apiFetch("/totems");
-        const totemList = Array.isArray(data) ? data : [];
+        // Soportar ambos formatos: array plano o { totems: [...] }
+        const totemList = Array.isArray(data) ? data : (data.totems || []);
+        
+        // Actualizar resumen global si viene
+        if (data.resumen_global) {
+          setResumenGlobal(data.resumen_global);
+        }
         
         // Actualizamos solo los campos de conexión en el estado actual
         // para evitar recargar playlists pesadas
@@ -295,6 +308,7 @@ export function useTotems() {
 
   return {
     totems,
+    resumenGlobal,
     loading,
     error,
     isSaving,

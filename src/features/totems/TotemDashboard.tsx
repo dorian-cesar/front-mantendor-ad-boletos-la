@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Search, Plus, LayoutList, LayoutGrid, CheckCircle2, XCircle, AlertCircle, Video } from "lucide-react";
+import { Search, Plus, LayoutList, LayoutGrid, CheckCircle2, XCircle, AlertCircle, Video, BarChart3, Ticket } from "lucide-react";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { useTotems } from "./useTotems";
 import { useVideos } from "@/features/videos/useVideos";
@@ -21,6 +21,7 @@ export function TotemDashboard() {
 
   const {
     totems,
+    resumenGlobal,
     loading,
     error: totemsError,
     isSaving,
@@ -257,6 +258,18 @@ export function TotemDashboard() {
                 <XCircle size={16} className="text-slate-400 " />
                 <span>Videos Inactivos: {videos.filter(v => v.status === false).length}</span>
               </div>
+              {resumenGlobal.total_transacciones > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-sm font-bold">
+                  <BarChart3 size={16} />
+                  <span>Transacciones: {resumenGlobal.total_transacciones}</span>
+                </div>
+              )}
+              {resumenGlobal.boletos_vendidos > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-sm font-bold">
+                  <Ticket size={16} />
+                  <span>Boletos Vendidos: {resumenGlobal.boletos_vendidos}</span>
+                </div>
+              )}
             </div>
           </div>
 
