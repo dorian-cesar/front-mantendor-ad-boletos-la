@@ -154,14 +154,14 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
             });
             
             chunkSuccess = true;
-          } catch (err) {
+          } catch (err: any) {
             attempts++;
-            console.warn(`[Upload] Fragmento ${chunkIndex + 1}/${totalChunks} falló. Reintento ${attempts}/${maxAttempts}...`);
+            console.warn(`[Upload] Fragmento ${chunkIndex + 1}/${totalChunks} falló (intento ${attempts}/${maxAttempts}):`, err?.message || err);
             if (attempts >= maxAttempts) {
-              throw new Error(`Fallo definitivo al subir el fragmento ${chunkIndex + 1} tras ${maxAttempts} intentos.`);
+              throw new Error(`Fallo definitivo al subir el fragmento ${chunkIndex + 1} tras ${maxAttempts} intentos. Último error: ${err?.message || "desconocido"}`);
             }
             // Retraso exponencial
-            await new Promise((r) => setTimeout(r, Math.pow(2, attempts) * 1000));
+            await new Promise((r) => setTimeout(r, Math.min(Math.pow(2, attempts) * 1000, 16000)));
           }
         }
       }
