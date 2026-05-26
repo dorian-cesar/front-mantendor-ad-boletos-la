@@ -2,7 +2,6 @@ const BASE_URL = "/api/proxy";
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
   const isFormData = options.body instanceof FormData;
 
   const headers: Record<string, string> = {
@@ -14,31 +13,71 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     headers["Content-Type"] = "application/json";
   }
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  const maxRetries = 3;
+  let lastError: any = null;
 
-  if (response.status === 401) {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-  }
-
-  if (!response.ok) {
-    const text = await response.text().catch(() => "No response body");
-    console.error(`[API Error] ${response.status} ${endpoint}:`, text);
-    
-    let message = "API Error";
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-        const json = JSON.parse(text);
-        message = json.message || json.error || message;
-    } catch {
-        message = `Error ${response.status}: ${text.substring(0, 50)}...`;
-    }
-    throw new Error(message);
-  }
+      const response = await fetch(`${BASE_URL}${endpoint}`, {
+        ...options,
+        headers,
+      });
 
-  return response.json();
+      if (response.status === 401) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+        }
+      }
+
+      // Si es un error temporal (ej. proxy caído o red inestable), lanzamos error para forzar reintento
+      if (response.status >= 502 && response.status <= 504) {
+        throw new Error(`Error temporal de red o servidor (${response.status})`);
+      }
+
+      if (!response.ok) {
+        const text = await response.text().catch(() => "No response body");
+        console.error(`[API Error] ${response.status} ${endpoint}:`, text);
+        
+        let message = "API Error";
+        try {
+            const json = JSON.parse(text);
+            message = json.message || json.error || message;
+        } catch {
+            message = `Error ${response.status}: ${text.substring(0, 50)}...`;
+        }
+        
+        // Errores 4xx (como 400 Bad Request o 404) no se reintentan porque son errores del cliente
+        const clientError = new Error(message);
+        (clientError as any).status = response.status;
+        throw clientError;
+      }
+
+      return await response.json();
+
+    } catch (err: any) {
+      lastError = err;
+      
+      // Solo reintentamos si es un error de conexión pura (TypeError de fetch) o un error de proxy/gateway (50x)
+      const isNetworkError = err.name === "TypeError" || err.message.includes("fetch failed") || err.message.includes("temporal de red");
+      
+      // No reintentamos errores de cliente (400, 404, etc.)
+      const isClientError = err.status && err.status >= 400 && err.status < 500;
+
+      // Por seguridad, es mejor reintentar siempre GET. Para otros métodos, lo reintentaremos si es claramente un fallo de red.
+      const isSafeMethod = !options.method || options.method.toUpperCase() === "GET";
+
+      if (attempt < maxRetries && isNetworkError && !isClientError) {
+        // Exponential backoff: 1s, 2s, 4s...
+        const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500; 
+        console.warn(`[Red Inestable] Fallo en ${endpoint}. Reintentando en ${Math.round(delay)}ms... (Intento ${attempt + 1} de ${maxRetries})`);
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+
+      // Si superamos los reintentos o no era un error reintentable, lanzamos el error original
+      throw lastError;
+    }
+  }
 }
