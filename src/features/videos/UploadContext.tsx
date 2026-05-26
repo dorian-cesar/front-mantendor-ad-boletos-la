@@ -249,10 +249,13 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
       setIsModalOpen(false);
 
       const MAX_SIZE_NO_COMPRESS = 9 * 1024 * 1024; // 9MB
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
       let fileToUpload: Blob = file;
 
       if (file.size <= MAX_SIZE_NO_COMPRESS) {
         console.log(`[Upload] Archivo de ${(file.size / 1024 / 1024).toFixed(1)}MB (≤9MB), subiendo directo sin compresión`);
+      } else if (isMobile) {
+        console.log(`[Upload] Dispositivo móvil detectado. Saltando compresión local para evitar bloqueos. Se subirá el archivo original (${(file.size / 1024 / 1024).toFixed(1)}MB).`);
       } else {
         // Archivo grande: comprimir con FFmpeg
         setJob({
