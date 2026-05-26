@@ -91,7 +91,7 @@ export function Sidebar() {
       {/* Overlay for mobile */}
       {isOpenMobile && (
         <div 
-          className="md:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 animate-in fade-in duration-300" 
+          className="md:hidden fixed inset-0 bg-slate-900/60 z-40 animate-in fade-in duration-200" 
           onClick={() => setIsOpenMobile(false)}
         />
       )}

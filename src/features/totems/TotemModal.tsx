@@ -44,7 +44,7 @@ export function TotemModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-300 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40  p-4 animate-in fade-in duration-300 overflow-y-auto">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg my-8 overflow-visible animate-in zoom-in-95 duration-200">
         <div className="bg-slate-900 p-6 flex justify-between items-center text-white rounded-t-3xl">
           <div className="flex items-center gap-3">

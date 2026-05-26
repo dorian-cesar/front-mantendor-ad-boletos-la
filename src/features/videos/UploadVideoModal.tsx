@@ -100,7 +100,7 @@ export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSucces
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 ">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden font-sans border border-slate-100 mx-4">
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50">
           <h3 className="text-xl font-bold text-slate-800">Subir Nuevo Video</h3>

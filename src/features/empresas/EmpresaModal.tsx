@@ -51,7 +51,7 @@ export function EmpresaModal({ isOpen, onClose, onSuccess }: EmpresaModalProps) 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  transition-opacity">
       <div 
         className="bg-white rounded-3xl shadow-2xl w-full max-md overflow-hidden transform transition-all border border-slate-100 mx-4"
         onClick={(e) => e.stopPropagation()}
