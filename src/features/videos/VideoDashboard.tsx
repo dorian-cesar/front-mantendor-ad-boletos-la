@@ -295,7 +295,7 @@ export function VideoDashboard() {
                               </div>
                               <button 
                                 onClick={() => startEditing(vid)}
-                                className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-white rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-white rounded-lg transition-all opacity-100 md:opacity-0 group-hover:opacity-100"
                                 title="Editar video"
                               >
                                 <Edit size={16} />
@@ -312,7 +312,7 @@ export function VideoDashboard() {
 
                               <button 
                                 onClick={() => handleDelete(vid.id)}
-                                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all opacity-0 group-hover:opacity-100 ml-1"
+                                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all opacity-100 md:opacity-0 group-hover:opacity-100 ml-1"
                                 title="Eliminar video"
                               >
                                 <XCircle size={16} />

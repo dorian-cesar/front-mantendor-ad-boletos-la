@@ -102,7 +102,7 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                 
                 <div className="flex items-center gap-2">
                   {onReorder && (
-                    <div className="flex items-center bg-slate-50 rounded-lg border border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center bg-slate-50 rounded-lg border border-slate-100 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                       <button 
                         type="button"
                         onClick={(e) => { e.stopPropagation(); moveItem(index, 'up'); }}
@@ -126,7 +126,7 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                     <button 
                       type="button"
                       onClick={(e) => { e.stopPropagation(); removeItem(String(v.id)); }}
-                      className="p-1.5 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
+                      className="p-1.5 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all"
                       title="Quitar video del tótem"
                     >
                       <X size={14} strokeWidth={2.5} />
