@@ -84,25 +84,25 @@ export function VideoDashboard() {
     const matchesStatus = statusFilter === "Todos" || currentStatus === statusFilter;
     const matchesEmpresa = empresaFilter === "Todas" || String(v.empresa_id) === String(empresaFilter);
     return matchesSearch && matchesStatus && matchesEmpresa;
-  }).sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime());
+  }).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
 
   return (
     <div className="flex h-screen w-full bg-[#f8f9fc] text-slate-800 font-sans">
       <Sidebar />
 
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 flex-shrink-0">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <span>Inicio</span>
-            <span>/</span>
-            <span className="text-slate-800 font-medium">Videos</span>
+        <header className="h-16 flex items-center justify-between px-4 md:px-8 bg-white border-b border-slate-200 flex-shrink-0">
+          <div className="flex items-center gap-2 text-sm text-slate-500 truncate">
+            <span className="hidden sm:inline">Inicio</span>
+            <span className="hidden sm:inline">/</span>
+            <span className="text-slate-800 font-medium truncate">Videos</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs font-semibold bg-slate-100 border border-slate-200 text-slate-900 px-3 py-1.5 rounded-full">ROL: SUPER_ADMIN</span>
           </div>
         </header>
 
-        <div className="flex-1 overflow-auto p-8 relative">
+        <div className="flex-1 overflow-auto p-4 md:p-8 relative w-full max-w-[100vw]">
           <UploadVideoModal 
             isOpen={isUploadModalOpen} 
             initialFile={initialFile}
@@ -123,10 +123,10 @@ export function VideoDashboard() {
               <h2 className="text-3xl font-bold text-slate-800  tracking-tight mb-2">Videos Subidos</h2>
               <p className="text-slate-500  text-sm">Listado de videos gestionados y procesados por el backend.</p>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center w-full md:w-auto">
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-slate-900 hover:bg-black text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] shadow-xl shadow-slate-900/20 transition-all flex items-center gap-2 transform active:scale-95 border-2 border-slate-900"
+                className="w-full md:w-auto justify-center bg-slate-900 hover:bg-black text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] shadow-xl shadow-slate-900/20 transition-all flex items-center gap-2 transform active:scale-95 border-2 border-slate-900"
               >
                 <Plus size={18} strokeWidth={2.5} />
                 Subir Video
@@ -187,8 +187,8 @@ export function VideoDashboard() {
             </div>
           </div>
 
-          <div className="bg-white  rounded-xl shadow-sm border border-slate-200  overflow-hidden transition-colors duration-300">
-            <table className="w-full text-left text-sm border-collapse">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto transition-colors duration-300">
+            <table className="w-full min-w-[800px] text-left text-sm border-collapse">
               <thead>
                 <tr className="bg-slate-50  border-b border-slate-200  text-slate-600 ">
                   <th className="py-3 px-5 font-semibold w-24">ID</th>

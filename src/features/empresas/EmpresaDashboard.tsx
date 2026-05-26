@@ -72,18 +72,18 @@ export function EmpresaDashboard() {
       <Sidebar />
 
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 flex-shrink-0">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <span>Inicio</span>
-            <span>/</span>
-            <span className="text-slate-800 font-medium transition-colors">Empresas</span>
+        <header className="h-16 flex items-center justify-between px-4 md:px-8 bg-white border-b border-slate-200 flex-shrink-0">
+          <div className="flex items-center gap-2 text-sm text-slate-500 truncate">
+            <span className="hidden sm:inline">Inicio</span>
+            <span className="hidden sm:inline">/</span>
+            <span className="text-slate-800 font-medium transition-colors truncate">Empresas</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs font-semibold bg-slate-100 border border-slate-200 text-slate-900 px-3 py-1.5 rounded-full">ROL: SUPER_ADMIN</span>
           </div>
         </header>
 
-        <div className="flex-1 overflow-auto p-8 relative">
+        <div className="flex-1 overflow-auto p-4 md:p-8 relative w-full max-w-[100vw]">
           <EmpresaModal 
             isOpen={isModalOpen} 
             onClose={() => setIsModalOpen(false)} 
@@ -97,7 +97,7 @@ export function EmpresaDashboard() {
             </div>
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-semibold shadow-xl shadow-slate-900/20 transition-all flex items-center gap-2 transform active:scale-95"
+              className="w-full sm:w-auto bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-semibold shadow-xl shadow-slate-900/20 transition-all flex items-center justify-center gap-2 transform active:scale-95"
             >
               <Plus size={18} strokeWidth={2.5} />
               Nueva Empresa
@@ -144,8 +144,8 @@ export function EmpresaDashboard() {
           </div>
 
           {/* TABLE SECTION */}
-          <div className="bg-white  rounded-2xl shadow-sm border border-slate-200  overflow-hidden transition-colors duration-300">
-            <table className="w-full text-left text-sm border-collapse">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-x-auto transition-colors duration-300">
+            <table className="w-full min-w-[800px] text-left text-sm border-collapse">
               <thead>
                 <tr className="bg-slate-50/50  border-b border-slate-200  text-slate-400 ">
                   <th className="py-4 px-6 font-black text-[10px] uppercase tracking-widest w-24">ID</th>

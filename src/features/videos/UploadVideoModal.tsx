@@ -85,7 +85,10 @@ export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSucces
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
-    startUpload(file, title, description, selectedEmpresa, onSuccess);
+    startUpload(file, title, description, selectedEmpresa, () => {
+      if (onSuccess) onSuccess();
+      handleClose();
+    });
   };
 
   const handleCancel = () => {

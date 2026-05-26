@@ -79,8 +79,8 @@ export function ApiKeyDashboard() {
       
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Header Section */}
-        <header className="bg-white border-b border-slate-200 px-8 py-6 flex flex-col gap-6">
-          <div className="flex items-center justify-between">
+        <header className="bg-white border-b border-slate-200 px-4 md:px-8 py-6 flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-slate-900/20">
                 <Key size={24} strokeWidth={2.5} />
@@ -97,7 +97,7 @@ export function ApiKeyDashboard() {
             
             <button 
               onClick={() => handleOpenModal()}
-              className="flex items-center gap-2.5 px-6 py-3.5 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-slate-900/10"
+              className="w-full md:w-auto justify-center flex items-center gap-2.5 px-6 py-3.5 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-slate-900/10"
             >
               <Plus size={18} strokeWidth={3} />
               Generar Nueva Key
@@ -116,22 +116,22 @@ export function ApiKeyDashboard() {
               />
             </div>
             
-            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl p-1 shadow-sm shrink-0">
+            <div className="flex w-full md:w-auto items-center gap-2 bg-white border border-slate-200 rounded-2xl p-1 shadow-sm shrink-0 overflow-x-auto">
               <button 
                 onClick={() => setFilterType("ALL")}
-                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-tight transition-all ${filterType === "ALL" ? "bg-slate-900 text-white shadow-md" : "text-slate-500 hover:bg-slate-50"}`}
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-black uppercase tracking-tight transition-all ${filterType === "ALL" ? "bg-slate-900 text-white shadow-md" : "text-slate-500 hover:bg-slate-50"}`}
               >
                 Todas
               </button>
               <button 
                 onClick={() => setFilterType("PLATAFORMA")}
-                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-tight transition-all ${filterType === "PLATAFORMA" ? "bg-slate-900 text-white shadow-md" : "text-slate-500 hover:bg-slate-50"}`}
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-black uppercase tracking-tight transition-all ${filterType === "PLATAFORMA" ? "bg-slate-900 text-white shadow-md" : "text-slate-500 hover:bg-slate-50"}`}
               >
                 Plataforma
               </button>
               <button 
                 onClick={() => setFilterType("TOTEM")}
-                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-tight transition-all ${filterType === "TOTEM" ? "bg-slate-900 text-white shadow-md" : "text-slate-500 hover:bg-slate-50"}`}
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-black uppercase tracking-tight transition-all ${filterType === "TOTEM" ? "bg-slate-900 text-white shadow-md" : "text-slate-500 hover:bg-slate-50"}`}
               >
                 Tótem
               </button>
@@ -140,7 +140,7 @@ export function ApiKeyDashboard() {
         </header>
 
         {/* Content Section */}
-        <div className="flex-1 overflow-y-auto p-8 scrollbar-thin scrollbar-thumb-slate-200">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-thin scrollbar-thumb-slate-200 w-full max-w-[100vw]">
           {loading ? (
             <div className="h-64 flex flex-col items-center justify-center gap-4">
               <div className="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
@@ -172,8 +172,8 @@ export function ApiKeyDashboard() {
             </div>
           ) : (
             <div className="bg-white border border-slate-200 rounded-[32px] shadow-sm overflow-hidden transition-all">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+              <div className="overflow-x-auto w-full">
+                <table className="w-full text-left border-collapse min-w-[800px]">
                   <thead>
                     <tr className="bg-slate-50/50 border-b border-slate-100">
                       <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Descripción / Nombre</th>

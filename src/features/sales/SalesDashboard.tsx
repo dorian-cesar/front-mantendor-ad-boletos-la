@@ -59,7 +59,7 @@ export function SalesDashboard() {
       
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
-        <header className="h-20 bg-white border-b border-slate-200 px-10 flex items-center justify-between flex-shrink-0">
+        <header className="h-auto py-4 md:h-20 bg-white border-b border-slate-200 px-4 md:px-10 flex flex-col md:flex-row md:items-center justify-between gap-4 flex-shrink-0">
           <div>
             <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
               <ShoppingCart className="text-slate-900" size={28} />
@@ -78,14 +78,14 @@ export function SalesDashboard() {
             >
               <RefreshCcw size={20} className={loading ? "animate-spin" : ""} />
             </button>
-            <button className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10">
+            <button className="flex-1 md:flex-none justify-center flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10">
               <Download size={18} />
-              Exportar Reporte
+              <span className="hidden sm:inline">Exportar Reporte</span>
             </button>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 md:p-10 space-y-6 md:space-y-10 custom-scrollbar w-full max-w-[100vw]">
           
           {/* KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -124,7 +124,7 @@ export function SalesDashboard() {
           </div>
 
           {/* Filters Section */}
-          <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
+          <div className="bg-white border border-slate-200 rounded-[32px] p-4 md:p-8 shadow-sm">
             <div className="flex flex-col md:flex-row md:items-end gap-6">
               <div className="flex-1 space-y-4">
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -160,9 +160,9 @@ export function SalesDashboard() {
 
               <div className="flex flex-col gap-4">
                 <div className="flex gap-2">
-                  <button onClick={() => quickFilter('today')} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-xl transition-all">Hoy</button>
-                  <button onClick={() => quickFilter('last7')} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-xl transition-all">7 Días</button>
-                  <button onClick={() => quickFilter('last30')} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-xl transition-all">30 Días</button>
+                  <button onClick={() => quickFilter('today')} className="flex-1 px-2 md:px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-xl transition-all">Hoy</button>
+                  <button onClick={() => quickFilter('last7')} className="flex-1 px-2 md:px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-xl transition-all">7 Días</button>
+                  <button onClick={() => quickFilter('last30')} className="flex-1 px-2 md:px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-xl transition-all">30 Días</button>
                 </div>
                 <button 
                   onClick={handleSearch}
@@ -184,8 +184,8 @@ export function SalesDashboard() {
                </div>
              </div>
 
-             <div className="overflow-x-auto">
-               <table className="w-full text-left border-collapse">
+             <div className="overflow-x-auto w-full">
+               <table className="w-full text-left border-collapse min-w-[800px]">
                  <thead>
                    <tr className="bg-slate-50/50 border-b border-slate-100">
                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">ID Operación</th>

@@ -28,7 +28,8 @@ export function TotemDashboard() {
     fetchPlaylist,
     handleSave,
     handleCreate,
-    handleDelete
+    handleDelete,
+    toggleBlockScreenSaver
   } = useTotems();
 
   const { videos, loading: videosLoading, error: videosError, fetchVideos } = useVideos();
@@ -132,8 +133,8 @@ export function TotemDashboard() {
     try {
       const success = await handleSave(id, editForm);
       if (success) setEditingId(null);
-    } catch (error) {
-      alert("Error al actualizar");
+    } catch (error: any) {
+      alert("Error al actualizar: " + (error.message || "Error desconocido"));
     }
   };
 
@@ -154,11 +155,11 @@ export function TotemDashboard() {
       <Sidebar />
 
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 flex-shrink-0">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <span>Inicio</span>
-            <span>/</span>
-            <span className="text-slate-800 font-medium">Tótems</span>
+        <header className="h-16 flex items-center justify-between px-4 md:px-8 bg-white border-b border-slate-200 flex-shrink-0">
+          <div className="flex items-center gap-2 text-sm text-slate-500 truncate">
+            <span className="hidden sm:inline">Inicio</span>
+            <span className="hidden sm:inline">/</span>
+            <span className="text-slate-800 font-medium truncate">Tótems</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs font-semibold bg-slate-100 border border-slate-200 text-slate-900 px-3 py-1.5 rounded-full">
@@ -167,7 +168,7 @@ export function TotemDashboard() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-auto p-8 relative">
+        <div className="flex-1 overflow-auto p-4 md:p-8 relative w-full max-w-[100vw]">
           {/* Error Banner */}
           {hasAnyError && (
             <div className="mb-6 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center justify-between animate-in slide-in-from-top-4 duration-300 shadow-xl shadow-slate-900/20">
@@ -196,34 +197,34 @@ export function TotemDashboard() {
               <h2 className="text-3xl font-bold text-slate-800 tracking-tight mb-2">Tótems de Venta</h2>
               <p className="text-slate-500 text-sm">Monitoreo en tiempo real de terminales físicos y métricas.</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-semibold shadow-xl shadow-slate-900/20 transition-all flex items-center gap-2 transform active:scale-95"
+                className="w-full sm:w-auto bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-semibold shadow-xl shadow-slate-900/20 transition-all flex items-center justify-center gap-2 transform active:scale-95"
               >
                 <Plus size={18} strokeWidth={2.5} />
                 Nuevo Tótem
               </button>
-              <div className="flex items-center gap-1 bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
+              <div className="w-full sm:w-auto flex items-center gap-1 bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === "list"
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === "list"
                       ? "bg-slate-900 text-white shadow-md border border-slate-900/10"
                       : "text-slate-500 hover:text-slate-700 border border-transparent"
                     }`}
                 >
                   <LayoutList size={18} />
-                  Lista
+                  <span className="hidden sm:inline">Lista</span>
                 </button>
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === "grid"
-                      ? "bg-slate-900  text-white  shadow-md border border-slate-900/10"
-                      : "text-slate-500  hover:text-slate-700  border border-transparent"
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === "grid"
+                      ? "bg-slate-900 text-white shadow-md border border-slate-900/10"
+                      : "text-slate-500 hover:text-slate-700 border border-transparent"
                     }`}
                 >
                   <LayoutGrid size={18} />
-                  Cuadros
+                  <span className="hidden sm:inline">Cuadros</span>
                 </button>
               </div>
             </div>
@@ -271,6 +272,7 @@ export function TotemDashboard() {
               onEdit={onEditClick}
               onSave={onSaveEdit}
               onDelete={handleDelete}
+              onToggleBlockScreenSaver={toggleBlockScreenSaver}
               isSaving={isSaving}
               onCancelEdit={() => setEditingId(null)}
               allVideos={videos}
@@ -287,6 +289,7 @@ export function TotemDashboard() {
               onEdit={onEditClick}
               onSave={onSaveEdit}
               onDelete={handleDelete}
+              onToggleBlockScreenSaver={toggleBlockScreenSaver}
               isSaving={isSaving}
               onCancelEdit={() => setEditingId(null)}
               allVideos={videos}

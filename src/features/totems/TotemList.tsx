@@ -15,6 +15,7 @@ interface TotemListProps {
   onEdit: (totem: any) => void;
   onSave: (id: string) => void;
   onDelete: (id: string) => void;
+  onToggleBlockScreenSaver: (id: string, currentValue: boolean) => void;
   isSaving: boolean;
   onCancelEdit: () => void;
   allVideos: any[];
@@ -33,6 +34,7 @@ export function TotemList({
   onEdit,
   onSave,
   onDelete,
+  onToggleBlockScreenSaver,
   isSaving,
   onCancelEdit,
   allVideos,
@@ -65,8 +67,8 @@ export function TotemList({
   }
 
   return (
-    <div className="bg-white  rounded-xl shadow-sm border border-slate-200  overflow-hidden animate-in fade-in duration-300 transition-colors">
-      <table className="w-full text-left text-sm border-collapse">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto animate-in fade-in duration-300 transition-colors">
+      <table className="w-full min-w-[900px] text-left text-sm border-collapse">
         <thead>
           <tr className="bg-slate-50  border-b border-slate-200  text-slate-600 ">
             <th className="py-3 px-5 font-semibold w-12 text-center"></th>
@@ -131,8 +133,8 @@ export function TotemList({
                 <tr className="bg-slate-50/50 border-b border-slate-200">
                   <td colSpan={7} className="p-0">
                     {editingId === t.id ? (
-                      <div className="px-16 py-8 animate-in slide-in-from-top-2 duration-200 fade-in">
-                        <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 max-w-4xl mx-auto flex flex-col gap-6">
+                      <div className="px-4 md:px-16 py-8 animate-in slide-in-from-top-2 duration-200 fade-in">
+                        <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-4 md:p-6 max-w-4xl mx-auto flex flex-col gap-6">
                           <div className="flex justify-between items-center border-b border-slate-100 pb-4">
                             <h3 className="font-bold text-slate-900 flex items-center gap-2 text-lg">
                               <Edit size={20} /> Editando Configuración: {t.id}
@@ -218,8 +220,8 @@ export function TotemList({
                         </div>
                       </div>
                     ) : (
-                      <div className="px-16 py-6 flex flex-col md:flex-row gap-10 md:items-start animate-in slide-in-from-top-2 duration-200 fade-in">
-                        <div className="flex items-start gap-3 w-1/4">
+                      <div className="px-6 md:px-16 py-6 flex flex-col md:flex-row gap-6 md:gap-10 md:items-start animate-in slide-in-from-top-2 duration-200 fade-in">
+                        <div className="flex items-start gap-3 w-full md:w-1/4">
                           <div className="bg-white p-2 rounded-xl border border-slate-200 shadow-sm text-slate-700 mt-1">
                             <Terminal size={18} strokeWidth={2.5} />
                           </div>
@@ -231,7 +233,7 @@ export function TotemList({
                             <p className="text-xs text-slate-500 mt-0.5">ID: {t.id}</p>
                           </div>
                         </div>
-                        <div className="flex items-start gap-3 w-1/4">
+                        <div className="flex items-start gap-3 w-full md:w-1/4">
                             <div className="bg-white p-2 rounded-xl border border-slate-200 shadow-sm text-slate-700 mt-1">
                                 <DollarSign size={18} strokeWidth={2.5}/>
                             </div>
@@ -241,14 +243,14 @@ export function TotemList({
                             </div>
                         </div>
                         {/* Videos assigned section */}
-                        <div className="flex-1 flex flex-col gap-3 min-w-[300px]">
+                        <div className="flex-1 flex flex-col gap-3 w-full md:min-w-[300px]">
                             <VideosListDisplay 
                               videos={allVideos} 
                               empresas={empresas} 
                               videoIds={t.playlist && t.playlist.length > 0 ? t.playlist.map((p: any) => p.id || p.video_id) : (t.video_ids && t.video_ids.length > 0 ? t.video_ids : (t.videos?.map((v: any) => v.id) || []))} 
                             />
                         </div>
-                        <div className="ml-auto w-1/4 flex flex-col gap-2">
+                        <div className="w-full md:w-1/4 flex flex-row md:flex-col gap-2">
                           <button
                             onClick={() => onEdit(t)}
                             className="text-xs font-semibold px-4 py-2.5 border border-slate-200 bg-white hover:bg-slate-50 hover:text-slate-900 text-slate-700 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
@@ -260,6 +262,20 @@ export function TotemList({
                             className="text-xs font-semibold px-4 py-2.5 text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center gap-2"
                           >
                             <Trash2 size={14} /> Eliminar
+                          </button>
+                        </div>
+                        
+                        {/* Screen Saver Toggle */}
+                        <div className="w-full md:w-1/6 flex flex-row md:flex-col items-center justify-between md:justify-center border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 pl-0 md:pl-4 mt-2 md:mt-0 md:ml-2">
+                          <span className="text-[10px] font-bold text-slate-500 md:mb-2 uppercase tracking-wider text-left md:text-center">
+                            Bloquear<br className="hidden md:block" />Protector
+                          </span>
+                          <button
+                            onClick={() => onToggleBlockScreenSaver(t.id, t.block_screen_saver || false)}
+                            className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-slate-900/20 shadow-inner ${t.block_screen_saver ? 'bg-emerald-500' : 'bg-slate-200'}`}
+                            title="Mantener pantalla activa"
+                          >
+                            <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${t.block_screen_saver ? 'translate-x-[16px]' : 'translate-x-0'}`} />
                           </button>
                         </div>
                       </div>

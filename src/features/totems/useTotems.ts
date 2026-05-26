@@ -134,7 +134,7 @@ export function useTotems() {
         direccion: editForm.direccion,
         latitud: editForm.latitud || 0,
         longitud: editForm.longitud || 0,
-        status: editForm.status,
+        status: editForm.status === "Activo" || editForm.status === true,
       };
 
       console.log(">>> [3] PUT /totems/{id}:", putPayload);
@@ -238,6 +238,29 @@ export function useTotems() {
     }
   };
 
+  const toggleBlockScreenSaver = async (id: string, currentValue: boolean) => {
+    const newValue = !currentValue;
+    
+    // Actualización optimista local
+    setTotems((prev) => 
+      prev.map(t => String(t.id) === String(id) ? { ...t, block_screen_saver: newValue } : t)
+    );
+
+    try {
+      await apiFetch(`/totems/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ block_screen_saver: newValue }),
+      });
+    } catch (error) {
+      console.error("Error toggling block_screen_saver:", error);
+      // Revertir en caso de error
+      setTotems((prev) => 
+        prev.map(t => String(t.id) === String(id) ? { ...t, block_screen_saver: currentValue } : t)
+      );
+      alert("Error al actualizar la configuración del protector de pantalla");
+    }
+  };
+
   // Efecto para auto-refrescar el estado de conexión cada 30 segundos
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -280,5 +303,6 @@ export function useTotems() {
     handleSave,
     handleCreate,
     handleDelete,
+    toggleBlockScreenSaver,
   };
 }

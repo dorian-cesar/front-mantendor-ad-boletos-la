@@ -1,4 +1,4 @@
-import { LogOut, TabletSmartphone, Building, Video, Key, ShoppingCart } from "lucide-react";
+import { LogOut, TabletSmartphone, Building, Video, Key, ShoppingCart, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -33,6 +33,7 @@ function SidebarItem({ icon, label, href, active }: SidebarItemProps) {
 export function Sidebar() {
   const [sidebarWidth, setSidebarWidth] = useState(260);
   const [isDragging, setIsDragging] = useState(false);
+  const [isOpenMobile, setIsOpenMobile] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -78,16 +79,33 @@ export function Sidebar() {
   }, [isDragging]);
   
   return (
-    <aside
-      style={{ width: `${sidebarWidth}px` }}
-      className={`relative bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 ${
-        isDragging ? "transition-none select-none" : "transition-none"
-      }`}
-    >
-      <div
-        onMouseDown={handleMouseDown}
-        className="absolute top-0 -right-[3px] w-[6px] h-full cursor-col-resize z-20 group flex items-center justify-center"
+    <>
+      {/* Mobile Hamburger Button */}
+      <button 
+        onClick={() => setIsOpenMobile(true)}
+        className="md:hidden fixed bottom-6 right-6 z-40 bg-slate-900 text-white p-3.5 rounded-full shadow-xl shadow-slate-900/30 hover:scale-105 active:scale-95 transition-all"
       >
+        <Menu size={24} />
+      </button>
+
+      {/* Overlay for mobile */}
+      {isOpenMobile && (
+        <div 
+          className="md:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 animate-in fade-in duration-300" 
+          onClick={() => setIsOpenMobile(false)}
+        />
+      )}
+
+      <aside
+        style={{ width: typeof window !== 'undefined' && window.innerWidth < 768 ? '280px' : `${sidebarWidth}px` }}
+        className={`fixed md:relative inset-y-0 left-0 z-50 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 transition-transform duration-300 md:translate-x-0 ${
+          isOpenMobile ? "translate-x-0" : "-translate-x-full"
+        } ${isDragging ? "md:transition-none select-none" : "md:transition-none"}`}
+      >
+        <div
+          onMouseDown={handleMouseDown}
+          className="hidden md:flex absolute top-0 -right-[3px] w-[6px] h-full cursor-col-resize z-20 group items-center justify-center"
+        >
         <div
           className={`w-[3px] h-full transition-colors ${
             isDragging ? "bg-slate-400" : "bg-transparent group-hover:bg-slate-200"
@@ -96,12 +114,18 @@ export function Sidebar() {
       </div>
 
       <div className="overflow-hidden whitespace-nowrap w-full">
-        <div className="h-16 flex items-center px-6 border-b border-slate-100 mb-6">
+        <div className="h-16 flex items-center justify-between px-6 border-b border-slate-100 mb-6">
           <img 
             src="/assets/logo-wit-mini-dark.png" 
             alt="WIT Logo" 
             className="h-8 w-auto object-contain"
           />
+          <button 
+            className="md:hidden text-slate-400 hover:text-slate-700" 
+            onClick={() => setIsOpenMobile(false)}
+          >
+            <X size={24} />
+          </button>
         </div>
 
         <nav className="px-4 space-y-1.5">
@@ -148,5 +172,6 @@ export function Sidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }
