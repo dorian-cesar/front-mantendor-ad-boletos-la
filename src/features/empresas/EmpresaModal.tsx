@@ -53,7 +53,7 @@ export function EmpresaModal({ isOpen, onClose, onSuccess }: EmpresaModalProps) 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60  transition-opacity">
       <div 
-        className="bg-white rounded-3xl shadow-2xl w-full max-md overflow-hidden transform transition-all border border-slate-100 mx-4"
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all border border-slate-100 mx-4 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-slate-50/50">

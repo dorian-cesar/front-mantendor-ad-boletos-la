@@ -70,7 +70,7 @@ export function ApiKeyModal({ isOpen, onClose, onSubmit, totems, isSaving, initi
         onClick={onClose}
       />
       
-      <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 mx-4 max-h-[90vh] overflow-y-auto">
         <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg shadow-slate-900/20">

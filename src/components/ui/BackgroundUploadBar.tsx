@@ -41,7 +41,7 @@ export function BackgroundUploadBar() {
   const config = stageConfig[job.stage];
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] w-[380px] animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:bottom-6 z-[9999] w-auto md:w-[380px] animate-in slide-in-from-bottom-4 duration-300">
       <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl shadow-slate-900/15 overflow-hidden">
         {/* Progress bar (top edge) */}
         <div className="h-1 bg-slate-100 w-full">
@@ -51,9 +51,9 @@ export function BackgroundUploadBar() {
           />
         </div>
 
-        <div className="px-5 py-4 flex items-center gap-4">
+        <div className="px-4 py-3 md:px-5 md:py-4 flex items-center gap-3 md:gap-4">
           {/* Icon */}
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+          <div className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
             job.stage === "done" ? "bg-emerald-50" : job.stage === "error" ? "bg-red-50" : "bg-slate-50"
           }`}>
             {config.icon}

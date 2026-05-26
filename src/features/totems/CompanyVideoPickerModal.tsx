@@ -58,7 +58,7 @@ export function CompanyVideoPickerModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60  animate-in fade-in duration-300">
-      <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-300">
+      <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300 mx-4">
         
         {/* Header */}
         <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
@@ -120,7 +120,7 @@ export function CompanyVideoPickerModal({
           {/* Step 2: Select Videos */}
           {selectedEmpresaId && (
             <div className="flex-1 flex flex-col gap-4 min-h-0 animate-in slide-in-from-bottom-2 duration-300">
-              <div className="flex items-center justify-between border-t border-slate-100 pt-5">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-t border-slate-100 pt-5 gap-3">
                 <div className="flex flex-col">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                     Paso 2: Gestionar Videos ({filteredVideos.length} disponibles)
@@ -129,7 +129,7 @@ export function CompanyVideoPickerModal({
                     <Info size={10} /> Haz clic para añadir o remover de la playlist.
                   </p>
                 </div>
-                <div className="relative w-48">
+                <div className="relative w-full md:w-48">
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input 
                     type="text"
@@ -206,22 +206,22 @@ export function CompanyVideoPickerModal({
         </div>
 
         {/* Footer */}
-        <div className="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+        <div className="p-4 md:p-6 bg-slate-50 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-slate-500">
             <span className="text-xs font-bold bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">
                {tempSelection.length} videos en total para el equipo
             </span>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 w-full md:w-auto">
              <button
                onClick={onClose}
-               className="px-6 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-800 transition-colors"
+               className="flex-1 md:flex-none px-6 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-800 transition-colors"
              >
                Cancelar
              </button>
              <button
                onClick={handleConfirm}
-               className="px-8 py-2.5 bg-slate-900 hover:bg-black text-white rounded-2xl text-sm font-bold shadow-xl shadow-slate-900/20 transition-all flex items-center gap-2 transform active:scale-[0.98]"
+               className="flex-1 md:flex-none px-8 py-2.5 bg-slate-900 hover:bg-black text-white rounded-2xl text-sm font-bold shadow-xl shadow-slate-900/20 transition-all flex items-center justify-center gap-2 transform active:scale-[0.98]"
              >
                Actualizar Playlist
                <ChevronRight size={18} />
