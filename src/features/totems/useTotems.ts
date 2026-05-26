@@ -245,6 +245,29 @@ export function useTotems() {
     }
   };
 
+  const toggleStatus = async (id: string, currentStatus: boolean) => {
+    const newStatus = !currentStatus;
+    
+    // Actualización optimista local
+    setTotems((prev) => 
+      prev.map(t => String(t.id) === String(id) ? { ...t, status: newStatus } : t)
+    );
+
+    try {
+      await apiFetch(`/totems/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: newStatus }),
+      });
+    } catch (error) {
+      console.error("Error toggling status:", error);
+      // Revertir en caso de error
+      setTotems((prev) => 
+        prev.map(t => String(t.id) === String(id) ? { ...t, status: currentStatus } : t)
+      );
+      alert("Error al cambiar el estado del tótem");
+    }
+  };
+
   const toggleBlockScreenSaver = async (id: string, currentValue: boolean) => {
     const newValue = !currentValue;
     
@@ -318,5 +341,6 @@ export function useTotems() {
     handleCreate,
     handleDelete,
     toggleBlockScreenSaver,
+    toggleStatus,
   };
 }

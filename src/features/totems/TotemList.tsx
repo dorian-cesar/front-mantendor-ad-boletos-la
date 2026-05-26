@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Edit, Trash2, ChevronDown, ChevronUp, Hash, DollarSign, Terminal, Loader2, Film, Video, Building, Save, BarChart3, Ticket } from "lucide-react";
+import { Edit, Power, ChevronDown, ChevronUp, Hash, DollarSign, Terminal, Loader2, Film, Video, Building, Save, BarChart3, Ticket } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { VideosListDisplay } from "./VideosListDisplay";
 import { VideoSelector } from "./VideoSelector";
@@ -22,6 +22,7 @@ interface TotemListProps {
   availableVideos: any[];
   empresas: any[];
   onStats?: (totem: any) => void;
+  onToggleStatus?: (id: string, currentStatus: boolean) => void;
 }
 
 export function TotemList({
@@ -42,6 +43,7 @@ export function TotemList({
   availableVideos,
   empresas,
   onStats,
+  onToggleStatus,
 }: TotemListProps) {
   
   const handleVideoChange = (selectedIds: string[]) => {
@@ -280,12 +282,19 @@ export function TotemList({
                           >
                             <Edit size={14} /> Modificar Tótem
                           </button>
-                          <button
-                            onClick={() => onDelete(t.id)}
-                            className="text-xs font-semibold px-4 py-2.5 text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center gap-2"
-                          >
-                            <Trash2 size={14} /> Eliminar
-                          </button>
+                          {onToggleStatus && (
+                            <button
+                              onClick={() => onToggleStatus(t.id, t.status === true || t.status === "Activo")}
+                              className={`text-xs font-semibold px-4 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                                t.status === true || t.status === "Activo"
+                                  ? "text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100"
+                                  : "text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100"
+                              }`}
+                            >
+                              <Power size={14} />
+                              {t.status === true || t.status === "Activo" ? "Desactivar" : "Activar"}
+                            </button>
+                          )}
                         </div>
                         
                         {/* Screen Saver Toggle */}

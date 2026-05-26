@@ -31,7 +31,8 @@ export function TotemDashboard() {
     handleSave,
     handleCreate,
     handleDelete,
-    toggleBlockScreenSaver
+    toggleBlockScreenSaver,
+    toggleStatus
   } = useTotems();
 
   const { videos, loading: videosLoading, error: videosError, fetchVideos } = useVideos();
@@ -311,6 +312,7 @@ export function TotemDashboard() {
               onEdit={onEditClick}
               onSave={onSaveEdit}
               onDelete={handleDelete}
+              onToggleStatus={toggleStatus}
               onToggleBlockScreenSaver={toggleBlockScreenSaver}
               isSaving={isSaving}
               onCancelEdit={() => setEditingId(null)}
@@ -329,6 +331,7 @@ export function TotemDashboard() {
               onEdit={onEditClick}
               onSave={onSaveEdit}
               onDelete={handleDelete}
+              onToggleStatus={toggleStatus}
               onToggleBlockScreenSaver={toggleBlockScreenSaver}
               isSaving={isSaving}
               onCancelEdit={() => setEditingId(null)}

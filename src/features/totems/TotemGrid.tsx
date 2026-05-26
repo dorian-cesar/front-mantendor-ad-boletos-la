@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Edit, Trash2, MonitorSmartphone, Terminal, Loader2, Save, Film, Building, BarChart3, Ticket } from "lucide-react";
+import { Edit, Power, MonitorSmartphone, Terminal, Loader2, Save, Film, Building, BarChart3, Ticket } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { VideosListDisplay } from "./VideosListDisplay";
 import { VideoSelector } from "./VideoSelector";
@@ -20,6 +20,7 @@ interface TotemGridProps {
   availableVideos: any[];
   empresas: any[];
   onStats?: (totem: any) => void;
+  onToggleStatus?: (id: string, currentStatus: boolean) => void;
 }
 
 export function TotemGrid({
@@ -38,6 +39,7 @@ export function TotemGrid({
   availableVideos,
   empresas,
   onStats,
+  onToggleStatus,
 }: TotemGridProps) {
 
   const handleVideoChange = (selectedIds: string[]) => {
@@ -282,12 +284,19 @@ export function TotemGrid({
                           <BarChart3 size={12} /> Diagnóstico
                         </button>
                       )}
-                      <button
-                        onClick={() => onDelete(t.id)}
-                        className="flex-1 py-2 text-[11px] font-bold text-slate-600 bg-slate-100 border border-slate-200 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center gap-2"
-                      >
-                        <Trash2 size={12} /> Eliminar
-                      </button>
+                      {onToggleStatus && (
+                        <button
+                          onClick={() => onToggleStatus(t.id, t.status === true || t.status === "Activo")}
+                          className={`flex-1 py-2 text-[11px] font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                            t.status === true || t.status === "Activo"
+                              ? "text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100"
+                              : "text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100"
+                          }`}
+                        >
+                          <Power size={12} />
+                          {t.status === true || t.status === "Activo" ? "Desactivar" : "Activar"}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
