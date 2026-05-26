@@ -159,7 +159,10 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
         const chunk = file.slice(start, end);
 
         const formData = new FormData();
-        formData.append("chunk", chunk, "chunk.blob");
+        // iOS Safari Fix: Wrap the blob slice into a proper File object
+        // Otherwise, fetch() with FormData drops the blob during upload
+        const chunkFile = new File([chunk], "chunk.blob", { type: "application/octet-stream" });
+        formData.append("chunk", chunkFile);
 
         let chunkSuccess = false;
         let attempts = 0;
@@ -263,7 +266,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
           console.log("[Upload] Intentando cargar FFmpeg...");
           const ffmpegLoaded = await Promise.race([
             loadFFmpeg().then(() => ffmpegLoadedRef.current),
-            new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 15000)),
+            new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 45000)),
           ]);
 
           if (ffmpegLoaded && ffmpegRef.current) {
