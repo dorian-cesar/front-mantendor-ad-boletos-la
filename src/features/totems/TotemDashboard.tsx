@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Search, Plus, LayoutList, LayoutGrid, CheckCircle2, XCircle, AlertCircle, Video, BarChart3, Ticket } from "lucide-react";
+import { Search, Plus, LayoutList, LayoutGrid, CheckCircle2, XCircle, AlertCircle, Video, BarChart3, Ticket, TrendingUp } from "lucide-react";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { useTotems } from "./useTotems";
 import { useVideos } from "@/features/videos/useVideos";
-import { useEmpresas } from "@/features/empresas/useEmpresas";
+import { useEmpresas } from "../empresas/useEmpresas";
 import { TotemList } from "./TotemList";
 import { TotemGrid } from "./TotemGrid";
 import { TotemModal } from "./TotemModal";
 import { CompanyVideoPickerModal } from "./CompanyVideoPickerModal";
+import { TotemStatsModal } from "./TotemStatsModal";
 
 export function TotemDashboard() {
   // Gestión del Picker Modal Simplificado
@@ -79,6 +80,9 @@ export function TotemDashboard() {
     empresa_ids: [] as string[],
     video_ids: [] as string[]
   });
+
+  // Estado para el modal de estadísticas
+  const [statsTotem, setStatsTotem] = useState<any>(null);
 
   const filteredTotems = totems.filter(t =>
     t.identificador?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -231,6 +235,48 @@ export function TotemDashboard() {
             </div>
           </div>
 
+          {/* Resumen Global Cards */}
+          {(resumenGlobal.total_transacciones > 0 || resumenGlobal.boletos_vendidos > 0) && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 animate-in slide-in-from-top-2 duration-300">
+              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+                    <CheckCircle2 size={16} />
+                  </div>
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tótems</span>
+                </div>
+                <p className="text-2xl font-black text-slate-900">{totems.length}</p>
+              </div>
+              <div className="bg-white border border-emerald-200 rounded-xl p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center">
+                    <TrendingUp size={16} />
+                  </div>
+                  <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Transacciones</span>
+                </div>
+                <p className="text-2xl font-black text-emerald-700">{resumenGlobal.total_transacciones.toLocaleString("es-CL")}</p>
+              </div>
+              <div className="bg-white border border-blue-200 rounded-xl p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-blue-500 text-white flex items-center justify-center">
+                    <Ticket size={16} />
+                  </div>
+                  <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">Boletos</span>
+                </div>
+                <p className="text-2xl font-black text-blue-700">{resumenGlobal.boletos_vendidos.toLocaleString("es-CL")}</p>
+              </div>
+              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+                    <Video size={16} />
+                  </div>
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Videos Activos</span>
+                </div>
+                <p className="text-2xl font-black text-slate-900">{videos.filter(v => v.status === true).length}</p>
+              </div>
+            </div>
+          )}
+
           <div className="bg-white  rounded-xl shadow-sm border border-slate-200  p-5 mb-6 transition-colors duration-300">
             <div className="relative mb-5">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -250,26 +296,6 @@ export function TotemDashboard() {
                 <CheckCircle2 size={16} />
                 <span>Tótems: {totems.length}</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900  text-white  border border-slate-900  rounded-md text-sm font-bold shadow-sm transition-all ">
-                <Video size={16} className="text-white " />
-                <span>Videos Activos: {videos.filter(v => v.status === true).length}</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white  text-slate-500  border border-slate-200  rounded-md text-sm font-medium">
-                <XCircle size={16} className="text-slate-400 " />
-                <span>Videos Inactivos: {videos.filter(v => v.status === false).length}</span>
-              </div>
-              {resumenGlobal.total_transacciones > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-sm font-bold">
-                  <BarChart3 size={16} />
-                  <span>Transacciones: {resumenGlobal.total_transacciones}</span>
-                </div>
-              )}
-              {resumenGlobal.boletos_vendidos > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-sm font-bold">
-                  <Ticket size={16} />
-                  <span>Boletos Vendidos: {resumenGlobal.boletos_vendidos}</span>
-                </div>
-              )}
             </div>
           </div>
 
@@ -291,6 +317,7 @@ export function TotemDashboard() {
               allVideos={videos}
               availableVideos={availableVideos}
               empresas={empresas}
+              onStats={(t: any) => setStatsTotem(t)}
             />
           ) : (
             <TotemGrid
@@ -308,6 +335,7 @@ export function TotemDashboard() {
               allVideos={videos}
               availableVideos={availableVideos}
               empresas={empresas}
+              onStats={(t: any) => setStatsTotem(t)}
             />
           )}
         </div>
@@ -342,6 +370,12 @@ export function TotemDashboard() {
           
           setPickerState(prev => ({ ...prev, isOpen: false }));
         }}
+      />
+
+      <TotemStatsModal
+        isOpen={!!statsTotem}
+        totem={statsTotem}
+        onClose={() => setStatsTotem(null)}
       />
     </div>
   );

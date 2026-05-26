@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Edit, Trash2, ChevronDown, ChevronUp, Hash, DollarSign, Terminal, Loader2, Film, Video, Building, Save } from "lucide-react";
+import { Edit, Trash2, ChevronDown, ChevronUp, Hash, DollarSign, Terminal, Loader2, Film, Video, Building, Save, BarChart3, Ticket } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { VideosListDisplay } from "./VideosListDisplay";
 import { VideoSelector } from "./VideoSelector";
@@ -21,6 +21,7 @@ interface TotemListProps {
   allVideos: any[];
   availableVideos: any[];
   empresas: any[];
+  onStats?: (totem: any) => void;
 }
 
 export function TotemList({
@@ -40,6 +41,7 @@ export function TotemList({
   allVideos,
   availableVideos,
   empresas,
+  onStats,
 }: TotemListProps) {
   
   const handleVideoChange = (selectedIds: string[]) => {
@@ -77,6 +79,8 @@ export function TotemList({
             <th className="py-3 px-5 font-semibold w-40 text-center">CONEXIÓN</th>
             <th className="py-3 px-5 font-semibold w-40 text-right pr-6">TICKETS HOY</th>
             <th className="py-3 px-5 font-semibold w-40 text-right pr-6">RECAUDACIÓN</th>
+            <th className="py-3 px-5 font-semibold w-28 text-center">TRANSACC.</th>
+            <th className="py-3 px-5 font-semibold w-28 text-center">BOLETOS</th>
             <th className="py-3 px-5 font-semibold w-32 text-center">STATUS</th>
           </tr>
         </thead>
@@ -125,13 +129,32 @@ export function TotemList({
                 <td className="py-3.5 px-5 font-semibold text-emerald-600 text-right pr-6">
                   ${(t.revenue || 0).toLocaleString("es-CL")}
                 </td>
-                <td className="py-3.5 px-5 flex justify-center">
+                <td className="py-3.5 px-5 text-center">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-100 rounded-lg text-xs font-black text-emerald-700">
+                    {t.total_transacciones || 0}
+                  </span>
+                </td>
+                <td className="py-3.5 px-5 text-center">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-100 rounded-lg text-xs font-black text-blue-700">
+                    {t.boletos_vendidos || 0}
+                  </span>
+                </td>
+                <td className="py-3.5 px-5 flex justify-center items-center gap-2">
                   <StatusBadge status={t.status === true || t.status === "Activo" ? "Activo" : "Inactivo"} />
+                  {onStats && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onStats(t); }}
+                      className="p-1.5 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-lg transition-colors text-emerald-600"
+                      title="Ver diagnóstico"
+                    >
+                      <BarChart3 size={14} />
+                    </button>
+                  )}
                 </td>
               </tr>
               {expandedId === t.id && (
                 <tr className="bg-slate-50/50 border-b border-slate-200">
-                  <td colSpan={7} className="p-0">
+                  <td colSpan={9} className="p-0">
                     {editingId === t.id ? (
                       <div className="px-4 md:px-16 py-8 animate-in slide-in-from-top-2 duration-200 fade-in">
                         <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-4 md:p-6 max-w-4xl mx-auto flex flex-col gap-6">

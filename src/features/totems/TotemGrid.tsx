@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Edit, Trash2, MonitorSmartphone, Terminal, Loader2, Save, Film, Building } from "lucide-react";
+import { Edit, Trash2, MonitorSmartphone, Terminal, Loader2, Save, Film, Building, BarChart3, Ticket } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { VideosListDisplay } from "./VideosListDisplay";
 import { VideoSelector } from "./VideoSelector";
@@ -19,6 +19,7 @@ interface TotemGridProps {
   allVideos: any[];
   availableVideos: any[];
   empresas: any[];
+  onStats?: (totem: any) => void;
 }
 
 export function TotemGrid({
@@ -36,6 +37,7 @@ export function TotemGrid({
   allVideos,
   availableVideos,
   empresas,
+  onStats,
 }: TotemGridProps) {
 
   const handleVideoChange = (selectedIds: string[]) => {
@@ -201,6 +203,21 @@ export function TotemGrid({
                         </span>
                       </div>
                     </div>
+
+                    {/* Transacciones y Boletos */}
+                    {(t.total_transacciones > 0 || t.boletos_vendidos > 0) && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-2 text-center">
+                          <p className="text-sm font-black text-emerald-700">{t.total_transacciones || 0}</p>
+                          <p className="text-[8px] font-bold text-emerald-500 uppercase tracking-wider">Transacciones</p>
+                        </div>
+                        <div className="bg-blue-50 border border-blue-100 rounded-lg p-2 text-center">
+                          <p className="text-sm font-black text-blue-700">{t.boletos_vendidos || 0}</p>
+                          <p className="text-[8px] font-bold text-blue-500 uppercase tracking-wider">Boletos</p>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
                         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
@@ -257,6 +274,14 @@ export function TotemGrid({
                     </div>
 
                     <div className="flex gap-2">
+                      {onStats && (
+                        <button
+                          onClick={() => onStats(t)}
+                          className="flex-1 py-2 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-lg transition-colors flex items-center justify-center gap-2"
+                        >
+                          <BarChart3 size={12} /> Diagnóstico
+                        </button>
+                      )}
                       <button
                         onClick={() => onDelete(t.id)}
                         className="flex-1 py-2 text-[11px] font-bold text-slate-600 bg-slate-100 border border-slate-200 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center gap-2"
