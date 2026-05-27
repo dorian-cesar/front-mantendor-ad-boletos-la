@@ -166,10 +166,21 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
         let chunkSuccess = false;
         let attempts = 0;
-        const maxAttempts = 5;
+        const maxAttempts = 100; // Reintentos casi infinitos para redes inestables
 
         while (!chunkSuccess && attempts < maxAttempts) {
           if (controller.signal.aborted) throw new Error("Subida cancelada");
+
+          // Pausar si no hay conexión a internet
+          while (typeof navigator !== "undefined" && !navigator.onLine) {
+            if (controller.signal.aborted) throw new Error("Subida cancelada");
+            setJob((prev) => prev ? { 
+              ...prev, 
+              message: "Sin conexión. Esperando red...", 
+              chunkDetail: `Pausado en fragmento ${chunkIndex + 1}/${totalChunks}` 
+            } : prev);
+            await new Promise((r) => setTimeout(r, 3000));
+          }
 
           try {
             const chunkRes = await fetch(
@@ -203,10 +214,20 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
             if (controller.signal.aborted) throw new Error("Subida cancelada");
             attempts++;
             console.warn(`[Upload] Fragmento ${chunkIndex + 1}/${totalChunks} falló (intento ${attempts}/${maxAttempts}):`, err?.message || err);
+            
             if (attempts >= maxAttempts) {
-              throw new Error(`Fallo en fragmento ${chunkIndex + 1}/${totalChunks} tras ${maxAttempts} intentos. Error: ${err?.message || "desconocido"}`);
+              throw new Error(`Fallo definitivo en fragmento ${chunkIndex + 1}/${totalChunks} tras ${maxAttempts} intentos. Verifica tu conexión.`);
             }
-            await new Promise((r) => setTimeout(r, Math.min(Math.pow(2, attempts) * 1000, 16000)));
+            
+            // Notificar al usuario que se está reintentando automáticamente
+            setJob((prev) => prev ? {
+              ...prev,
+              message: `Red inestable. Reintentando...`,
+              chunkDetail: `Fragmento ${chunkIndex + 1}/${totalChunks} (Intento ${attempts})`,
+            } : prev);
+            
+            // Espera antes de reintentar (3 a 5 segundos)
+            await new Promise((r) => setTimeout(r, Math.min(Math.pow(1.5, attempts) * 1000, 5000)));
           }
         }
       }
