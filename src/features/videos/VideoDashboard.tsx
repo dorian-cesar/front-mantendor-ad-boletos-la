@@ -7,8 +7,10 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useVideos } from "./useVideos";
 import { useEmpresas } from "../empresas/useEmpresas";
 import { UploadVideoModal } from "./UploadVideoModal";
+import { useUpload } from "./UploadContext";
 
 export function VideoDashboard() {
+  const { openModal } = useUpload();
   const {
     videos,
     loading,
@@ -24,7 +26,6 @@ export function VideoDashboard() {
   const [statusFilter, setStatusFilter] = useState("Todos");
   const [empresaFilter, setEmpresaFilter] = useState("Todas");
   const [sortOrder, setSortOrder] = useState("newest");
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [initialFile, setInitialFile] = useState<File | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   
@@ -37,7 +38,7 @@ export function VideoDashboard() {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setInitialFile(selectedFile);
-      setIsUploadModalOpen(true);
+      openModal();
     }
   };
 
@@ -116,9 +117,7 @@ export function VideoDashboard() {
 
         <div className="flex-1 overflow-auto p-4 md:p-8 relative w-full max-w-[100vw]">
           <UploadVideoModal 
-            isOpen={isUploadModalOpen} 
             initialFile={initialFile}
-            onClose={() => setIsUploadModalOpen(false)} 
             onSuccess={fetchVideos}
           />
 

@@ -67,14 +67,14 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
     try {
       const raw = sessionStorage.getItem(SESSION_KEY);
       if (raw) return JSON.parse(raw) as SavedSession;
-    } catch {}
+    } catch { }
     try {
       const lsRaw = localStorage.getItem(SESSION_KEY);
       if (lsRaw) {
         const { data, expiresAt } = JSON.parse(lsRaw);
         if (Date.now() < expiresAt) return data as SavedSession;
       }
-    } catch {}
+    } catch { }
     return null;
   });
 
@@ -107,8 +107,8 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
   const saveSession = useCallback((session: SavedSession) => {
     const payload = JSON.stringify({ data: session, expiresAt: Date.now() + SESSION_TTL_MS });
-    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(session)); } catch {}
-    try { localStorage.setItem(SESSION_KEY, payload); } catch {}
+    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(session)); } catch { }
+    try { localStorage.setItem(SESSION_KEY, payload); } catch { }
   }, []);
 
   const loadSession = useCallback((): SavedSession | null => {
@@ -116,7 +116,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
     try {
       const raw = sessionStorage.getItem(SESSION_KEY);
       if (raw) return JSON.parse(raw) as SavedSession;
-    } catch {}
+    } catch { }
     // Fallback a localStorage con validación de TTL
     try {
       const raw = localStorage.getItem(SESSION_KEY);
@@ -125,13 +125,13 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
         if (Date.now() < expiresAt) return data as SavedSession;
         localStorage.removeItem(SESSION_KEY); // expirada, limpiar
       }
-    } catch {}
+    } catch { }
     return null;
   }, []);
 
   const clearSession = useCallback(() => {
-    try { sessionStorage.removeItem(SESSION_KEY); } catch {}
-    try { localStorage.removeItem(SESSION_KEY); } catch {}
+    try { sessionStorage.removeItem(SESSION_KEY); } catch { }
+    try { localStorage.removeItem(SESSION_KEY); } catch { }
   }, []);
 
   // ─── FFmpeg ──────────────────────────────────────────────────────────────
@@ -139,7 +139,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined") return;
     // Fix CB1: ffmpegRef.current?.loaded puede lanzar en Firefox si WebAssembly fue interrumpido
     let alreadyLoaded = false;
-    try { alreadyLoaded = ffmpegLoadedRef.current && !!ffmpegRef.current?.loaded; } catch {}
+    try { alreadyLoaded = ffmpegLoadedRef.current && !!ffmpegRef.current?.loaded; } catch { }
     if (alreadyLoaded) return;
 
     if (!ffmpegRef.current) ffmpegRef.current = new FFmpeg();
@@ -200,7 +200,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
         if (!receivedSet.has(i)) pendingChunks.push(i);
       }
 
-      console.log(`[Upload] Recibidos: [${receivedChunks.sort((a,b)=>a-b).join(", ")}] (${receivedChunks.length}/${totalChunks})`);
+      console.log(`[Upload] Recibidos: [${receivedChunks.sort((a, b) => a - b).join(", ")}] (${receivedChunks.length}/${totalChunks})`);
       console.log(`[Upload] Pendientes: [${pendingChunks.join(", ")}] (${pendingChunks.length}/${totalChunks})`);
 
       // Informar al usuario si hay chunks ya subidos
@@ -208,7 +208,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
         setJob((prev) => prev ? {
           ...prev,
           message: `Reanudando: ${receivedChunks.length} de ${totalChunks} fragmentos ya subidos`,
-          chunkDetail: `✓ Fragmentos ${receivedChunks.sort((a,b)=>a-b).map(i => i + 1).join(", ")} | Pendientes: ${pendingChunks.map(i => i + 1).join(", ")}`,
+          chunkDetail: `✓ Fragmentos ${receivedChunks.sort((a, b) => a - b).map(i => i + 1).join(", ")} | Pendientes: ${pendingChunks.map(i => i + 1).join(", ")}`,
           progress: Math.round((receivedChunks.length / totalChunks) * 100),
         } : prev);
         await new Promise((r) => setTimeout(r, 2000));
@@ -245,10 +245,10 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
           // Pausar si no hay conexión a internet
           while (typeof navigator !== "undefined" && !navigator.onLine) {
             if (controller.signal.aborted) throw new Error("Subida cancelada");
-            setJob((prev) => prev ? { 
-              ...prev, 
-              message: "Sin conexión. Esperando red...", 
-              chunkDetail: `Pausado en fragmento ${chunkIndex + 1}/${totalChunks}` 
+            setJob((prev) => prev ? {
+              ...prev,
+              message: "Sin conexión. Esperando red...",
+              chunkDetail: `Pausado en fragmento ${chunkIndex + 1}/${totalChunks}`
             } : prev);
             await new Promise((r) => setTimeout(r, 3000));
           }
@@ -296,18 +296,18 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
             if (err?.isAuthError) throw err;
             attempts++;
             console.warn(`[Upload] Fragmento ${chunkIndex + 1}/${totalChunks} falló (intento ${attempts}/${maxAttempts}):`, err?.message || err);
-            
+
             if (attempts >= maxAttempts) {
               throw new Error(`Fallo definitivo en fragmento ${chunkIndex + 1}/${totalChunks} tras ${maxAttempts} intentos. Verifica tu conexión.`);
             }
-            
+
             // Notificar al usuario que se está reintentando automáticamente
             setJob((prev) => prev ? {
               ...prev,
               message: `Red inestable. Reintentando...`,
               chunkDetail: `Fragmento ${chunkIndex + 1}/${totalChunks} (Intento ${attempts})`,
             } : prev);
-            
+
             // Espera antes de reintentar (3 a 5 segundos)
             await new Promise((r) => setTimeout(r, Math.min(Math.pow(1.5, attempts) * 1000, 5000)));
           }
@@ -430,11 +430,11 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
                 ffmpeg.terminate();
                 ffmpegRef.current = null;
                 ffmpegLoadedRef.current = false;
-              } catch (e) {}
+              } catch (e) { }
               try {
                 await ffmpeg.deleteFile("input.mp4");
                 await ffmpeg.deleteFile("output.mp4");
-              } catch (e) {}
+              } catch (e) { }
             }
           } else {
             console.warn("[Upload] FFmpeg no disponible (timeout o error), subiendo archivo original sin compresión");
@@ -699,8 +699,8 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
       uploadIdRef.current = null;
     }
 
-    try { sessionStorage.removeItem(SESSION_KEY); } catch {}
-    try { localStorage.removeItem(SESSION_KEY); } catch {};
+    try { sessionStorage.removeItem(SESSION_KEY); } catch { }
+    try { localStorage.removeItem(SESSION_KEY); } catch { };
     pendingFileRef.current = null;
 
     setJob(null);
@@ -716,8 +716,8 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
   const dismissJob = useCallback(() => {
     pendingFileRef.current = null;
     // Fix M2: Limpiar sesión de ambos storages
-    try { sessionStorage.removeItem(SESSION_KEY); } catch {}
-    try { localStorage.removeItem(SESSION_KEY); } catch {}
+    try { sessionStorage.removeItem(SESSION_KEY); } catch { }
+    try { localStorage.removeItem(SESSION_KEY); } catch { }
     setJob(null);
     setIsMinimized(false);
   }, []);

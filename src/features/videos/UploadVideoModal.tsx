@@ -6,14 +6,12 @@ import { apiFetch } from '@/lib/api';
 import { useUpload } from './UploadContext';
 
 interface UploadVideoModalProps {
-  isOpen: boolean;
   initialFile?: File | null;
-  onClose: () => void;
   onSuccess?: () => void;
 }
 
-export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSuccess }: UploadVideoModalProps) {
-  const { job, startUpload, retryUpload, minimizeModal, cancelUpload, orphanSession, resumeWithNewFile, dismissJob } = useUpload();
+export function UploadVideoModal({ initialFile = null, onSuccess }: UploadVideoModalProps) {
+  const { job, startUpload, retryUpload, minimizeModal, cancelUpload, orphanSession, resumeWithNewFile, dismissJob, isModalOpen, closeModal } = useUpload();
   
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -48,7 +46,7 @@ export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSucces
   };
 
   useEffect(() => {
-    if (isOpen) {
+    if (isModalOpen) {
       fetchEmpresas();
       if (initialFile) {
         setFile(initialFile);
@@ -60,19 +58,18 @@ export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSucces
         setDescription("");
       }
     }
-  }, [isOpen, initialFile]);
+  }, [isModalOpen, initialFile]);
 
   const handleClose = () => {
     if (isProcessing) {
       // Si está procesando, minimizar en vez de cerrar
       minimizeModal();
-      onClose();
       return;
     }
     setFile(null);
     setOrphanFile(null);
     setOrphanSizeError(null);
-    onClose();
+    closeModal();
   };
 
   const handleOrphanFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,19 +89,18 @@ export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSucces
     resumeWithNewFile(orphanFile);
     setOrphanFile(null);
     setOrphanSizeError(null);
-    onClose();
+    // resumeWithNewFile ya maneja el estado del modal
   };
 
   const handleOrphanDiscard = () => {
     dismissJob();
     setOrphanFile(null);
     setOrphanSizeError(null);
-    onClose();
+    closeModal();
   };
 
   const handleMinimize = () => {
     minimizeModal();
-    onClose();
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -128,10 +124,10 @@ export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSucces
   const handleCancel = () => {
     cancelUpload();
     setFile(null);
-    onClose();
+    closeModal();
   };
 
-  if (!isOpen) return null;
+  if (!isModalOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 ">
