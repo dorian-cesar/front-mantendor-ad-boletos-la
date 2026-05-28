@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { X, UploadCloud, Loader2, Minimize2, RotateCcw } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, UploadCloud, Loader2, Minimize2, FolderOpen, AlertTriangle } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { useUpload } from './UploadContext';
 
@@ -13,10 +13,13 @@ interface UploadVideoModalProps {
 }
 
 export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSuccess }: UploadVideoModalProps) {
-  const { job, startUpload, retryUpload, minimizeModal, cancelUpload } = useUpload();
+  const { job, startUpload, retryUpload, minimizeModal, cancelUpload, orphanSession, resumeWithNewFile, dismissJob } = useUpload();
   
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [orphanFile, setOrphanFile] = useState<File | null>(null);
+  const [orphanSizeError, setOrphanSizeError] = useState<string | null>(null);
+  const orphanInputRef = useRef<HTMLInputElement>(null);
   
   const [empresas, setEmpresas] = useState<any[]>([]);
   const [selectedEmpresa, setSelectedEmpresa] = useState("");
@@ -24,6 +27,8 @@ export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSucces
   const [description, setDescription] = useState("");
 
   const isProcessing = job && (job.stage === "loading" || job.stage === "compressing" || job.stage === "uploading");
+  // Modo recuperación: sesión huérfana detectada y ninguna subida activa
+  const isOrphanMode = !!orphanSession && !job;
 
   const fetchEmpresas = async () => {
     try {
@@ -65,6 +70,35 @@ export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSucces
       return;
     }
     setFile(null);
+    setOrphanFile(null);
+    setOrphanSizeError(null);
+    onClose();
+  };
+
+  const handleOrphanFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] || null;
+    setOrphanFile(f);
+    if (f && orphanSession && f.size !== orphanSession.fileSize) {
+      setOrphanSizeError(
+        `El archivo seleccionado (${(f.size / 1024 / 1024).toFixed(1)} MB) no coincide con la sesión guardada (${(orphanSession.fileSize / 1024 / 1024).toFixed(1)} MB). Selecciona el archivo original.`
+      );
+    } else {
+      setOrphanSizeError(null);
+    }
+  };
+
+  const handleOrphanResume = () => {
+    if (!orphanFile || orphanSizeError) return;
+    resumeWithNewFile(orphanFile);
+    setOrphanFile(null);
+    setOrphanSizeError(null);
+    onClose();
+  };
+
+  const handleOrphanDiscard = () => {
+    dismissJob();
+    setOrphanFile(null);
+    setOrphanSizeError(null);
     onClose();
   };
 
@@ -179,6 +213,65 @@ export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSucces
                 </button>
               </div>
             </div>
+          ) : isOrphanMode && orphanSession ? (
+            // Modo recuperación: sesión huérfana detectada tras recargar la página
+            <div className="space-y-5 py-2">
+              <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+                <AlertTriangle size={20} className="text-amber-500 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-bold text-amber-900">Subida interrumpida detectada</p>
+                  <p className="text-xs text-amber-700 mt-1">
+                    Se encontró una subida pendiente de <span className="font-semibold">{orphanSession.fileName}</span>{' '}
+                    ({(orphanSession.fileSize / 1024 / 1024).toFixed(1)} MB). Selecciona el mismo archivo para reanudar desde donde quedó.
+                  </p>
+                </div>
+              </div>
+
+              <div
+                className="border-2 border-dashed border-amber-300 bg-amber-50/50 rounded-xl p-5 text-center cursor-pointer hover:bg-amber-50 transition-all"
+                onClick={() => orphanInputRef.current?.click()}
+              >
+                <FolderOpen size={28} className="mx-auto text-amber-400 mb-2" />
+                <p className="text-sm font-black text-slate-800 uppercase tracking-widest">
+                  {orphanFile ? orphanFile.name : 'Seleccionar archivo original'}
+                </p>
+                {orphanFile && !orphanSizeError && (
+                  <p className="text-xs text-emerald-600 font-semibold mt-1">✓ Tamaño verificado ({(orphanFile.size / 1024 / 1024).toFixed(1)} MB)</p>
+                )}
+                <input
+                  ref={orphanInputRef}
+                  type="file"
+                  className="sr-only"
+                  accept="video/mp4,video/quicktime,video/webm,video/x-msvideo,video/x-matroska,video/*"
+                  onChange={handleOrphanFileChange}
+                />
+              </div>
+
+              {orphanSizeError && (
+                <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl">
+                  <AlertTriangle size={14} className="text-red-500 mt-0.5 shrink-0" />
+                  <p className="text-xs text-red-700 font-medium">{orphanSizeError}</p>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleOrphanDiscard}
+                  className="px-5 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-sm text-slate-600"
+                >
+                  Descartar sesión
+                </button>
+                <button
+                  type="button"
+                  onClick={handleOrphanResume}
+                  disabled={!orphanFile || !!orphanSizeError}
+                  className="px-8 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black uppercase tracking-widest text-xs shadow-lg shadow-amber-500/20 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  Reanudar Subida
+                </button>
+              </div>
+            </div>
           ) : (
             // Formulario normal
             <form className="space-y-4" onSubmit={handleSubmit}>
@@ -213,7 +306,7 @@ export function UploadVideoModal({ isOpen, initialFile = null, onClose, onSucces
                   <UploadCloud className="mx-auto text-slate-400" size={32} />
                   <div className="text-sm font-black text-slate-900 uppercase tracking-widest bg-white border border-slate-200 py-2 px-4 rounded-lg inline-block cursor-pointer hover:bg-slate-50 transition-all">
                     {file ? file.name : "Seleccionar Archivo"}
-                    <input type="file" className="sr-only" accept="video/*" onChange={e => setFile(e.target.files?.[0] || null)} />
+                <input type="file" className="sr-only" accept="video/mp4,video/quicktime,video/webm,video/x-msvideo,video/x-matroska,video/*" onChange={e => setFile(e.target.files?.[0] || null)} />
                   </div>
                   {file && <p className="text-xs text-slate-500">{(file.size / (1024 * 1024)).toFixed(1)} MB</p>}
                 </div>

@@ -126,7 +126,7 @@ export function VideoDashboard() {
             type="file" 
             ref={fileInputRef}
             className="hidden" 
-            accept="video/*"
+            accept="video/mp4,video/quicktime,video/webm,video/x-msvideo,video/x-matroska,video/*"
             onChange={handleQuickUpload}
           />
 

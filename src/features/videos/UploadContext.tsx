@@ -19,8 +19,12 @@ interface UploadContextType {
   job: UploadJob | null;
   isModalOpen: boolean;
   isMinimized: boolean;
+  /** Sesión huérfana detectada en sessionStorage (para recuperación tras recarga) */
+  orphanSession: SavedSession | null;
   startUpload: (file: File, title: string, description: string, empresaId: string, onSuccess?: () => void) => void;
   retryUpload: () => void;
+  /** Reanuda una sesión huérfana usando un archivo provisto por el usuario */
+  resumeWithNewFile: (file: File) => void;
   cancelUpload: () => void;
   minimizeModal: () => void;
   restoreModal: () => void;
@@ -56,6 +60,23 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
   const [job, setJob] = useState<UploadJob | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  // Bug 1: Estado de sesión huérfana detectada en sessionStorage al montar
+  const [orphanSession, setOrphanSession] = useState<SavedSession | null>(() => {
+    if (typeof window === "undefined") return null;
+    // Fix M2: Intentar sessionStorage y fallback a localStorage
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      if (raw) return JSON.parse(raw) as SavedSession;
+    } catch {}
+    try {
+      const lsRaw = localStorage.getItem(SESSION_KEY);
+      if (lsRaw) {
+        const { data, expiresAt } = JSON.parse(lsRaw);
+        if (Date.now() < expiresAt) return data as SavedSession;
+      }
+    } catch {}
+    return null;
+  });
 
   const ffmpegRef = useRef<FFmpeg | null>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
@@ -66,10 +87,60 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
   const pendingFileRef = useRef<Blob | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // ─── FFmpeg ────────────────────────────────────────────────
+  // ─── Detección robusta de dispositivo móvil ─────────────────────────────
+  // Fix M1: window.innerWidth es frágil (iPad landscape, monitor pequeño, etc.).
+  // Combinamos UA, maxTouchPoints y matchMedia para mayor precisión.
+  const isMobileDevice = useCallback((): boolean => {
+    if (typeof window === "undefined" || typeof navigator === "undefined") return false;
+    const ua = navigator.userAgent || "";
+    const hasTouch = navigator.maxTouchPoints > 0;
+    const isSmallScreen = window.matchMedia("(max-width: 1023px)").matches;
+    const uaMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    // Es móvil si: tiene touch Y pantalla pequeña, O si el UA lo indica claramente
+    return uaMobile || (hasTouch && isSmallScreen);
+  }, []);
+
+  // ─── Helpers de sesión con fallback localStorage (Fix M2) ───────
+  // En iOS Safari privado, sessionStorage lanza excepciones silenciosas.
+  // Usamos localStorage como fallback con TTL de 6 horas.
+  const SESSION_TTL_MS = 6 * 60 * 60 * 1000; // 6 horas
+
+  const saveSession = useCallback((session: SavedSession) => {
+    const payload = JSON.stringify({ data: session, expiresAt: Date.now() + SESSION_TTL_MS });
+    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(session)); } catch {}
+    try { localStorage.setItem(SESSION_KEY, payload); } catch {}
+  }, []);
+
+  const loadSession = useCallback((): SavedSession | null => {
+    // Intentar sessionStorage primero
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      if (raw) return JSON.parse(raw) as SavedSession;
+    } catch {}
+    // Fallback a localStorage con validación de TTL
+    try {
+      const raw = localStorage.getItem(SESSION_KEY);
+      if (raw) {
+        const { data, expiresAt } = JSON.parse(raw);
+        if (Date.now() < expiresAt) return data as SavedSession;
+        localStorage.removeItem(SESSION_KEY); // expirada, limpiar
+      }
+    } catch {}
+    return null;
+  }, []);
+
+  const clearSession = useCallback(() => {
+    try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+    try { localStorage.removeItem(SESSION_KEY); } catch {}
+  }, []);
+
+  // ─── FFmpeg ──────────────────────────────────────────────────────────────
   const loadFFmpeg = useCallback(async () => {
     if (typeof window === "undefined") return;
-    if (ffmpegLoadedRef.current && ffmpegRef.current?.loaded) return;
+    // Fix CB1: ffmpegRef.current?.loaded puede lanzar en Firefox si WebAssembly fue interrumpido
+    let alreadyLoaded = false;
+    try { alreadyLoaded = ffmpegLoadedRef.current && !!ffmpegRef.current?.loaded; } catch {}
+    if (alreadyLoaded) return;
 
     if (!ffmpegRef.current) ffmpegRef.current = new FFmpeg();
     const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd";
@@ -197,6 +268,13 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
             );
 
             if (!chunkRes.ok) {
+              // Bug 4: Detectar 401 Unauthorized (token expirado) y abortar sin reintentar
+              if (chunkRes.status === 401) {
+                throw Object.assign(
+                  new Error("Tu sesión ha expirado. Inicia sesión nuevamente para reanudar la subida."),
+                  { isAuthError: true }
+                );
+              }
               const errText = await chunkRes.text().catch(() => "sin detalle");
               throw new Error(`HTTP ${chunkRes.status}: ${errText}`);
             }
@@ -211,7 +289,11 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
               chunkDetail: `${uploaded} de ${totalChunks} completados`,
             } : prev);
           } catch (err: any) {
+            // Fix M3: Safari < 15.4 no lanza AbortError al abortar un fetch, lo ignora silenciosamente.
+            // Verificamos manualmente si la señal fue abortada después del catch.
             if (controller.signal.aborted) throw new Error("Subida cancelada");
+            // Bug 4: Re-lanzar errores de autenticación directamente sin reintentar
+            if (err?.isAuthError) throw err;
             attempts++;
             console.warn(`[Upload] Fragmento ${chunkIndex + 1}/${totalChunks} falló (intento ${attempts}/${maxAttempts}):`, err?.message || err);
             
@@ -253,8 +335,8 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
         throw new Error(`Fallo al ensamblar: HTTP ${completeRes.status}: ${errText}`);
       }
 
-      // Limpiar sesión persistida
-      try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+      // Fix M2: Limpiar sesión de ambos storages
+      clearSession();
       uploadIdRef.current = null;
       return await completeRes.json();
     },
@@ -270,11 +352,20 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
       setIsModalOpen(false);
 
       const MAX_SIZE_NO_COMPRESS = 9 * 1024 * 1024; // 9MB
-      const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+      // Fix M1: Usar detección robusta de dispositivo móvil
+      const isMobile = isMobileDevice();
       let fileToUpload: Blob = file;
 
-      if (file.size <= MAX_SIZE_NO_COMPRESS) {
-        console.log(`[Upload] Archivo de ${(file.size / 1024 / 1024).toFixed(1)}MB (≤9MB), subiendo directo sin compresión`);
+      // Bug 3: Verificar si el formato es nativo del navegador (MP4 / WebM).
+      // Si no lo es (ej: .mov, .avi, .mkv), forzar compresión a MP4 independientemente del tamaño.
+      const NATIVE_FORMATS = ["video/mp4", "video/webm"];
+      const isNativeFormat = NATIVE_FORMATS.some((fmt) => file.type.startsWith(fmt));
+      const shouldSkipCompressDueToSize = file.size <= MAX_SIZE_NO_COMPRESS && isNativeFormat;
+
+      if (shouldSkipCompressDueToSize) {
+        console.log(`[Upload] Archivo de ${(file.size / 1024 / 1024).toFixed(1)}MB (≤9MB, formato nativo ${file.type}), subiendo directo sin compresión`);
+      } else if (!isNativeFormat && file.size <= MAX_SIZE_NO_COMPRESS) {
+        console.log(`[Upload] Formato no nativo (${file.type || 'desconocido'}), forzando compresión a MP4 aunque pese ${(file.size / 1024 / 1024).toFixed(1)}MB`);
       } else if (isMobile) {
         console.log(`[Upload] Dispositivo móvil detectado. Saltando compresión local para evitar bloqueos. Se subirá el archivo original (${(file.size / 1024 / 1024).toFixed(1)}MB).`);
       } else {
@@ -319,11 +410,27 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
                 console.warn("[Upload] Error limpiando caché de FFmpeg:", cleanupErr);
               }
 
+              // Bug 2: Terminar el proceso FFmpeg tras éxito para liberar RAM de WebAssembly
+              try {
+                ffmpeg.terminate();
+                ffmpegRef.current = null;
+                ffmpegLoadedRef.current = false;
+                console.log("[Upload] Proceso FFmpeg terminado para liberar memoria.");
+              } catch (terminateErr) {
+                console.warn("[Upload] Error terminando FFmpeg post-compresión:", terminateErr);
+              }
+
               const ratio = ((1 - fileToUpload.size / file.size) * 100).toFixed(0);
               console.log(`[Upload] Compresión exitosa: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(fileToUpload.size / 1024 / 1024).toFixed(1)}MB (-${ratio}%)`);
             } catch (compressErr) {
               console.warn("[Upload] Compresión falló, subiendo archivo original:", compressErr);
               fileToUpload = file;
+              // Intentar limpiar aunque haya fallado
+              try {
+                ffmpeg.terminate();
+                ffmpegRef.current = null;
+                ffmpegLoadedRef.current = false;
+              } catch (e) {}
               try {
                 await ffmpeg.deleteFile("input.mp4");
                 await ffmpeg.deleteFile("output.mp4");
@@ -401,8 +508,8 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
           empresaId,
         };
 
-        // Persistir sesión para poder reanudar
-        try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(session)); } catch {}
+        // Fix M2: Guardar sesión con fallback localStorage
+        saveSession(session);
 
         console.log(`[Upload] Sesión ${uploadId} creada: ${session.totalChunks} chunks`);
         await uploadChunksWithProgress(fileToUpload, session);
@@ -436,21 +543,33 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    [loadFFmpeg, uploadChunksWithProgress]
+    [loadFFmpeg, uploadChunksWithProgress, isMobileDevice]
   );
 
-  // ─── Reanudar subida desde donde se quedó ─────────────────
-  const retryUpload = useCallback(async () => {
-    const file = pendingFileRef.current;
-    let sessionStr: string | null = null;
-    try { sessionStr = sessionStorage.getItem(SESSION_KEY); } catch {}
+  // ─── Bug 1: Reanudar sesión huérfana con un archivo provisto por el usuario ──
+  const resumeWithNewFile = useCallback(async (file: File) => {
+    // Fix M2: Usar helper loadSession para compatibilidad con iOS Safari privado
+    const session = loadSession();
 
-    if (!file || !sessionStr) {
-      setJob((prev) => prev ? { ...prev, message: "No se puede reanudar: la sesión expiró. Intenta subir de nuevo.", canRetry: false } : prev);
+    if (!session) {
+      console.warn("[Upload] resumeWithNewFile: no hay sesión huérfana guardada");
       return;
     }
 
-    const session: SavedSession = JSON.parse(sessionStr);
+    // Validar que el archivo coincide con la sesión guardada
+    if (file.size !== session.fileSize) {
+      setJob({
+        fileName: session.fileName,
+        stage: "error",
+        progress: 0,
+        message: `El archivo seleccionado no coincide con la sesión guardada. Tamaño esperado: ${(session.fileSize / 1024 / 1024).toFixed(1)}MB, recibido: ${(file.size / 1024 / 1024).toFixed(1)}MB.`,
+        canRetry: false,
+      });
+      return;
+    }
+
+    pendingFileRef.current = file;
+    setOrphanSession(null);
 
     setIsMinimized(true);
     setIsModalOpen(false);
@@ -458,7 +577,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
       fileName: session.fileName,
       stage: "uploading",
       progress: 0,
-      message: "Reanudando subida...",
+      message: "Reanudando sesión guardada...",
       chunkDetail: "Consultando fragmentos ya recibidos en el servidor...",
     });
 
@@ -467,6 +586,62 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
       setJob({
         fileName: session.fileName,
+        stage: "done",
+        progress: 100,
+        message: "¡Video subido exitosamente!",
+        chunkDetail: `${session.totalChunks} fragmentos enviados y ensamblados`,
+      });
+
+      console.log("[Upload] ✅ Reanudación con archivo nuevo completada");
+      pendingFileRef.current = null;
+      if (onSuccessRef.current) onSuccessRef.current();
+
+      setTimeout(() => {
+        setJob(null);
+        setIsMinimized(false);
+      }, 4000);
+    } catch (err: any) {
+      console.error("[Upload] ❌ Error en reanudación con archivo nuevo:", err);
+      setJob({
+        fileName: session.fileName,
+        stage: "error",
+        progress: 0,
+        message: err.message || "Error al reanudar la subida",
+        canRetry: true,
+        chunkDetail: "Puedes reintentar nuevamente",
+      });
+    }
+  }, [uploadChunksWithProgress, loadSession, clearSession]);
+
+  // ─── Reanudar subida desde donde se quedó ─────────────────
+  const retryUpload = useCallback(async () => {
+    const file = pendingFileRef.current;
+    // Fix M2: Cargar sesión desde ambos storages
+    const session = loadSession();
+    const sessionStr = session ? JSON.stringify(session) : null;
+
+    if (!file || !sessionStr) {
+      setJob((prev) => prev ? { ...prev, message: "No se puede reanudar: la sesión expiró. Intenta subir de nuevo.", canRetry: false } : prev);
+      return;
+    }
+
+    const retrySession: SavedSession = JSON.parse(sessionStr);
+
+    setIsMinimized(true);
+    setIsModalOpen(false);
+    setJob({
+      fileName: retrySession.fileName,
+      stage: "uploading",
+      progress: 0,
+      message: "Reanudando subida...",
+      chunkDetail: "Consultando fragmentos ya recibidos en el servidor...",
+    });
+
+    try {
+      await uploadChunksWithProgress(file, retrySession);
+
+      setJob({
+        fileName: retrySession.fileName,
         stage: "done",
         progress: 100,
         message: "¡Video subido exitosamente!",
@@ -484,7 +659,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       console.error("[Upload] ❌ Error en reanudación:", err);
       setJob({
-        fileName: session.fileName,
+        fileName: retrySession.fileName,
         stage: "error",
         progress: 0,
         message: err.message || "Error al reanudar la subida",
@@ -492,7 +667,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
         chunkDetail: "Puedes reintentar nuevamente",
       });
     }
-  }, [uploadChunksWithProgress]);
+  }, [uploadChunksWithProgress, loadSession]);
 
   // ─── Cancelar ─────────────────────────────────────────────
   const cancelUpload = useCallback(() => {
@@ -525,6 +700,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
     }
 
     try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+    try { localStorage.removeItem(SESSION_KEY); } catch {};
     pendingFileRef.current = null;
 
     setJob(null);
@@ -539,7 +715,9 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
   const dismissJob = useCallback(() => {
     pendingFileRef.current = null;
+    // Fix M2: Limpiar sesión de ambos storages
     try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+    try { localStorage.removeItem(SESSION_KEY); } catch {}
     setJob(null);
     setIsMinimized(false);
   }, []);
@@ -550,8 +728,10 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
         job,
         isModalOpen,
         isMinimized,
+        orphanSession,
         startUpload,
         retryUpload,
+        resumeWithNewFile,
         cancelUpload,
         minimizeModal,
         restoreModal,
