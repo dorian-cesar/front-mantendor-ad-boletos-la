@@ -149,12 +149,17 @@ async function handleRequest(request: NextRequest, path: string[]) {
     ];
 
     headersToReturn.forEach(h => {
-      const val = response.headers.get(h);
+      const val = response!.headers.get(h);
       if (val) responseHeaders.set(h, val);
     });
 
+    // Inyectar Cache-Control agresivo para videos si es GET y es respuesta exitosa (200 o 206)
+    if (request.method === 'GET' && isVideoAPI && (response!.status === 200 || response!.status === 206)) {
+      responseHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+
     // Manejo especial para 304 (Not Modified), que NO debe tener body
-    if (response.status === 304) {
+    if (response!.status === 304) {
       return new NextResponse(null, {
         status: 304,
         headers: responseHeaders,

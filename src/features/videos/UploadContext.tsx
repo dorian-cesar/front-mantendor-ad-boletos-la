@@ -86,7 +86,6 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
   const onSuccessRef = useRef<(() => void) | undefined>(undefined);
   const pendingFileRef = useRef<Blob | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-
   // ─── Detección robusta de dispositivo móvil ─────────────────────────────
   // Fix M1: window.innerWidth es frágil (iPad landscape, monitor pequeño, etc.).
   // Combinamos UA, maxTouchPoints y matchMedia para mayor precisión.
@@ -721,6 +720,62 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
     setJob(null);
     setIsMinimized(false);
   }, []);
+
+  // ─── Wake Lock & Visibility Management (Auto-resume) ───
+  const isWorking = job?.stage === 'compressing' || job?.stage === 'uploading';
+  const shouldAutoResume = job?.stage === 'error' && job?.canRetry && !!pendingFileRef.current;
+
+  React.useEffect(() => {
+    let wakeLock: any = null;
+
+    const requestWakeLock = async () => {
+      if ('wakeLock' in navigator) {
+        try {
+          wakeLock = await (navigator as any).wakeLock.request('screen');
+          console.log('[Upload] Wake Lock activado');
+        } catch (err) {
+          console.warn('[Upload] Wake Lock falló:', err);
+        }
+      }
+    };
+
+    const releaseWakeLock = async () => {
+      if (wakeLock && !wakeLock.released) {
+        try {
+          await wakeLock.release();
+        } catch (e) {}
+      }
+      wakeLock = null;
+    };
+
+    // Pedir o soltar el lock según el estado
+    if (isWorking) {
+      requestWakeLock();
+    } else {
+      releaseWakeLock();
+    }
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        // El OS suelta el lock al ir a background, hay que pedirlo de nuevo obligatoriamente
+        if (isWorking) {
+          requestWakeLock();
+        }
+        // Reanudación automática
+        if (shouldAutoResume) {
+          console.log('[Upload] Auto-reanudando subida tras volver de background...');
+          retryUpload();
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    
+    return () => {
+      releaseWakeLock();
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [isWorking, shouldAutoResume, retryUpload]);
 
   return (
     <UploadContext.Provider
