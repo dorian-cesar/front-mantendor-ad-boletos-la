@@ -142,7 +142,7 @@ export function TotemList({
                   </span>
                 </td>
                 <td className="py-3.5 px-5 flex justify-center items-center gap-2">
-                  <StatusBadge status={t.status === true || t.status === "Activo" ? "Activo" : "Inactivo"} />
+                  <StatusBadge status={!t.is_online ? "Desconectado" : (t.status === true || t.status === "Activo" ? "Activo" : "Inactivo")} />
                   {onStats && (
                     <button
                       onClick={(e) => { e.stopPropagation(); onStats(t); }}

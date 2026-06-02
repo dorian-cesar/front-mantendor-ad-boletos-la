@@ -324,7 +324,7 @@ export function useTotems() {
       } catch (err) {
         console.warn("Error en el refresco automático de conexión:", err);
       }
-    }, 20000); // 20 segundos
+    }, 5000); // 5 segundos
 
     return () => clearInterval(interval);
   }, []);

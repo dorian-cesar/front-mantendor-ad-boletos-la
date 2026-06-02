@@ -17,9 +17,15 @@ export function StatusBadge({ status }: StatusBadgeProps) {
         Inactivo
       </span>
     );
-  if (status === "Error" || status === "Error Físico" || status === "Desconectado")
+  if (status === "Desconectado")
     return (
-      <span className="bg-slate-200 text-slate-800 px-3 py-1 rounded-full text-[10px] font-black tracking-widest border border-slate-300 uppercase shadow-sm">
+      <span className="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-[10px] font-black tracking-widest border border-slate-300 uppercase shadow-sm">
+        Desconectado
+      </span>
+    );
+  if (status === "Error" || status === "Error Físico")
+    return (
+      <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-black tracking-widest border border-red-200 uppercase shadow-sm">
         Con Error
       </span>
     );
