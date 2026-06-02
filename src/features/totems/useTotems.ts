@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { apiFetch } from "@/lib/api";
 
 export function useTotems() {
@@ -7,6 +7,9 @@ export function useTotems() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  // Tracks which totem IDs have a pending local status change.
+  // The polling skips overwriting 'status' for these IDs for 10 seconds.
+  const pendingStatusRef = useRef<Map<string, number>>(new Map());
 
   const fetchTotems = async () => {
     try {
@@ -135,13 +138,14 @@ export function useTotems() {
         }
       }
 
-      // 3. PUT /totems/{id} - Solo datos básicos (sin video_ids para evitar FK errors)
+      // 3. PUT /totems/{id} - Solo datos básicos (sin status ni video_ids para evitar conflictos)
+      // NOTA: No enviamos 'status' aquí porque el backend lo vincula con is_online.
+      // El status (Activo/Inactivo como habilitación) se gestiona con toggleStatus por separado.
       const putPayload = {
         identificador: editForm.identificador,
         direccion: editForm.direccion,
         latitud: editForm.latitud || 0,
         longitud: editForm.longitud || 0,
-        status: editForm.status === "Activo" || editForm.status === true,
       };
 
       console.log(">>> [3] PUT /totems/{id}:", putPayload);
@@ -248,7 +252,11 @@ export function useTotems() {
   const toggleStatus = async (id: string, currentStatus: boolean) => {
     const newStatus = !currentStatus;
     
-    // Actualización optimista local
+    // Mark this totem as having a pending status change for 10 seconds
+    // so the polling doesn't immediately revert our optimistic update.
+    pendingStatusRef.current.set(String(id), Date.now())
+
+    // Optimistic local update
     setTotems((prev) => 
       prev.map(t => String(t.id) === String(id) ? { ...t, status: newStatus } : t)
     );
@@ -260,7 +268,8 @@ export function useTotems() {
       });
     } catch (error) {
       console.error("Error toggling status:", error);
-      // Revertir en caso de error
+      // Revert on error
+      pendingStatusRef.current.delete(String(id))
       setTotems((prev) => 
         prev.map(t => String(t.id) === String(id) ? { ...t, status: currentStatus } : t)
       );
@@ -305,17 +314,25 @@ export function useTotems() {
           setResumenGlobal(data.resumen_global);
         }
         
-        // Actualizamos solo los campos de conexión en el estado actual
-        // para evitar recargar playlists pesadas
+        // Update only connection fields in current state.
+        // Skip 'status' for totems that have a pending local change (< 10s old).
+        const PENDING_TTL = 10_000
         setTotems(currentTotems => 
           currentTotems.map(t => {
             const updated = totemList.find((u: any) => String(u.id) === String(t.id));
             if (updated) {
+              const pendingTs = pendingStatusRef.current.get(String(t.id))
+              const hasPendingStatus = pendingTs && (Date.now() - pendingTs < PENDING_TTL)
+              if (!hasPendingStatus) {
+                pendingStatusRef.current.delete(String(t.id))
+              }
               return { 
                 ...t, 
                 is_online: updated.is_online,
+                last_ping: updated.last_ping,
                 ultimo_login: updated.ultimo_login,
-                status: updated.status
+                // Only sync status from server if no pending local change
+                ...(hasPendingStatus ? {} : { status: updated.status }),
               };
             }
             return t;
@@ -324,7 +341,7 @@ export function useTotems() {
       } catch (err) {
         console.warn("Error en el refresco automático de conexión:", err);
       }
-    }, 5000); // 5 segundos
+    }, 5_000); // 5 segundos - para reflejar cambios de is_online (login/logout del tótem) rápidamente
 
     return () => clearInterval(interval);
   }, []);

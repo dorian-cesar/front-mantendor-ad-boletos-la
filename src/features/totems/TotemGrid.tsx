@@ -171,7 +171,7 @@ export function TotemGrid({
                   <div>
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex flex-col gap-1.5">
-                        <StatusBadge status={!t.is_online ? "Desconectado" : (t.status === true || t.status === "Activo" ? "Activo" : "Inactivo")} />
+                        <StatusBadge status={t.status === true || t.status === "Activo" ? "Activo" : "Inactivo"} />
                         <div className="flex items-center gap-1.5 ml-1">
                           <div className={`w-2 h-2 rounded-full ${t.is_online ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-red-400'}`} />
                           <span className={`text-[9px] font-black uppercase tracking-tighter ${t.is_online ? 'text-emerald-600' : 'text-red-500'}`}>

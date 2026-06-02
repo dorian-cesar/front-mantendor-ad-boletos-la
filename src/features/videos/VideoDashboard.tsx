@@ -219,15 +219,17 @@ export function VideoDashboard() {
                   <th className="py-3 px-5 font-semibold w-24">ID</th>
                   <th className="py-3 px-5 font-semibold">TÍTULO</th>
                   <th className="py-3 px-5 font-semibold">DESCRIPCIÓN</th>
+                  <th className="py-3 px-5 font-semibold w-24">TAMAÑO</th>
+                  <th className="py-3 px-5 font-semibold w-24">RESOLUCIÓN</th>
                   <th className="py-3 px-5 font-semibold w-40">FECHA DE SUBIDA</th>
                   <th className="py-3 px-5 font-semibold text-center w-40">ACCIONES / STATUS</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={5} className="py-20 text-center"><Loader2 size={32} className="animate-spin mx-auto text-slate-900 mb-2"/> Cargando videos...</td></tr>
+                  <tr><td colSpan={7} className="py-20 text-center"><Loader2 size={32} className="animate-spin mx-auto text-slate-900 mb-2"/> Cargando videos...</td></tr>
                 ) : filteredVideos.length === 0 ? (
-                  <tr><td colSpan={5} className="py-20 text-center text-slate-400 font-medium">No se encontraron videos.</td></tr>
+                  <tr><td colSpan={7} className="py-20 text-center text-slate-400 font-medium">No se encontraron videos.</td></tr>
                 ) : filteredVideos.map((vid) => {
                   const isEditing = editingId === vid.id;
 
@@ -265,6 +267,12 @@ export function VideoDashboard() {
                         ) : (
                           <p className="text-slate-500  truncate max-w-[250px]">{vid.descripcion || 'Sin descripción'}</p>
                         )}
+                      </td>
+                      <td className="py-3.5 px-5 text-slate-500 font-mono text-xs">
+                        {vid.tamano ? (typeof vid.tamano === 'number' ? (vid.tamano / (1024 * 1024)).toFixed(2) + ' MB' : vid.tamano) : (vid.size ? (typeof vid.size === 'number' ? (vid.size / (1024 * 1024)).toFixed(2) + ' MB' : vid.size) : 'N/A')}
+                      </td>
+                      <td className="py-3.5 px-5 text-slate-500 font-mono text-xs">
+                        {vid.resolucion || vid.resolution || 'N/A'}
                       </td>
                       <td className="py-3.5 px-5 text-slate-500 ">{new Date(vid.createdAt || Date.now()).toLocaleDateString()}</td>
                       <td className="py-3.5 px-5">
