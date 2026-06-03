@@ -460,6 +460,28 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
           chunkDetail: `0/${totalChunks} completados | ${(fileToUpload.size / 1024 / 1024).toFixed(1)}MB total`,
         });
 
+        const getVideoResolution = (blob: Blob): Promise<string> => {
+          return new Promise((resolve) => {
+            if (typeof document === 'undefined') {
+              resolve("Unknown");
+              return;
+            }
+            const video = document.createElement("video");
+            video.preload = "metadata";
+            video.onloadedmetadata = () => {
+              resolve(`${video.videoWidth}x${video.videoHeight}`);
+              URL.revokeObjectURL(video.src);
+            };
+            video.onerror = () => {
+              resolve("Unknown");
+              URL.revokeObjectURL(video.src);
+            };
+            video.src = URL.createObjectURL(blob);
+          });
+        };
+
+        const resolucion = await getVideoResolution(fileToUpload);
+
         // Obtener config
         const configRes = await fetch("/api/upload-config");
         if (!configRes.ok) throw new Error("No se pudo obtener la configuración de subida");
@@ -482,6 +504,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
             empresa_id: Number(empresaId),
             nombre: title,
             descripcion: description,
+            resolucion,
           }),
         });
 
@@ -644,7 +667,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
         stage: "done",
         progress: 100,
         message: "¡Video subido exitosamente!",
-        chunkDetail: `${session.totalChunks} fragmentos enviados y ensamblados`,
+        chunkDetail: `${retrySession.totalChunks} fragmentos enviados y ensamblados`,
       });
 
       console.log("[Upload] ✅ Reanudación completada");

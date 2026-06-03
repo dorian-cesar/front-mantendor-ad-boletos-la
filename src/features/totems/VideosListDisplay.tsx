@@ -92,11 +92,16 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                          </div>
                        )}
                     </div>
-                    {empresa && (
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {empresa && (
+                        <span className={`text-[9px] font-black uppercase tracking-tighter ${isInactive ? "text-red-300" : "text-slate-400"}`}>
+                          {empresa.nombre}
+                        </span>
+                      )}
                       <span className={`text-[9px] font-black uppercase tracking-tighter ${isInactive ? "text-red-300" : "text-slate-400"}`}>
-                        {empresa.nombre}
+                        • {v.resolucion || v.resolution || 'N/A'}
                       </span>
-                    )}
+                    </div>
                   </div>
                 </div>
                 

@@ -153,6 +153,9 @@ export function VideoSelector({ videos, empresas, selectedIds, onChange }: Video
                               {empresa.nombre}
                             </span>
                           )}
+                          <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                            {v.resolucion || v.resolution || 'N/A'}
+                          </span>
                           {v.descripcion && (
                             <span className="text-[10px] text-slate-400 truncate group-hover/item:text-slate-500 transition-colors">
                               {v.descripcion}
@@ -220,6 +223,8 @@ export function VideoSelector({ videos, empresas, selectedIds, onChange }: Video
                       </div>
                       <span className={`text-[10px] font-medium flex items-center gap-1 mt-0.5 ${isInactive ? "text-red-300" : "text-slate-400"}`}>
                         <Hash size={10} /> {v.id.toString().substring(0, 8)}
+                        <span className="mx-1">•</span>
+                        {v.resolucion || v.resolution || 'N/A'}
                       </span>
                     </div>
                   </div>
