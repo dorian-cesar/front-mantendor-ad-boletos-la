@@ -36,21 +36,29 @@ export function useVideos() {
   };
 
   const handleUpdate = async (id: string, updateData: any) => {
+    // Optimistic update: reflect changes immediately in local state
+    setVideos((prev) =>
+      prev.map((v) =>
+        String(v.id) === String(id) ? { ...v, ...updateData } : v
+      )
+    );
     try {
       await apiFetch(`/videos/${id}`, {
         method: "PUT",
         body: JSON.stringify(updateData),
       });
-      await fetchVideos();
+      // Sync with server in background (don't block the UI)
+      fetchVideos();
       return true;
     } catch (error) {
       console.error("Error updating video:", error);
+      // Revert optimistic update on failure
+      fetchVideos();
       throw error;
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Está seguro de eliminar este video?")) return;
     try {
       await apiFetch(`/videos/${id}`, { method: "DELETE" });
       await fetchVideos();

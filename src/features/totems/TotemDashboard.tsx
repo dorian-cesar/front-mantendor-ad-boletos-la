@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { Search, Plus, LayoutList, LayoutGrid, CheckCircle2, XCircle, AlertCircle, Video, BarChart3, Ticket, TrendingUp } from "lucide-react";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { useTotems } from "./useTotems";
@@ -11,14 +11,22 @@ import { TotemGrid } from "./TotemGrid";
 import { TotemModal } from "./TotemModal";
 import { CompanyVideoPickerModal } from "./CompanyVideoPickerModal";
 import { TotemStatsModal } from "./TotemStatsModal";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { useToast } from "@/components/ui/Toast";
 
 export function TotemDashboard() {
+  const { showToast } = useToast();
+
   // Gestión del Picker Modal Simplificado
   const [pickerState, setPickerState] = useState<{ isOpen: boolean; totemId: string | null; selectedIds: string[] }>({
     isOpen: false,
     totemId: null,
     selectedIds: []
   });
+
+  // Delete confirmation
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     totems,
@@ -138,9 +146,12 @@ export function TotemDashboard() {
   const onSaveEdit = async (id: string) => {
     try {
       const success = await handleSave(id, editForm);
-      if (success) setEditingId(null);
+      if (success) {
+        setEditingId(null);
+        showToast("Tótem actualizado correctamente", "success");
+      }
     } catch (error: any) {
-      alert("Error al actualizar: " + (error.message || "Error desconocido"));
+      showToast("Error al actualizar: " + (error.message || "Error desconocido"), "error");
     }
   };
 
@@ -150,11 +161,26 @@ export function TotemDashboard() {
       if (success) {
         setIsCreateModalOpen(false);
         setCreateForm({ identificador: "", direccion: "", latitud: 0, longitud: 0, empresa_ids: [], video_ids: [] });
+        showToast("Tótem creado correctamente", "success");
       }
     } catch (error) {
-      alert("Error al crear");
+      showToast("Error al crear el tótem", "error");
     }
   };
+
+  const confirmDeleteTotem = useCallback(async () => {
+    if (!deleteTarget) return;
+    try {
+      setIsDeleting(true);
+      await handleDelete(deleteTarget);
+      showToast("Tótem eliminado correctamente", "success");
+    } catch {
+      showToast("Error al eliminar el tótem", "error");
+    } finally {
+      setIsDeleting(false);
+      setDeleteTarget(null);
+    }
+  }, [deleteTarget, handleDelete, showToast]);
 
   return (
     <div className="flex h-screen w-full bg-[#f8f9fc] text-slate-800 font-sans">
@@ -311,7 +337,7 @@ export function TotemDashboard() {
               setEditForm={setEditForm}
               onEdit={onEditClick}
               onSave={onSaveEdit}
-              onDelete={handleDelete}
+              onDelete={(id) => setDeleteTarget(id)}
               onToggleStatus={toggleStatus}
               onToggleBlockScreenSaver={toggleBlockScreenSaver}
               isSaving={isSaving}
@@ -330,7 +356,7 @@ export function TotemDashboard() {
               setEditForm={setEditForm}
               onEdit={onEditClick}
               onSave={onSaveEdit}
-              onDelete={handleDelete}
+              onDelete={(id) => setDeleteTarget(id)}
               onToggleStatus={toggleStatus}
               onToggleBlockScreenSaver={toggleBlockScreenSaver}
               isSaving={isSaving}
@@ -379,6 +405,17 @@ export function TotemDashboard() {
         isOpen={!!statsTotem}
         totem={statsTotem}
         onClose={() => setStatsTotem(null)}
+      />
+
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Eliminar tótem"
+        message="¿Estás seguro de que deseas eliminar este tótem? Esta acción eliminará también la configuración de videos asociados."
+        confirmLabel="Sí, eliminar"
+        onConfirm={confirmDeleteTotem}
+        onCancel={() => setDeleteTarget(null)}
+        isLoading={isDeleting}
+        variant="danger"
       />
     </div>
   );

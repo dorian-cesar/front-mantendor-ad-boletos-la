@@ -239,7 +239,6 @@ export function useTotems() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Está seguro de eliminar este tótem?")) return;
     try {
       await apiFetch(`/totems/${id}`, { method: "DELETE" });
       await fetchTotems();
