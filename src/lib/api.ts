@@ -19,6 +19,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       const response = await fetch(`${BASE_URL}${endpoint}`, {
+        cache: "no-store", // Bypass browser cache entirely
         ...options,
         headers,
       });

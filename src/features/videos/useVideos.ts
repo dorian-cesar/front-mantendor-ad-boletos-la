@@ -35,7 +35,11 @@ export function useVideos() {
     }
   };
 
-  const handleUpdate = async (id: string, updateData: any) => {
+  const handleUpdate = async (
+    id: string,
+    updateData: any,
+    method: "PUT" | "PATCH" = "PUT"
+  ) => {
     // Optimistic update: reflect changes immediately in local state
     setVideos((prev) =>
       prev.map((v) =>
@@ -44,12 +48,12 @@ export function useVideos() {
     );
     try {
       const result = await apiFetch(`/videos/${id}`, {
-        method: "PUT",
+        method,
         body: JSON.stringify(updateData),
       });
+      console.log(`[Video ${method}] Server response for id=${id}:`, result);
       // If the backend returns the updated video object, merge it into the
-      // specific video in state for server-confirmed data — without reloading
-      // the full list (fetchVideos is never called on success).
+      // specific video in state for server-confirmed data.
       if (result && typeof result === "object" && result.id) {
         setVideos((prev) =>
           prev.map((v) =>
@@ -57,9 +61,10 @@ export function useVideos() {
           )
         );
       }
-      return true;
+      // Return server response so callers can verify field persistence
+      return result;
     } catch (error) {
-      console.error("Error updating video:", error);
+      console.error(`[Video ${method}] Error updating video ${id}:`, error);
       // Revert optimistic update on failure by fetching server state
       fetchVideos();
       throw error;

@@ -121,9 +121,32 @@ export function VideoDashboard() {
   const saveEdit = async (id: string) => {
     try {
       setIsSaving(true);
-      await handleUpdate(id, editForm);
+      const result = await handleUpdate(id, editForm);
       setEditingId(null);
-      showToast("Video actualizado correctamente", "success");
+
+      // Detect if the backend silently ignored nombre/descripcion.
+      // The server returns the video object — if the returned values don't
+      // match what we sent, those fields were NOT persisted.
+      if (result && typeof result === "object" && result.id) {
+        const nombreIgnored = editForm.nombre !== (result.nombre ?? result.nombre);
+        const descIgnored = editForm.descripcion !== (result.descripcion ?? result.description ?? "");
+
+        if (nombreIgnored || descIgnored) {
+          const ignoredFields = [
+            nombreIgnored && "título",
+            descIgnored && "descripción",
+          ].filter(Boolean).join(" y ");
+
+          showToast(
+            `Estado actualizado, pero el servidor no guardó: ${ignoredFields}. Contacta al administrador del backend.`,
+            "error"
+          );
+        } else {
+          showToast("Video actualizado correctamente", "success");
+        }
+      } else {
+        showToast("Video actualizado correctamente", "success");
+      }
     } catch {
       showToast("Error al actualizar el video", "error");
     } finally {
