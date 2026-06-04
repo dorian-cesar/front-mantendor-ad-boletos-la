@@ -26,9 +26,22 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
       if (response.status === 401) {
         if (typeof window !== "undefined") {
+          const hadToken = !!localStorage.getItem("token");
           localStorage.removeItem("token");
-          window.location.href = "/login";
+          // Only redirect if a session existed (token expired). During login, let the error bubble up.
+          if (hadToken) {
+            window.location.href = "/login";
+          }
         }
+        const text = await response.text().catch(() => "");
+        let message = "Credenciales incorrectas. Por favor, verifique su correo y contraseña.";
+        try {
+          const json = JSON.parse(text);
+          message = json.message || json.error || message;
+        } catch { /* use default */ }
+        const authError = new Error(message);
+        (authError as any).status = 401;
+        throw authError;
       }
 
       // Si es un error temporal (ej. proxy caído o red inestable), lanzamos error para forzar reintento
