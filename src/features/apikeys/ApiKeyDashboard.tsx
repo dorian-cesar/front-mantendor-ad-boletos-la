@@ -7,15 +7,11 @@ import {
   Search,
   Shield,
   TabletSmartphone,
-  MoreHorizontal,
   Trash2,
   Copy,
   Check,
   Calendar,
   RefreshCcw,
-  ToggleLeft,
-  ToggleRight,
-  Filter,
   Pencil
 } from "lucide-react";
 import { Sidebar } from "@/components/ui/Sidebar";
@@ -241,10 +237,12 @@ export function ApiKeyDashboard() {
                           <div className="flex justify-center">
                             <button
                               onClick={() => handleToggleStatus(k.id, k.status)}
-                              className={`p-1 rounded-lg transition-all ${k.status ? 'text-slate-900 hover:bg-white hover:shadow-sm' : 'text-slate-200'}`}
+                              className={`w-8 h-[18px] rounded-full relative transition-colors flex-shrink-0 ${k.status ? "bg-emerald-500" : "bg-slate-300"}`}
                               title={k.status ? "Desactivar" : "Activar"}
                             >
-                              {k.status ? <ToggleRight size={24} /> : <ToggleLeft size={24} />}
+                              <div
+                                className={`absolute top-[2px] w-[14px] h-[14px] bg-white rounded-full shadow transition-all ${k.status ? "left-[18px]" : "left-[2px]"}`}
+                              />
                             </button>
                           </div>
                         </td>

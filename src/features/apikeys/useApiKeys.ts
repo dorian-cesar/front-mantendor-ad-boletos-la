@@ -29,17 +29,15 @@ export function useApiKeys() {
   const handleCreateKey = async (form: { description: string; tipo: "PLATAFORMA" | "TOTEM"; totem_id?: number | null }) => {
     try {
       setIsSaving(true);
-      // Validar según requerimientos
       const payload: any = {
         description: form.description,
         tipo: form.tipo,
       };
-      
+
       if (form.tipo === "TOTEM") {
         if (!form.totem_id) throw new Error("El ID de Tótem es obligatorio para llaves de tipo TOTEM");
         payload.totem_id = Number(form.totem_id);
       } else {
-        // Para PLATAFORMA no se envía totem_id o se envía null
         payload.totem_id = null;
       }
 
@@ -59,24 +57,38 @@ export function useApiKeys() {
   };
 
   const handleUpdateKey = async (id: number, form: { description?: string; status?: boolean; tipo?: "PLATAFORMA" | "TOTEM"; totem_id?: number | null }) => {
+    // Optimistic update: apply changes immediately in local state
+    setApiKeys((prev) =>
+      prev.map((k) => (k.id === id ? { ...k, ...form } : k))
+    );
+
     try {
       setIsSaving(true);
       const payload: any = { ...form };
-      
+
       if (payload.tipo === "PLATAFORMA") {
         payload.totem_id = null;
       } else if (payload.tipo === "TOTEM" && payload.totem_id) {
         payload.totem_id = Number(payload.totem_id);
       }
 
-      await apiFetch(`/api-keys/${id}`, {
+      const result = await apiFetch(`/api-keys/${id}`, {
         method: "PATCH",
         body: JSON.stringify(payload),
       });
-      await fetchApiKeys();
+
+      // Merge confirmed server response if available
+      if (result && typeof result === "object" && result.id) {
+        setApiKeys((prev) =>
+          prev.map((k) => (k.id === id ? { ...k, ...result } : k))
+        );
+      }
+
       return true;
     } catch (err: any) {
       console.error("Error updating API key:", err);
+      // Revert optimistic update on failure
+      fetchApiKeys();
       throw err;
     } finally {
       setIsSaving(false);
@@ -87,10 +99,13 @@ export function useApiKeys() {
     if (!confirm("¿Está seguro de eliminar esta API Key?")) return;
     try {
       await apiFetch(`/api-keys/${id}`, { method: "DELETE" });
-      await fetchApiKeys();
+      // Remove the key directly from local state
+      setApiKeys((prev) => prev.filter((k) => k.id !== id));
       return true;
     } catch (err: any) {
       console.error("Error deleting API key:", err);
+      // Refetch to restore accurate state on failure
+      fetchApiKeys();
       throw err;
     }
   };

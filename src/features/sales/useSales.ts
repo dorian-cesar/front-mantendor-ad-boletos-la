@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { apiFetch } from "@/lib/api";
 
 export interface SalesSummary {
@@ -25,54 +25,88 @@ export function useSales() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [summary, setSummary] = useState<SalesSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
   });
 
-  const fetchSales = async () => {
+  // Keep a ref to current filters so the interval always reads the latest value
+  const filtersRef = useRef(filters);
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
+
+  const fetchSales = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
+      else setIsRefreshing(true);
       setError(null);
-      
+
+      const { startDate, endDate } = filtersRef.current;
       let query = "";
-      if (filters.startDate && filters.endDate) {
-        query = `?startDate=${filters.startDate}&endDate=${filters.endDate}`;
-      } else if (filters.startDate) {
-        query = `?startDate=${filters.startDate}`;
+      if (startDate && endDate) {
+        query = `?startDate=${startDate}&endDate=${endDate}`;
+      } else if (startDate) {
+        query = `?startDate=${startDate}`;
       }
 
       const data = await apiFetch(`/ventas/auditoria${query}`);
-      
-      setSales(data.ventas || []);
+      const newSales: Sale[] = data.ventas || [];
+
+      if (silent) {
+        // Smart merge: add new rows at the top, update existing ones in-place.
+        // This preserves any active sort/scroll position for existing rows.
+        setSales((prev) => {
+          const prevMap = new Map(prev.map((s) => [s.id, s]));
+          const newMap = new Map(newSales.map((s) => [s.id, s]));
+
+          // Update existing rows with fresh data (status changes, etc.)
+          const merged = prev.map((s) => newMap.get(s.id) ?? s);
+
+          // Prepend truly new sales (IDs not present in prev)
+          const brandNew = newSales.filter((s) => !prevMap.has(s.id));
+          return [...brandNew, ...merged];
+        });
+      } else {
+        setSales(newSales);
+      }
+
       setSummary(data.summary || null);
+      setLastRefreshed(new Date());
     } catch (err: any) {
       console.error("Error fetching sales:", err);
       setError(err.message || "Error al cargar las ventas");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
+      else setIsRefreshing(false);
     }
-  };
+  }, []);
 
+  // Initial load + re-fetch whenever filters change (non-silent, shows spinner)
   useEffect(() => {
-    fetchSales();
+    fetchSales(false);
+  }, [filters, fetchSales]);
 
-    // Auto-refresh cada 15 segundos
+  // Auto-refresh every 15 seconds — silent so sorting/scrolling is not disrupted
+  useEffect(() => {
     const interval = setInterval(() => {
-      fetchSales();
+      fetchSales(true);
     }, 15000);
-
     return () => clearInterval(interval);
-  }, [filters]);
+  }, [fetchSales]);
 
   return {
     sales,
     summary,
     loading,
+    isRefreshing,
     error,
+    lastRefreshed,
     filters,
     setFilters,
-    fetchSales
+    fetchSales: () => fetchSales(false),
   };
 }

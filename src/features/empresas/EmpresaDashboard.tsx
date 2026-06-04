@@ -244,10 +244,10 @@ export function EmpresaDashboard() {
                                 ...comp, 
                                 status: (comp.status === true || comp.status === "Activo") ? false : true 
                               })}
-                              className={`w-8 h-4 rounded-full relative transition-colors opacity-0 group-hover:opacity-100 mr-2 ${(comp.status === true || comp.status === "Activo") ? 'bg-slate-900' : 'bg-slate-300'}`}
+                              className={`w-8 h-[18px] rounded-full relative transition-colors opacity-0 group-hover:opacity-100 mr-2 flex-shrink-0 ${(comp.status === true || comp.status === "Activo") ? 'bg-emerald-500' : 'bg-slate-300'}`}
                               title={(comp.status === true || comp.status === "Activo") ? "Desactivar" : "Activar"}
                             >
-                              <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${(comp.status === true || comp.status === "Activo") ? 'left-4.5' : 'left-0.5'}`} />
+                              <div className={`absolute top-[2px] w-[14px] h-[14px] bg-white rounded-full shadow transition-all ${(comp.status === true || comp.status === "Activo") ? 'left-[18px]' : 'left-[2px]'}`} />
                             </button>
 
                             <button 

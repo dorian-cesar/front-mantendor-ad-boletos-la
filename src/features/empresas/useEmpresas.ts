@@ -26,16 +26,29 @@ export function useEmpresas() {
   }, []);
 
   const handleUpdate = async (id: string, form: any) => {
+    // Optimistic update: reflect changes immediately in local state
+    setEmpresas((prev) =>
+      prev.map((e) => (String(e.id) === String(id) ? { ...e, ...form } : e))
+    );
+
     try {
-      await apiFetch(`/empresas/${id}`, {
+      const result = await apiFetch(`/empresas/${id}`, {
         method: "PUT",
-        // Enviamos todo el form completo por si el backend necesita otros campos
         body: JSON.stringify(form),
       });
-      await fetchEmpresas();
+
+      // Merge server-confirmed data if backend returns the updated object
+      if (result && typeof result === "object" && result.id) {
+        setEmpresas((prev) =>
+          prev.map((e) => (String(e.id) === String(id) ? { ...e, ...result } : e))
+        );
+      }
+
       return true;
     } catch (error) {
       console.error("Error updating empresa:", error);
+      // Revert optimistic update on failure
+      fetchEmpresas();
       throw error;
     }
   };
@@ -44,10 +57,13 @@ export function useEmpresas() {
     if (!confirm("¿Está seguro de eliminar esta empresa?")) return;
     try {
       await apiFetch(`/empresas/${id}`, { method: "DELETE" });
-      await fetchEmpresas();
+      // Remove directly from local state
+      setEmpresas((prev) => prev.filter((e) => String(e.id) !== String(id)));
       return true;
     } catch (error) {
       console.error("Error deleting empresa:", error);
+      // Refetch to restore accurate state on failure
+      fetchEmpresas();
       throw error;
     }
   };

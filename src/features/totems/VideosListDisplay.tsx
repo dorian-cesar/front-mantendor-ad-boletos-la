@@ -1,4 +1,5 @@
-import { Film, Hash, Video, PlayCircle, Building, ChevronRight, AlertTriangle, ChevronUp, ChevronDown, X } from "lucide-react";
+import React, { useState } from "react";
+import { Film, Hash, Video, PlayCircle, Building, ChevronRight, AlertTriangle, ChevronUp, ChevronDown, X, GripVertical } from "lucide-react";
 
 interface VideosListDisplayProps {
   videos: any[];
@@ -9,6 +10,9 @@ interface VideosListDisplayProps {
 }
 
 export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, onRemove }: VideosListDisplayProps) {
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
   // Respect the order of videoIds array
   const selectedVideos = videoIds
     .map(vid => videos.find(v => String(v.id) === String(vid)))
@@ -31,6 +35,31 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
   const removeItem = (videoId: string) => {
     if (!onRemove) return;
     onRemove(videoId);
+  };
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    setDragOverIndex(null);
+    if (!onReorder || draggedIndex === null || draggedIndex === targetIndex) return;
+
+    const newOrder = [...videoIds];
+    const [moved] = newOrder.splice(draggedIndex, 1);
+    newOrder.splice(targetIndex, 0, moved);
+    
+    onReorder(newOrder);
+    setDraggedIndex(null);
   };
 
   return (
@@ -60,19 +89,37 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
             </p>
         </div>
       ) : (
-        <div className="space-y-2 h-[192px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200">
+        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200">
           {selectedVideos.map((v, index) => {
             const empresa = empresas.find(e => String(e.id) === String(v.empresa_id));
             const isInactive = v.status === false || v.status === 0 || v.status === "Inactivo";
+            const isDragging = draggedIndex === index;
+            const isDragOver = dragOverIndex === index;
             
             return (
               <div 
                 key={`${v.id}-${index}`}
-                className={`flex items-center justify-between p-3 bg-white border transition-all group ${isInactive ? "border-red-100 bg-red-50/30 opacity-90" : "border-slate-100 rounded-xl hover:border-slate-900"}`}
+                draggable={!!onReorder}
+                onDragStart={(e) => handleDragStart(e, index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragLeave={() => setDragOverIndex(null)}
+                onDrop={(e) => handleDrop(e, index)}
+                className={`flex items-center justify-between p-3 bg-white border transition-all group ${
+                  !!onReorder ? "cursor-grab active:cursor-grabbing" : ""
+                } ${
+                  isInactive ? "border-red-100 bg-red-50/30 opacity-90" : "border-slate-100 rounded-xl hover:border-slate-900"
+                } ${isDragging ? "opacity-50 scale-[0.98]" : ""} ${
+                  isDragOver ? "border-t-4 border-t-blue-500" : ""
+                }`}
                 style={isInactive ? { borderRadius: '12px' } : {}}
               >
                 <div className="flex items-center gap-3">
-                  <div className="text-[10px] font-black text-slate-300 w-4">{index + 1}</div>
+                  {!!onReorder && <GripVertical size={16} className="text-slate-300 cursor-grab" />}
+                  
+                  <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-900 text-white font-black text-[11px] shadow-sm shrink-0">
+                    {index + 1}
+                  </div>
+
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isInactive ? "bg-red-100 text-red-500 shadow-inner" : "bg-slate-50 text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-900"}`}>
                     <Video size={14} />
                   </div>
@@ -107,23 +154,22 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                 
                 <div className="flex items-center gap-2">
                   {onReorder && (
-                    <div className="flex items-center bg-slate-50 rounded-lg border border-slate-100 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex flex-col gap-1 mr-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                       <button 
                         type="button"
                         onClick={(e) => { e.stopPropagation(); moveItem(index, 'up'); }}
                         disabled={index === 0}
-                        className="p-1.5 hover:text-slate-900 disabled:text-slate-200 transition-colors"
+                        className="p-1 rounded transition-colors hover:bg-slate-100 text-slate-400 hover:text-blue-600 disabled:opacity-30"
                       >
-                        <ChevronUp size={14} />
+                        <ChevronUp size={14} strokeWidth={3} />
                       </button>
-                      <div className="w-px h-3 bg-slate-200" />
                       <button 
                         type="button"
                         onClick={(e) => { e.stopPropagation(); moveItem(index, 'down'); }}
                         disabled={index === selectedVideos.length - 1}
-                        className="p-1.5 hover:text-slate-900 disabled:text-slate-200 transition-colors"
+                        className="p-1 rounded transition-colors hover:bg-slate-100 text-slate-400 hover:text-blue-600 disabled:opacity-30"
                       >
-                        <ChevronDown size={14} />
+                        <ChevronDown size={14} strokeWidth={3} />
                       </button>
                     </div>
                   )}
@@ -131,13 +177,12 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                     <button 
                       type="button"
                       onClick={(e) => { e.stopPropagation(); removeItem(String(v.id)); }}
-                      className="p-1.5 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all"
+                      className="p-2 shrink-0 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all duration-200 opacity-100 md:opacity-0 group-hover:opacity-100"
                       title="Quitar video del tótem"
                     >
-                      <X size={14} strokeWidth={2.5} />
+                      <X size={16} strokeWidth={2.5} />
                     </button>
                   )}
-                  <div className={`w-1.5 h-1.5 rounded-full transition-all ${isInactive ? "bg-slate-200" : "bg-slate-900 shadow-[0_0_8px_rgba(0,0,0,0.1)]"}`} />
                 </div>
               </div>
             );
