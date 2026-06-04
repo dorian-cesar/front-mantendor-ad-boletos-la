@@ -15,7 +15,7 @@ import { useUpload } from "./UploadContext";
 import { useToast } from "@/components/ui/Toast";
 
 // ─── Types ────────────────────────────────────────────────────
-type SortField = "peso" | "resolucion" | "extension" | "createdAt" | null;
+type SortField = "nombre" | "peso" | "resolucion" | "extension" | "createdAt" | null;
 type SortDir = "asc" | "desc";
 
 // ─── Sortable Column Header ────────────────────────────────────
@@ -102,7 +102,7 @@ export function VideoDashboard() {
       setEditingId(freshVid.id);
       setEditForm({
         nombre: freshVid.nombre ?? "",
-        descripcion: freshVid.descripcion ?? "",
+        descripcion: freshVid.descripcion ?? freshVid.description ?? "",
         status: freshVid.status === true,
       });
     } catch {
@@ -110,7 +110,7 @@ export function VideoDashboard() {
       setEditingId(vid.id);
       setEditForm({
         nombre: vid.nombre ?? "",
-        descripcion: vid.descripcion ?? "",
+        descripcion: vid.descripcion ?? vid.description ?? "",
         status: vid.status === true,
       });
     }
@@ -166,12 +166,14 @@ export function VideoDashboard() {
       if (tableSort.field) {
         const dir = tableSort.direction === "asc" ? 1 : -1;
         switch (tableSort.field) {
+          case "nombre":
+            return (a.nombre || "").localeCompare(b.nombre || "") * dir;
           case "peso":
             return ((a.peso || 0) - (b.peso || 0)) * dir;
           case "resolucion":
-            return ((a.resolucion || "") > (b.resolucion || "") ? 1 : -1) * dir;
+            return (a.resolucion || "").localeCompare(b.resolucion || "") * dir;
           case "extension":
-            return ((a.extension || "") > (b.extension || "") ? 1 : -1) * dir;
+            return (a.extension || "").localeCompare(b.extension || "") * dir;
           case "createdAt":
             return (
               (new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()) * dir
@@ -301,7 +303,13 @@ export function VideoDashboard() {
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wide">
                   <th className="py-3 px-4 font-semibold w-16">ID</th>
-                  <th className="py-3 px-4 font-semibold">TÍTULO</th>
+                  <SortableHeader
+                    label="TÍTULO"
+                    field="nombre"
+                    current={tableSort.field}
+                    direction={tableSort.direction}
+                    onClick={toggleTableSort}
+                  />
                   <th className="py-3 px-4 font-semibold hidden lg:table-cell">DESCRIPCIÓN</th>
                   <SortableHeader
                     label="TAMAÑO"
@@ -396,7 +404,7 @@ export function VideoDashboard() {
                             />
                           ) : (
                             <p className="text-slate-400 text-xs truncate">
-                              {(vid.descripcion ?? "").trim() || "Sin descripción"}
+                              {(vid.descripcion ?? vid.description ?? "").trim() || "Sin descripción"}
                             </p>
                           )}
                         </td>
@@ -486,7 +494,7 @@ export function VideoDashboard() {
 
                                 <button
                                   onClick={() => startEditing(vid)}
-                                  className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-all opacity-100 md:opacity-0 group-hover:opacity-100"
+                                  className="p-1.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg hover:bg-amber-100 hover:text-amber-800 transition-all opacity-100 md:opacity-0 group-hover:opacity-100"
                                   title="Editar"
                                 >
                                   <Edit size={14} />
@@ -494,7 +502,7 @@ export function VideoDashboard() {
 
                                 <button
                                   onClick={() => setDeleteTarget(vid.id)}
-                                  className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-100 md:opacity-0 group-hover:opacity-100"
+                                  className="p-1.5 bg-red-50 text-red-500 border border-red-200 rounded-lg hover:bg-red-100 hover:text-red-700 transition-all opacity-100 md:opacity-0 group-hover:opacity-100"
                                   title="Eliminar"
                                 >
                                   <XCircle size={14} />

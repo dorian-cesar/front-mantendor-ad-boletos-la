@@ -43,16 +43,24 @@ export function useVideos() {
       )
     );
     try {
-      await apiFetch(`/videos/${id}`, {
+      const result = await apiFetch(`/videos/${id}`, {
         method: "PUT",
         body: JSON.stringify(updateData),
       });
-      // Sync with server in background (don't block the UI)
-      fetchVideos();
+      // If the backend returns the updated video object, merge it into the
+      // specific video in state for server-confirmed data — without reloading
+      // the full list (fetchVideos is never called on success).
+      if (result && typeof result === "object" && result.id) {
+        setVideos((prev) =>
+          prev.map((v) =>
+            String(v.id) === String(id) ? { ...v, ...result } : v
+          )
+        );
+      }
       return true;
     } catch (error) {
       console.error("Error updating video:", error);
-      // Revert optimistic update on failure
+      // Revert optimistic update on failure by fetching server state
       fetchVideos();
       throw error;
     }

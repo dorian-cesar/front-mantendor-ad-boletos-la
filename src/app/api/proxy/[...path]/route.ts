@@ -154,8 +154,12 @@ async function handleRequest(request: NextRequest, path: string[]) {
     });
 
     // Inyectar Cache-Control agresivo para videos si es GET y es respuesta exitosa (200 o 206)
+    const contentType = response!.headers.get('content-type') || '';
     if (request.method === 'GET' && isVideoAPI && (response!.status === 200 || response!.status === 206)) {
-      responseHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
+      // SOLO cachear si realmente es un archivo multimedia, no respuestas JSON de la API
+      if (contentType.startsWith('video/') || contentType.startsWith('audio/') || contentType.startsWith('image/')) {
+        responseHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
+      }
     }
 
     // Manejo especial para 304 (Not Modified), que NO debe tener body
