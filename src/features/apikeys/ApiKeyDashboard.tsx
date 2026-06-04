@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  Key, 
-  Plus, 
-  Search, 
-  Shield, 
-  TabletSmartphone, 
-  MoreHorizontal, 
-  Trash2, 
-  Copy, 
+import {
+  Key,
+  Plus,
+  Search,
+  Shield,
+  TabletSmartphone,
+  MoreHorizontal,
+  Trash2,
+  Copy,
   Check,
   Calendar,
   RefreshCcw,
@@ -59,13 +59,13 @@ export function ApiKeyDashboard() {
   };
 
   const filteredKeys = apiKeys.filter(k => {
-    const matchesSearch = 
+    const matchesSearch =
       k.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       k.key?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       k.totem?.identificador?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesType = filterType === "ALL" || k.tipo === filterType;
-    
+
     return matchesSearch && matchesType;
   });
 
@@ -76,7 +76,7 @@ export function ApiKeyDashboard() {
   return (
     <div className="flex h-screen bg-[#F8FAFC]">
       <Sidebar />
-      
+
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Header Section */}
         <header className="bg-white border-b border-slate-200 px-4 md:px-8 py-6 flex flex-col gap-6">
@@ -94,8 +94,8 @@ export function ApiKeyDashboard() {
                 </p>
               </div>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => handleOpenModal()}
               className="w-full md:w-auto justify-center flex items-center gap-2.5 px-6 py-3.5 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-slate-900/10"
             >
@@ -107,29 +107,29 @@ export function ApiKeyDashboard() {
           <div className="flex flex-col md:flex-row gap-4 items-center">
             <div className="relative flex-1 group w-full">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-900 transition-colors" size={18} />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Buscar por descripción, valor de key o tótem..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-slate-100/50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium outline-none focus:bg-white focus:ring-4 focus:ring-slate-900/5 focus:border-slate-300 transition-all shadow-sm"
               />
             </div>
-            
+
             <div className="flex w-full md:w-auto items-center gap-2 bg-white border border-slate-200 rounded-2xl p-1 shadow-sm shrink-0 overflow-x-auto">
-              <button 
+              <button
                 onClick={() => setFilterType("ALL")}
                 className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-black uppercase tracking-tight transition-all ${filterType === "ALL" ? "bg-slate-900 text-white shadow-md" : "text-slate-500 hover:bg-slate-50"}`}
               >
                 Todas
               </button>
-              <button 
+              <button
                 onClick={() => setFilterType("PLATAFORMA")}
                 className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-black uppercase tracking-tight transition-all ${filterType === "PLATAFORMA" ? "bg-slate-900 text-white shadow-md" : "text-slate-500 hover:bg-slate-50"}`}
               >
                 Plataforma
               </button>
-              <button 
+              <button
                 onClick={() => setFilterType("TOTEM")}
                 className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-black uppercase tracking-tight transition-all ${filterType === "TOTEM" ? "bg-slate-900 text-white shadow-md" : "text-slate-500 hover:bg-slate-50"}`}
               >
@@ -148,17 +148,17 @@ export function ApiKeyDashboard() {
             </div>
           ) : error ? (
             <div className="bg-white border-2 border-red-100 rounded-3xl p-12 text-center shadow-sm">
-               <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <RefreshCcw size={32} />
-               </div>
-               <h3 className="text-xl font-black text-slate-900 mb-2">Error al cargar datos</h3>
-               <p className="text-slate-500 mb-8 max-w-sm mx-auto">{error}</p>
-               <button 
+              </div>
+              <h3 className="text-xl font-black text-slate-900 mb-2">Error al cargar datos</h3>
+              <p className="text-slate-500 mb-8 max-w-sm mx-auto">{error}</p>
+              <button
                 onClick={fetchApiKeys}
                 className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-slate-900/20 hover:scale-105 active:scale-95 transition-all"
-               >
-                 Reintentar
-               </button>
+              >
+                Reintentar
+              </button>
             </div>
           ) : filteredKeys.length === 0 ? (
             <div className="bg-white border-2 border-dashed border-slate-200 rounded-[32px] p-20 text-center">
@@ -186,8 +186,8 @@ export function ApiKeyDashboard() {
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {filteredKeys.map((k) => (
-                      <tr 
-                        key={k.id} 
+                      <tr
+                        key={k.id}
                         className={`group hover:bg-slate-50/80 transition-all duration-200 ${!k.status ? 'opacity-50 grayscale-[0.5]' : ''}`}
                       >
                         <td className="px-6 py-4">
@@ -204,11 +204,10 @@ export function ApiKeyDashboard() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-lg tracking-tighter ${
-                            k.tipo === 'PLATAFORMA' 
-                              ? 'bg-blue-100/50 text-blue-700' 
+                          <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-lg tracking-tighter ${k.tipo === 'PLATAFORMA'
+                              ? 'bg-blue-100/50 text-blue-700'
                               : 'bg-emerald-100/50 text-emerald-700'
-                          }`}>
+                            }`}>
                             {k.tipo}
                           </span>
                         </td>
@@ -217,13 +216,12 @@ export function ApiKeyDashboard() {
                             <code className="bg-slate-100 px-2 py-1 rounded text-xs font-mono text-slate-600 max-w-[120px] truncate">
                               {k.key}
                             </code>
-                            <button 
+                            <button
                               onClick={() => copyToClipboard(k.key, k.id)}
-                              className={`p-1.5 rounded-lg transition-all ${
-                                copiedId === k.id 
-                                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-110' 
+                              className={`p-1.5 rounded-lg transition-all ${copiedId === k.id
+                                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-110'
                                   : 'text-slate-400 hover:bg-white hover:text-slate-900 hover:shadow-sm active:scale-95'
-                              }`}
+                                }`}
                             >
                               {copiedId === k.id ? <Check size={14} strokeWidth={3} /> : <Copy size={14} />}
                             </button>
@@ -252,16 +250,16 @@ export function ApiKeyDashboard() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-end gap-1">
-                            <button 
+                            <button
                               onClick={() => handleOpenModal(k)}
                               className="p-2 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-white hover:shadow-sm transition-all"
                               title="Editar"
                             >
                               <Pencil size={16} />
                             </button>
-                            <button 
+                            <button
                               onClick={() => handleDeleteKey(k.id)}
-                              className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                              className="p-2 rounded-lg text-red-400 hover:text-red-500 hover:bg-red-50 transition-all"
                               title="Eliminar"
                             >
                               <Trash2 size={16} />
@@ -278,7 +276,7 @@ export function ApiKeyDashboard() {
         </div>
       </main>
 
-      <ApiKeyModal 
+      <ApiKeyModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleSubmit}

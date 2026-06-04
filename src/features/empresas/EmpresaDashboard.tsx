@@ -259,7 +259,7 @@ export function EmpresaDashboard() {
                             </button>
                             <button 
                               onClick={() => handleDelete(comp.id)}
-                              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-white hover:shadow-sm rounded-xl transition-all opacity-0 group-hover:opacity-100" 
+                              className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 hover:shadow-sm rounded-xl transition-all opacity-0 group-hover:opacity-100" 
                               title="Eliminar"
                             >
                               <Trash2 size={16} />
