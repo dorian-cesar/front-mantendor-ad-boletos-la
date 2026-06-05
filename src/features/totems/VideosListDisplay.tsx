@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Film, Hash, Video, PlayCircle, Building, ChevronRight, AlertTriangle, ChevronUp, ChevronDown, X, GripVertical } from "lucide-react";
+import { Film, Hash, Video, PlayCircle, Building, ChevronRight, AlertTriangle, ChevronUp, ChevronDown, X, GripVertical, Eye, Calendar, HardDrive, Monitor, FileType, Clock } from "lucide-react";
 
 interface VideosListDisplayProps {
   videos: any[];
@@ -12,6 +12,15 @@ interface VideosListDisplayProps {
 export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, onRemove }: VideosListDisplayProps) {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [viewingVideo, setViewingVideo] = useState<any | null>(null);
+
+  // Helper para formatear bytes
+  const formatBytes = (bytes: number | string | undefined) => {
+    if (!bytes || isNaN(Number(bytes))) return "Desconocido";
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = parseInt(Math.floor(Math.log(Number(bytes)) / Math.log(1024)).toString());
+    return Math.round(Number(bytes) / Math.pow(1024, i)) + ' ' + sizes[i];
+  };
 
   // Respect the order of videoIds array
   const selectedVideos = videoIds
@@ -153,6 +162,14 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                 </div>
                 
                 <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setViewingVideo(v); }}
+                    className="p-2 shrink-0 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white transition-all duration-200 opacity-100 md:opacity-0 group-hover:opacity-100"
+                    title="Ver detalles del video"
+                  >
+                    <Eye size={16} strokeWidth={2.5} />
+                  </button>
                   {onReorder && (
                     <div className="flex flex-col gap-1 mr-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                       <button 
@@ -187,6 +204,74 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Modal de Detalles del Video */}
+      {viewingVideo && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={() => setViewingVideo(null)}>
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-inner">
+                  <Film size={20} />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-800 leading-tight">Detalles del Video</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">ID: {viewingVideo.id}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setViewingVideo(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            
+            <div className="p-5 space-y-4">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Nombre del Archivo</span>
+                <p className="text-sm font-bold text-slate-800 break-words">{viewingVideo.nombre || viewingVideo.original_name || 'Desconocido'}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1.5">
+                    <Monitor size={12} /> Resolución
+                  </span>
+                  <p className="text-xs font-bold text-slate-900">{viewingVideo.resolucion || viewingVideo.resolution || 'N/A'}</p>
+                </div>
+                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1.5">
+                    <HardDrive size={12} /> Tamaño
+                  </span>
+                  <p className="text-xs font-bold text-slate-900">{formatBytes(viewingVideo.size)}</p>
+                </div>
+                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1.5">
+                    <FileType size={12} /> Formato
+                  </span>
+                  <p className="text-xs font-bold text-slate-900">{viewingVideo.format || viewingVideo.mimetype || 'MP4'}</p>
+                </div>
+                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1.5">
+                    <Clock size={12} /> Duración
+                  </span>
+                  <p className="text-xs font-bold text-slate-900">{viewingVideo.duration ? `${viewingVideo.duration} seg` : 'N/A'}</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1.5">
+                  <Calendar size={12} /> Fecha de Subida
+                </span>
+                <p className="text-xs font-bold text-slate-900">
+                  {viewingVideo.created_at ? new Date(viewingVideo.created_at).toLocaleString('es-CL') : 'Desconocida'}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
