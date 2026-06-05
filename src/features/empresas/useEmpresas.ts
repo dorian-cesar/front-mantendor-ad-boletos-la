@@ -6,23 +6,32 @@ export function useEmpresas() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchEmpresas = async () => {
+  const fetchEmpresas = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
       const data = await apiFetch("/empresas");
       setEmpresas(Array.isArray(data) ? data : []);
     } catch (err: any) {
       console.error("Error fetching empresas:", err);
-      setError(err.message || "Error al cargar empresas");
-      setEmpresas([]);
+      if (!silent) {
+        setError(err.message || "Error al cargar empresas");
+        setEmpresas([]);
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchEmpresas();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchEmpresas(true);
+    }, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleUpdate = async (id: string, form: any) => {
@@ -72,7 +81,7 @@ export function useEmpresas() {
     empresas,
     loading,
     error,
-    fetchEmpresas,
+    fetchEmpresas: () => fetchEmpresas(false),
     handleUpdate,
     handleDelete,
   };

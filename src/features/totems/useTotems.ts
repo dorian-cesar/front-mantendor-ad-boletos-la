@@ -11,63 +11,62 @@ export function useTotems() {
   // The polling skips overwriting 'status' for these IDs for 10 seconds.
   const pendingStatusRef = useRef<Map<string, number>>(new Map());
 
+  const loadTotemsData = async () => {
+    const data = await apiFetch("/totems");
+    const totemList = Array.isArray(data) ? data : (data.totems || []);
+    
+    if (data.resumen_global) {
+      setResumenGlobal(data.resumen_global);
+    }
+
+    let salesData: any[] = [];
+    try {
+      const salesResponse = await apiFetch("/ventas/auditoria");
+      salesData = salesResponse.ventas || [];
+    } catch (salesErr) {
+      console.warn("No se pudieron cargar las ventas para el dashboard de tótems", salesErr);
+    }
+
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const totemsWithData = await Promise.all(
+      totemList.map(async (totem: any) => {
+        let playlist: any[] = [];
+        try {
+          const res = await fetch(`/api/proxy/totems/${totem.id}/playlist`, {
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          });
+          if (res.ok) {
+            const playlistData = await res.json();
+            playlist = [...(playlistData.playlist || [])].sort(
+              (a: any, b: any) => (a.orden ?? 0) - (b.orden ?? 0)
+            );
+          }
+        } catch { /* silencioso */ }
+
+        const mySales = salesData.filter((s: any) => String(s.totem_id) === String(totem.id));
+        const totalRevenue = mySales.reduce((acc: number, curr: any) => acc + (Number(curr.total_amount) || 0), 0);
+        const totalTickets = mySales.reduce((acc: number, curr: any) => acc + (curr.ticket_numbers?.length || 0), 0);
+
+        return { 
+          ...totem, 
+          playlist,
+          revenue: totalRevenue,
+          sales: totalTickets
+        };
+      })
+    );
+    
+    return totemsWithData;
+  };
+
   const fetchTotems = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiFetch("/totems");
-      // El backend ahora devuelve { totems: [...], resumen_global: {...} }
-      const totemList = Array.isArray(data) ? data : (data.totems || []);
-      
-      // Guardar resumen global si viene
-      if (data.resumen_global) {
-        setResumenGlobal(data.resumen_global);
-      }
-
-      // 2. Obtener datos de ventas para calcular recaudación real
-      let salesData: any[] = [];
-      try {
-        const salesResponse = await apiFetch("/ventas/auditoria");
-        salesData = salesResponse.ventas || [];
-      } catch (salesErr) {
-        console.warn("No se pudieron cargar las ventas para el dashboard de tótems", salesErr);
-      }
-
-      // 3. Obtener playlist ordenada de cada tótem y cruzar con ventas
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const totemsWithData = await Promise.all(
-        totemList.map(async (totem: any) => {
-          // Playlist
-          let playlist: any[] = [];
-          try {
-            const res = await fetch(`/api/proxy/totems/${totem.id}/playlist`, {
-              headers: {
-                "Content-Type": "application/json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-              },
-            });
-            if (res.ok) {
-              const playlistData = await res.json();
-              playlist = [...(playlistData.playlist || [])].sort(
-                (a: any, b: any) => (a.orden ?? 0) - (b.orden ?? 0)
-              );
-            }
-          } catch { /* silencioso */ }
-
-          // Calcular ventas y recaudación para este tótem específico
-          const mySales = salesData.filter((s: any) => String(s.totem_id) === String(totem.id));
-          const totalRevenue = mySales.reduce((acc: number, curr: any) => acc + (Number(curr.total_amount) || 0), 0);
-          const totalTickets = mySales.reduce((acc: number, curr: any) => acc + (curr.ticket_numbers?.length || 0), 0);
-
-          return { 
-            ...totem, 
-            playlist,
-            revenue: totalRevenue,
-            sales: totalTickets
-          };
-        })
-      );
-
+      const totemsWithData = await loadTotemsData();
       setTotems(totemsWithData);
     } catch (err: any) {
       console.error("Error fetching totems:", err);
@@ -299,48 +298,36 @@ export function useTotems() {
     }
   };
 
-  // Efecto para auto-refrescar el estado de conexión cada 30 segundos
+  // Efecto para auto-refrescar en segundo plano cada 15 segundos
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        // Hacemos un fetch ligero (solo /totems)
-        const data = await apiFetch("/totems");
-        // Soportar ambos formatos: array plano o { totems: [...] }
-        const totemList = Array.isArray(data) ? data : (data.totems || []);
+        const freshTotems = await loadTotemsData();
         
-        // Actualizar resumen global si viene
-        if (data.resumen_global) {
-          setResumenGlobal(data.resumen_global);
-        }
-        
-        // Update only connection fields in current state.
-        // Skip 'status' for totems that have a pending local change (< 10s old).
-        const PENDING_TTL = 10_000
-        setTotems(currentTotems => 
-          currentTotems.map(t => {
-            const updated = totemList.find((u: any) => String(u.id) === String(t.id));
-            if (updated) {
-              const pendingTs = pendingStatusRef.current.get(String(t.id))
-              const hasPendingStatus = pendingTs && (Date.now() - pendingTs < PENDING_TTL)
-              if (!hasPendingStatus) {
-                pendingStatusRef.current.delete(String(t.id))
-              }
-              return { 
-                ...t, 
-                is_online: updated.is_online,
-                last_ping: updated.last_ping,
-                ultimo_login: updated.ultimo_login,
-                // Only sync status from server if no pending local change
-                ...(hasPendingStatus ? {} : { status: updated.status }),
-              };
+        const PENDING_TTL = 10_000;
+        setTotems(currentTotems => {
+          // Hacemos merge de los tótems nuevos pero respetamos el status local si hubo un cambio optimista reciente
+          const mergedTotems = freshTotems.map(fresh => {
+            const current = currentTotems.find(t => String(t.id) === String(fresh.id));
+            if (!current) return fresh;
+
+            const pendingTs = pendingStatusRef.current.get(String(fresh.id));
+            const hasPendingStatus = pendingTs && (Date.now() - pendingTs < PENDING_TTL);
+            if (!hasPendingStatus) {
+              pendingStatusRef.current.delete(String(fresh.id));
             }
-            return t;
-          })
-        );
+
+            return {
+              ...fresh,
+              ...(hasPendingStatus ? { status: current.status } : {})
+            };
+          });
+          return mergedTotems;
+        });
       } catch (err) {
-        console.warn("Error en el refresco automático de conexión:", err);
+        console.warn("Error en el refresco automático de sincronización en tiempo real:", err);
       }
-    }, 5_000); // 5 segundos - para reflejar cambios de is_online (login/logout del tótem) rápidamente
+    }, 15_000); // 15 segundos - balance entre frescura y carga de red
 
     return () => clearInterval(interval);
   }, []);

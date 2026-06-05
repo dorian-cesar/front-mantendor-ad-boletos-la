@@ -7,23 +7,32 @@ export function useApiKeys() {
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const fetchApiKeys = async () => {
+  const fetchApiKeys = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
       const data = await apiFetch("/api-keys");
       setApiKeys(Array.isArray(data) ? data : []);
     } catch (err: any) {
       console.error("Error fetching API keys:", err);
-      setError(err.message || "Error al cargar las llaves");
-      setApiKeys([]);
+      if (!silent) {
+        setError(err.message || "Error al cargar las llaves");
+        setApiKeys([]);
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchApiKeys();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchApiKeys(true);
+    }, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleCreateKey = async (form: { description: string; tipo: "PLATAFORMA" | "TOTEM"; totem_id?: number | null }) => {
@@ -115,7 +124,7 @@ export function useApiKeys() {
     loading,
     error,
     isSaving,
-    fetchApiKeys,
+    fetchApiKeys: () => fetchApiKeys(false),
     handleCreateKey,
     handleUpdateKey,
     handleDeleteKey,

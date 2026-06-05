@@ -6,23 +6,32 @@ export function useVideos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchVideos = async () => {
+  const fetchVideos = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
       const data = await apiFetch("/videos");
       setVideos(Array.isArray(data) ? data : []);
     } catch (err: any) {
       console.error("Error fetching videos:", err);
-      setError(err.message || "Error al cargar videos");
-      setVideos([]);
+      if (!silent) {
+        setError(err.message || "Error al cargar videos");
+        setVideos([]);
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchVideos();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchVideos(true);
+    }, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const getVideoById = async (id: string) => {
@@ -86,7 +95,7 @@ export function useVideos() {
     videos,
     loading,
     error,
-    fetchVideos,
+    fetchVideos: () => fetchVideos(false),
     handleDelete,
     handleUpdate,
     getVideoById,

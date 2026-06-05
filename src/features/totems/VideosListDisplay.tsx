@@ -14,14 +14,6 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [viewingVideo, setViewingVideo] = useState<any | null>(null);
 
-  // Helper para formatear bytes
-  const formatBytes = (bytes: number | string | undefined) => {
-    if (!bytes || isNaN(Number(bytes))) return "Desconocido";
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = parseInt(Math.floor(Math.log(Number(bytes)) / Math.log(1024)).toString());
-    return Math.round(Number(bytes) / Math.pow(1024, i)) + ' ' + sizes[i];
-  };
-
   // Respect the order of videoIds array
   const selectedVideos = videoIds
     .map(vid => videos.find(v => String(v.id) === String(vid)))
@@ -246,19 +238,33 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                   <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1.5">
                     <HardDrive size={12} /> Tamaño
                   </span>
-                  <p className="text-xs font-bold text-slate-900">{formatBytes(viewingVideo.size)}</p>
+                  <p className="text-xs font-bold text-slate-900">
+                    {viewingVideo.peso
+                      ? (viewingVideo.peso / (1024 * 1024)).toFixed(2) + " MB"
+                      : viewingVideo.tamano
+                      ? typeof viewingVideo.tamano === "number"
+                        ? (viewingVideo.tamano / (1024 * 1024)).toFixed(2) + " MB"
+                        : viewingVideo.tamano
+                      : "N/A"}
+                  </p>
                 </div>
                 <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
                   <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1.5">
                     <FileType size={12} /> Formato
                   </span>
-                  <p className="text-xs font-bold text-slate-900">{viewingVideo.format || viewingVideo.mimetype || 'MP4'}</p>
+                  <p className="text-xs font-bold text-slate-900 uppercase">
+                    {viewingVideo.extension || viewingVideo.format || viewingVideo.mimetype || 'MP4'}
+                  </p>
                 </div>
                 <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
                   <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1.5">
                     <Clock size={12} /> Duración
                   </span>
-                  <p className="text-xs font-bold text-slate-900">{viewingVideo.duration ? `${viewingVideo.duration} seg` : 'N/A'}</p>
+                  <p className="text-xs font-bold text-slate-900">
+                    {viewingVideo.duracion || viewingVideo.duration 
+                      ? `${viewingVideo.duracion || viewingVideo.duration} seg` 
+                      : 'N/A'}
+                  </p>
                 </div>
               </div>
 
@@ -267,7 +273,9 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                   <Calendar size={12} /> Fecha de Subida
                 </span>
                 <p className="text-xs font-bold text-slate-900">
-                  {viewingVideo.created_at ? new Date(viewingVideo.created_at).toLocaleString('es-CL') : 'Desconocida'}
+                  {viewingVideo.createdAt || viewingVideo.created_at 
+                    ? new Date(viewingVideo.createdAt || viewingVideo.created_at).toLocaleString('es-CL') 
+                    : 'Desconocida'}
                 </p>
               </div>
             </div>
