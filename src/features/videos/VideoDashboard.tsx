@@ -455,7 +455,13 @@ export function VideoDashboard() {
                         {/* Duración */}
                         <td className="py-3 px-4 text-slate-500 font-mono text-xs whitespace-nowrap">
                           {vid.duracion || vid.duration 
-                            ? `${vid.duracion || vid.duration}s` 
+                            ? (() => {
+                                const secs = Number(vid.duracion || vid.duration);
+                                if (secs < 60) return `${secs}s`;
+                                const m = Math.floor(secs / 60);
+                                const s = Math.floor(secs % 60);
+                                return `${m}m ${s}s`;
+                              })()
                             : "—"}
                         </td>
 

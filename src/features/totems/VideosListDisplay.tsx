@@ -262,7 +262,13 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                   </span>
                   <p className="text-xs font-bold text-slate-900">
                     {viewingVideo.duracion || viewingVideo.duration 
-                      ? `${viewingVideo.duracion || viewingVideo.duration} seg` 
+                      ? (() => {
+                          const secs = Number(viewingVideo.duracion || viewingVideo.duration);
+                          if (secs < 60) return `${secs}s`;
+                          const m = Math.floor(secs / 60);
+                          const s = Math.floor(secs % 60);
+                          return `${m}m ${s}s`;
+                        })()
                       : 'N/A'}
                   </p>
                 </div>
