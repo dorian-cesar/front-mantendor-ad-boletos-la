@@ -1,4 +1,4 @@
-import { LogOut, TabletSmartphone, Building, Video, Key, ShoppingCart, Menu, X } from "lucide-react";
+import { LogOut, TabletSmartphone, Building, Video, Key, ShoppingCart, Menu, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -34,12 +34,16 @@ export function Sidebar() {
   const [sidebarWidth, setSidebarWidth] = useState(260);
   const [isDragging, setIsDragging] = useState(false);
   const [isOpenMobile, setIsOpenMobile] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    router.push("/login");
+    setIsLoggingOut(true);
+    setTimeout(() => {
+      localStorage.removeItem("token");
+      router.push("/login");
+    }, 500); // Pequeño retraso para que la animación del loader sea visible
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -165,10 +169,11 @@ export function Sidebar() {
       <div className="p-4 border-t border-slate-200 overflow-hidden whitespace-nowrap w-full">
         <button 
           onClick={handleLogout}
-          className="flex items-center gap-3 text-slate-500 hover:text-slate-800 transition-colors w-full px-2 py-2 rounded-md hover:bg-slate-50"
+          disabled={isLoggingOut}
+          className="flex items-center gap-3 text-slate-500 hover:text-slate-800 transition-colors w-full px-2 py-2 rounded-md hover:bg-slate-50 disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          <LogOut size={18} />
-          <span className="text-sm font-medium">Cerrar sesión</span>
+          {isLoggingOut ? <Loader2 size={18} className="animate-spin" /> : <LogOut size={18} />}
+          <span className="text-sm font-medium">{isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}</span>
         </button>
       </div>
     </aside>
