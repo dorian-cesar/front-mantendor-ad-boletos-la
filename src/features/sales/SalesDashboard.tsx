@@ -20,6 +20,7 @@ import { Sidebar } from "@/components/ui/Sidebar";
 import { useSales } from "./useSales";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { exportToCSV } from "@/lib/exportUtils";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 type SortField = "total_amount" | "status" | "timestamp_operacion" | null;
@@ -103,6 +104,32 @@ export function SalesDashboard() {
     setFilters({ startDate: startStr, endDate: endStr });
   };
 
+  const handleExport = () => {
+    if (sortedSales.length === 0) {
+      alert("No hay datos para exportar. Aplica un filtro de fechas primero.");
+      return;
+    }
+
+    const dataToExport = sortedSales.map((sale) => ({
+      "ID Operación": sale.id,
+      "Tótem ID": sale.totem_id,
+      "Tickets": (sale.ticket_numbers || []).join(" | "),
+      "Monto (Gs)": sale.total_amount || 0,
+      "Estado": sale.status,
+      "Operación": sale.operation || "",
+      "Proveedor": sale.provider || "",
+      "Fecha": format(new Date(sale.timestamp_operacion), "dd/MM/yyyy", { locale: es }),
+      "Hora": format(new Date(sale.timestamp_operacion), "HH:mm:ss"),
+    }));
+
+    const rangeLabel =
+      filters.startDate && filters.endDate
+        ? `_${filters.startDate}_al_${filters.endDate}`
+        : `_${format(new Date(), "yyyyMMdd")}`;
+
+    exportToCSV(dataToExport, `Reporte_Ventas${rangeLabel}`);
+  };
+
   // Apply column sort client-side (preserves auto-refresh data)
   const sortedSales = [...sales].sort((a, b) => {
     if (!tableSort.field) return 0;
@@ -148,7 +175,12 @@ export function SalesDashboard() {
             >
               <RefreshCcw size={20} className={loading ? "animate-spin" : ""} />
             </button>
-            <button className="flex-1 md:flex-none justify-center flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10">
+            <button
+              onClick={handleExport}
+              disabled={sortedSales.length === 0}
+              className="flex-1 md:flex-none justify-center flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 disabled:opacity-40 disabled:cursor-not-allowed"
+              title={sortedSales.length === 0 ? "No hay datos para exportar" : `Exportar ${sortedSales.length} registros como CSV`}
+            >
               <Download size={18} />
               <span className="hidden sm:inline">Exportar Reporte</span>
             </button>
