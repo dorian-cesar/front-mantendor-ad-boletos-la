@@ -15,7 +15,7 @@ import { useUpload } from "./UploadContext";
 import { useToast } from "@/components/ui/Toast";
 
 // ─── Types ────────────────────────────────────────────────────
-type SortField = "nombre" | "peso" | "resolucion" | "extension" | "createdAt" | null;
+type SortField = "nombre" | "peso" | "resolucion" | "extension" | "createdAt" | "duracion" | null;
 type SortDir = "asc" | "desc";
 
 // ─── Sortable Column Header ────────────────────────────────────
@@ -193,6 +193,8 @@ export function VideoDashboard() {
             return (a.nombre || "").localeCompare(b.nombre || "") * dir;
           case "peso":
             return ((a.peso || 0) - (b.peso || 0)) * dir;
+          case "duracion":
+            return ((a.duracion || a.duration || 0) - (b.duracion || b.duration || 0)) * dir;
           case "resolucion":
             return (a.resolucion || "").localeCompare(b.resolucion || "") * dir;
           case "extension":
@@ -342,6 +344,13 @@ export function VideoDashboard() {
                     onClick={toggleTableSort}
                   />
                   <SortableHeader
+                    label="DURACIÓN"
+                    field="duracion"
+                    current={tableSort.field}
+                    direction={tableSort.direction}
+                    onClick={toggleTableSort}
+                  />
+                  <SortableHeader
                     label="RESOLUCIÓN"
                     field="resolucion"
                     current={tableSort.field}
@@ -441,6 +450,13 @@ export function VideoDashboard() {
                               ? (vid.tamano / (1024 * 1024)).toFixed(2) + " MB"
                               : vid.tamano
                             : "N/A"}
+                        </td>
+
+                        {/* Duración */}
+                        <td className="py-3 px-4 text-slate-500 font-mono text-xs whitespace-nowrap">
+                          {vid.duracion || vid.duration 
+                            ? `${vid.duracion || vid.duration}s` 
+                            : "—"}
                         </td>
 
                         {/* Resolución */}
