@@ -232,8 +232,8 @@ export function SalesDashboard() {
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <Filter size={14} /> Filtros de búsqueda
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex-1 min-w-[180px] space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Fecha Inicio</label>
                     <div className="relative">
                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -245,7 +245,7 @@ export function SalesDashboard() {
                       />
                     </div>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="flex-1 min-w-[180px] space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Fecha Fin</label>
                     <div className="relative">
                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />

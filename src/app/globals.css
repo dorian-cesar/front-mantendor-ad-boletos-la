@@ -39,3 +39,10 @@ body {
 .min-w-screen {
   min-width: 100% !important;
 }
+
+/* Aumentar zoom para pantallas de Desktop y Smart TV (ej. 1920x1080) */
+@media (min-width: 1280px) {
+  body {
+    zoom: 90%;
+  }
+}
