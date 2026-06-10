@@ -236,7 +236,7 @@ export function SalesDashboard() {
                   <div className="flex-1 min-w-[180px] space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Fecha Inicio</label>
                     <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                       <input
                         type="date"
                         value={dateRange.start}
@@ -248,7 +248,7 @@ export function SalesDashboard() {
                   <div className="flex-1 min-w-[180px] space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Fecha Fin</label>
                     <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                       <input
                         type="date"
                         value={dateRange.end}
@@ -385,9 +385,9 @@ export function SalesDashboard() {
                               const badgeClass = statusUpper === "SUCCESS" || statusUpper === "APROBADA"
                                 ? "bg-emerald-50 text-emerald-600 border-emerald-100"
                                 : statusUpper === "FAILED" || statusUpper === "RECHAZADA"
-                                ? "bg-red-50 text-red-500 border-red-100"
-                                : "bg-amber-50 text-amber-600 border-amber-100";
-                              
+                                  ? "bg-red-50 text-red-500 border-red-100"
+                                  : "bg-amber-50 text-amber-600 border-amber-100";
+
                               return (
                                 <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm ${badgeClass}`}>
                                   {sale.status}
