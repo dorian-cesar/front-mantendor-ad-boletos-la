@@ -71,7 +71,7 @@ export function EmpresaDashboard() {
     <div className="flex h-screen w-full bg-[#f8f9fc] text-slate-800 font-sans">
       <Sidebar />
 
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden min-w-0">
         <header className="h-16 flex items-center justify-between px-4 md:px-8 bg-white border-b border-slate-200 flex-shrink-0">
           <div className="flex items-center gap-2 text-sm text-slate-500 truncate">
             <span className="hidden sm:inline">Inicio</span>
@@ -83,7 +83,7 @@ export function EmpresaDashboard() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-auto p-4 md:p-8 relative w-full max-w-[100vw]">
+        <div className="flex-1 overflow-auto p-4 md:p-8 relative w-full">
           <EmpresaModal 
             isOpen={isModalOpen} 
             onClose={() => setIsModalOpen(false)} 

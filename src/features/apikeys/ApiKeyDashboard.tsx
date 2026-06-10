@@ -73,7 +73,7 @@ export function ApiKeyDashboard() {
     <div className="flex h-screen bg-[#F8FAFC]">
       <Sidebar />
 
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Header Section */}
         <header className="bg-white border-b border-slate-200 px-4 md:px-8 py-6 flex flex-col gap-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -136,7 +136,7 @@ export function ApiKeyDashboard() {
         </header>
 
         {/* Content Section */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-thin scrollbar-thumb-slate-200 w-full max-w-[100vw]">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-thin scrollbar-thumb-slate-200 w-full">
           {loading ? (
             <div className="h-64 flex flex-col items-center justify-center gap-4">
               <div className="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
