@@ -236,7 +236,7 @@ export function SalesDashboard() {
                   <div className="flex-1 min-w-[180px] space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Fecha Inicio</label>
                     <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                      <Calendar className="relative left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                       <input
                         type="date"
                         value={dateRange.start}
@@ -248,7 +248,7 @@ export function SalesDashboard() {
                   <div className="flex-1 min-w-[180px] space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Fecha Fin</label>
                     <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                      <Calendar className="relative left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                       <input
                         type="date"
                         value={dateRange.end}
