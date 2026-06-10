@@ -227,7 +227,7 @@ export function SalesDashboard() {
 
           {/* Filters Section */}
           <div className="bg-white border border-slate-200 rounded-[32px] p-4 md:p-8 shadow-sm">
-            <div className="flex flex-col md:flex-row md:items-end gap-6">
+            <div className="flex flex-col xl:flex-row xl:items-end gap-6">
               <div className="flex-1 space-y-4">
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <Filter size={14} /> Filtros de búsqueda

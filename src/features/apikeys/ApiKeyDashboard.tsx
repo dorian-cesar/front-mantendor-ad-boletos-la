@@ -93,7 +93,7 @@ export function ApiKeyDashboard() {
 
             <button
               onClick={() => handleOpenModal()}
-              className="w-full md:w-auto justify-center flex items-center gap-2.5 px-6 py-3.5 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-slate-900/10"
+              className="w-full md:w-auto justify-center flex items-center gap-2.5 px-6 py-3.5 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-slate-900/10 whitespace-nowrap"
             >
               <Plus size={18} strokeWidth={3} />
               Generar Nueva Key

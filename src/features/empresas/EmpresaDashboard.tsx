@@ -97,7 +97,7 @@ export function EmpresaDashboard() {
             </div>
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="w-full sm:w-auto bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-semibold shadow-xl shadow-slate-900/20 transition-all flex items-center justify-center gap-2 transform active:scale-95"
+              className="w-full sm:w-auto bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-semibold shadow-xl shadow-slate-900/20 transition-all flex items-center justify-center gap-2 transform active:scale-95 whitespace-nowrap"
             >
               <Plus size={18} strokeWidth={2.5} />
               Nueva Empresa
