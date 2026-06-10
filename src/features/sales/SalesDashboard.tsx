@@ -232,31 +232,28 @@ export function SalesDashboard() {
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <Filter size={14} /> Filtros de búsqueda
                 </h3>
-                <div 
-                  className="grid gap-4 w-full"
-                  style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}
-                >
-                  <div className="space-y-1.5 w-full min-w-0">
+                <div className="flex flex-wrap gap-4 w-full">
+                  <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Fecha Inicio</label>
-                    <div className="relative w-full">
+                    <div className="relative">
                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                       <input
                         type="date"
                         value={dateRange.start}
                         onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 focus:bg-white focus:ring-2 focus:ring-slate-900/10 outline-none transition-all min-w-0"
+                        className="w-[170px] pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 focus:bg-white focus:ring-2 focus:ring-slate-900/10 outline-none transition-all"
                       />
                     </div>
                   </div>
-                  <div className="space-y-1.5 w-full min-w-0">
+                  <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Fecha Fin</label>
-                    <div className="relative w-full">
+                    <div className="relative">
                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                       <input
                         type="date"
                         value={dateRange.end}
                         onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 focus:bg-white focus:ring-2 focus:ring-slate-900/10 outline-none transition-all min-w-0"
+                        className="w-[170px] pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 focus:bg-white focus:ring-2 focus:ring-slate-900/10 outline-none transition-all"
                       />
                     </div>
                   </div>
