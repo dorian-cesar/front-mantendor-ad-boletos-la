@@ -232,7 +232,10 @@ export function SalesDashboard() {
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <Filter size={14} /> Filtros de búsqueda
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                <div 
+                  className="grid gap-4 w-full"
+                  style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}
+                >
                   <div className="space-y-1.5 w-full min-w-0">
                     <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Fecha Inicio</label>
                     <div className="relative w-full">
