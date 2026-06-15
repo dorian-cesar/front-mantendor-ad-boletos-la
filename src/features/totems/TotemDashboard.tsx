@@ -161,7 +161,7 @@ export function TotemDashboard() {
       const success = await handleCreate(createForm);
       if (success) {
         setIsCreateModalOpen(false);
-        setCreateForm({ identificador: "", direccion: "", latitud: 0, longitud: 0, empresa_ids: [], video_ids: [] });
+        setCreateForm({ id: "", identificador: "", direccion: "", latitud: 0, longitud: 0, empresa_ids: [], video_ids: [] });
         showToast("Tótem creado correctamente", "success");
       }
     } catch (error) {
