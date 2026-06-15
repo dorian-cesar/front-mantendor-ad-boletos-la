@@ -8,6 +8,7 @@ interface TotemModalProps {
   isOpen: boolean;
   onClose: () => void;
   form: { 
+    id?: string;
     identificador: string; 
     direccion: string; 
     empresa_ids?: string[];
@@ -62,17 +63,31 @@ export function TotemModal({
         </div>
 
         <div className="p-8 space-y-6">
-          <div>
-            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">
-              Identificador del Tótem
-            </label>
-            <input
-              type="text"
-              placeholder="Ej: Terminal Alameda - Totem 5"
-              value={form.identificador}
-              onChange={(e) => setForm({ ...form, identificador: e.target.value })}
-              className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-slate-900/10 focus:border-slate-900 focus:bg-white transition-all shadow-sm outline-none"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-1">
+              <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">
+                ID (Opcional)
+              </label>
+              <input
+                type="text"
+                placeholder="Ej: 105"
+                value={form.id || ""}
+                onChange={(e) => setForm({ ...form, id: e.target.value })}
+                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-slate-900/10 focus:border-slate-900 focus:bg-white transition-all shadow-sm outline-none"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">
+                Identificador del Tótem
+              </label>
+              <input
+                type="text"
+                placeholder="Ej: Terminal Alameda - Totem 5"
+                value={form.identificador}
+                onChange={(e) => setForm({ ...form, identificador: e.target.value })}
+                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-slate-900/10 focus:border-slate-900 focus:bg-white transition-all shadow-sm outline-none"
+              />
+            </div>
           </div>
 
           <div>

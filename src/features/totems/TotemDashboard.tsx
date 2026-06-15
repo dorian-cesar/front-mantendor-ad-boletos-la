@@ -82,6 +82,7 @@ export function TotemDashboard() {
   // States for Create Mode
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createForm, setCreateForm] = useState({ 
+    id: "",
     identificador: "", 
     direccion: "", 
     latitud: 0,

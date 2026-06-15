@@ -219,6 +219,7 @@ export function useTotems() {
       await apiFetch("/totems", {
         method: "POST",
         body: JSON.stringify({
+          id: createForm.id ? String(createForm.id) : undefined,
           identificador: createForm.identificador,
           direccion: createForm.direccion,
           latitud: createForm.latitud || 0,
