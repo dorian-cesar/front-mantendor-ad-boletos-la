@@ -78,6 +78,7 @@ export function TotemList({
             <th className="py-3 px-5 font-semibold w-12 text-center"></th>
             <th className="py-3 px-5 font-semibold w-24">ID</th>
             <th className="py-3 px-5 font-semibold">TERMINAL / UBICACIÓN</th>
+            <th className="py-3 px-5 font-semibold w-24 text-center text-[10px] uppercase leading-tight">Bloquear<br/>Protector</th>
             <th className="py-3 px-5 font-semibold w-40 text-center">CONEXIÓN</th>
             <th className="py-3 px-5 font-semibold w-40 text-right pr-6">TICKETS HOY</th>
             <th className="py-3 px-5 font-semibold w-40 text-right pr-6">RECAUDACIÓN</th>
@@ -111,10 +112,24 @@ export function TotemList({
                   </div>
                 </td>
                 <td className="py-3.5 px-5">
+                  <div className="flex justify-center items-center">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleBlockScreenSaver(t.id, t.block_screen_saver || false);
+                      }}
+                      className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-slate-900/20 shadow-inner ${t.block_screen_saver ? 'bg-emerald-500' : 'bg-slate-200'}`}
+                      title="Mantener pantalla activa"
+                    >
+                      <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${t.block_screen_saver ? 'translate-x-[16px]' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+                </td>
+                <td className="py-3.5 px-5">
                   <div className="flex flex-col items-center gap-1">
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${t.is_online ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-slate-300'}`} />
-                      <span className={`text-[10px] font-black uppercase tracking-tighter ${t.is_online ? 'text-emerald-600' : 'text-slate-400'}`}>
+                      <div className={`w-2 h-2 rounded-full ${t.is_online ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]'}`} />
+                      <span className={`text-[10px] font-black uppercase tracking-tighter ${t.is_online ? 'text-emerald-600' : 'text-red-500'}`}>
                         {t.is_online ? 'Online' : 'Offline'}
                       </span>
                     </div>
@@ -295,20 +310,6 @@ export function TotemList({
                               {t.status === true || t.status === "Activo" ? "Desactivar" : "Activar"}
                             </button>
                           )}
-                        </div>
-                        
-                        {/* Screen Saver Toggle */}
-                        <div className="w-full md:w-1/6 flex flex-row md:flex-col items-center justify-between md:justify-center border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 pl-0 md:pl-4 mt-2 md:mt-0 md:ml-2">
-                          <span className="text-[10px] font-bold text-slate-500 md:mb-2 uppercase tracking-wider text-left md:text-center">
-                            Bloquear<br className="hidden md:block" />Protector
-                          </span>
-                          <button
-                            onClick={() => onToggleBlockScreenSaver(t.id, t.block_screen_saver || false)}
-                            className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-slate-900/20 shadow-inner ${t.block_screen_saver ? 'bg-emerald-500' : 'bg-slate-200'}`}
-                            title="Mantener pantalla activa"
-                          >
-                            <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${t.block_screen_saver ? 'translate-x-[16px]' : 'translate-x-0'}`} />
-                          </button>
                         </div>
                       </div>
                     )}
