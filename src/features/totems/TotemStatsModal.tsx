@@ -7,6 +7,7 @@ import { apiFetch } from "@/lib/api";
 interface TotemStatsModalProps {
   isOpen: boolean;
   totem: any;
+  isPolling?: boolean;
   onClose: () => void;
 }
 
@@ -36,7 +37,7 @@ const PASO_COLORS: Record<string, string> = {
   impresion: "bg-purple-500",
 };
 
-export function TotemStatsModal({ isOpen, totem, onClose }: TotemStatsModalProps) {
+export function TotemStatsModal({ isOpen, totem, isPolling, onClose }: TotemStatsModalProps) {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -201,6 +202,11 @@ export function TotemStatsModal({ isOpen, totem, onClose }: TotemStatsModalProps
                       <div className="flex items-center gap-2 mb-4">
                         <Cpu size={16} className="text-slate-500" />
                         <h4 className="text-xs font-black text-slate-700 uppercase tracking-widest">Telemetría de Hardware</h4>
+                        {isPolling && (
+                          <div className="flex items-center justify-center p-1 bg-emerald-50 text-emerald-500 rounded-full animate-pulse" title="Sincronizando métricas en segundo plano...">
+                            <Loader2 size={12} className="animate-spin" />
+                          </div>
+                        )}
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">

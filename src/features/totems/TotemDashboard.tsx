@@ -418,6 +418,7 @@ export function TotemDashboard() {
       <TotemStatsModal
         isOpen={!!statsTotem}
         totem={statsTotem}
+        isPolling={isPolling}
         onClose={() => setStatsTotemId(null)}
       />
 

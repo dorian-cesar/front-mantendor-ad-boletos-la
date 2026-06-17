@@ -331,8 +331,14 @@ export function useTotems() {
             };
           });
         });
-      } catch (err) {
-        console.warn("Error en el refresco automático de métricas en segundo plano:", err);
+      } catch (err: any) {
+        if (err.message && err.message.includes("404")) {
+          // Silencioso: El backend posiblemente aún no implementa esta ruta o hay un conflicto de rutas
+        } else if (err.message && err.message.includes("Totem no encontrado")) {
+          // Silencioso: Conflicto de rutas en el backend (interpreta 'metrics' como ID)
+        } else {
+          console.warn("Error en el refresco automático de métricas en segundo plano:", err);
+        }
       } finally {
         // Un pequeño retraso para evitar parpadeos bruscos en la UI
         setTimeout(() => setIsPolling(false), 800);
