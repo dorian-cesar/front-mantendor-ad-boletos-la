@@ -66,7 +66,7 @@ export function TotemStatsModal({ isOpen, totem, isPolling, onClose }: TotemStat
         })
         .finally(() => setLoading(false));
     }
-  }, [isOpen, totem]);
+  }, [isOpen, totem?.id]);
 
   if (!isOpen || !totem) return null;
 
