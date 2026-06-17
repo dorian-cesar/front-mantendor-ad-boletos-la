@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Edit, Power, MonitorSmartphone, Terminal, Loader2, Save, Film, Building, BarChart3, Ticket } from "lucide-react";
+import { Edit, Power, MonitorSmartphone, Terminal, Loader2, Save, Film, Building, BarChart3, Ticket, AlertTriangle } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { VideosListDisplay } from "./VideosListDisplay";
 import { VideoSelector } from "./VideoSelector";
@@ -171,7 +171,14 @@ export function TotemGrid({
                   <div>
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex flex-col gap-1.5">
-                        <StatusBadge status={t.status === true || t.status === "Activo" ? "Activo" : "Inactivo"} />
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={t.status === true || t.status === "Activo" ? "Activo" : "Inactivo"} />
+                          {t.ultimo_error_critico && (
+                            <div title={`Error Crítico: ${t.ultimo_error_critico}`} className="text-red-500 bg-red-50 p-1 rounded-md border border-red-200 animate-pulse flex-shrink-0">
+                              <AlertTriangle size={14} />
+                            </div>
+                          )}
+                        </div>
                         <div className="flex items-center gap-1.5 ml-1">
                           <div className={`w-2 h-2 rounded-full ${t.is_online ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-red-400'}`} />
                           <span className={`text-[9px] font-black uppercase tracking-tighter ${t.is_online ? 'text-emerald-600' : 'text-red-500'}`}>

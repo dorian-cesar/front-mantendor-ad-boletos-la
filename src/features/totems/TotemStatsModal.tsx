@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { X, Loader2, CheckCircle2, XCircle, AlertTriangle, BarChart3, Activity, Ticket, TrendingUp } from "lucide-react";
+import { X, Loader2, CheckCircle2, XCircle, AlertTriangle, BarChart3, Activity, Ticket, TrendingUp, Cpu, Printer, MonitorPlay, ServerCrash } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 
 interface TotemStatsModalProps {
@@ -96,6 +96,16 @@ export function TotemStatsModal({ isOpen, totem, onClose }: TotemStatsModalProps
           </button>
         </div>
 
+        {totem.ultimo_error_critico && (
+          <div className="bg-red-500 text-white p-3 px-5 flex items-start gap-3">
+            <ServerCrash size={20} className="mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-bold">Error Crítico Detectado</p>
+              <p className="text-xs font-medium text-red-100 mt-0.5">{totem.ultimo_error_critico}</p>
+            </div>
+          </div>
+        )}
+
         {loading ? (
           <div className="py-20 flex flex-col items-center gap-3">
             <Loader2 size={32} className="animate-spin text-slate-400" />
@@ -184,6 +194,39 @@ export function TotemStatsModal({ isOpen, totem, onClose }: TotemStatsModalProps
                       {!hasTelemetry && exitosas > 0 && " (Datos basados en volumen de transacciones locales)."}
                     </p>
                   </div>
+
+                  {/* Telemetría de Hardware */}
+                  {totem.ultima_telemetria && (
+                    <div className="bg-white border border-slate-200 rounded-xl p-4 mt-4">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Cpu size={16} className="text-slate-500" />
+                        <h4 className="text-xs font-black text-slate-700 uppercase tracking-widest">Telemetría de Hardware</h4>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
+                          <Cpu size={18} className="text-slate-400 mb-2" />
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">CPU Temp</span>
+                          <span className="text-sm font-black text-slate-800">
+                            {totem.ultima_telemetria.hardware?.cpu_temperature_celsius ? `${totem.ultima_telemetria.hardware.cpu_temperature_celsius}°C` : 'N/A'}
+                          </span>
+                        </div>
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
+                          <Printer size={18} className="text-slate-400 mb-2" />
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Impresora</span>
+                          <span className={`text-sm font-black ${totem.ultima_telemetria.perifericos?.printer_connected === false ? 'text-red-500' : 'text-emerald-600'}`}>
+                            {totem.ultima_telemetria.perifericos?.printer_connected === false ? 'Desconectada' : (totem.ultima_telemetria.perifericos?.printer_connected ? 'Conectada' : 'N/A')}
+                          </span>
+                        </div>
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
+                          <MonitorPlay size={18} className="text-slate-400 mb-2" />
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">AnyDesk</span>
+                          <span className={`text-sm font-black ${totem.ultima_telemetria.servicios_locales?.anydesk_running === false ? 'text-red-500' : 'text-emerald-600'}`}>
+                            {totem.ultima_telemetria.servicios_locales?.anydesk_running === false ? 'Detenido' : (totem.ultima_telemetria.servicios_locales?.anydesk_running ? 'Corriendo' : 'N/A')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </>
               );
             })()}

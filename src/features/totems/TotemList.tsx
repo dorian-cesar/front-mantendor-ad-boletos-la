@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Edit, Power, ChevronDown, ChevronUp, Hash, DollarSign, Terminal, Loader2, Film, Video, Building, Save, BarChart3, Ticket } from "lucide-react";
+import { Edit, Power, ChevronDown, ChevronUp, Hash, DollarSign, Terminal, Loader2, Film, Video, Building, Save, BarChart3, Ticket, AlertTriangle } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { VideosListDisplay } from "./VideosListDisplay";
 import { VideoSelector } from "./VideoSelector";
@@ -104,6 +104,11 @@ export function TotemList({
                 <td className="py-3.5 px-5 font-bold text-slate-950  flex items-center gap-2 text-xs">
                   <Hash size={10} className="text-slate-900 " />
                   {t.id.toString().substring(0, 8)}
+                  {t.ultimo_error_critico && (
+                    <div title={`Error Crítico: ${t.ultimo_error_critico}`} className="text-red-500 animate-pulse ml-1">
+                      <AlertTriangle size={14} />
+                    </div>
+                  )}
                 </td>
                 <td className="py-3.5 px-5">
                   <div className="flex flex-col">
