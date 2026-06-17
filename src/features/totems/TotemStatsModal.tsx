@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { X, Loader2, CheckCircle2, XCircle, AlertTriangle, BarChart3, Activity, Ticket, TrendingUp, Cpu, Printer, MonitorPlay, ServerCrash } from "lucide-react";
+import { X, Loader2, CheckCircle2, XCircle, AlertTriangle, BarChart3, Activity, Ticket, TrendingUp, Cpu, Printer, MonitorPlay, ServerCrash, HardDrive, Database, LayoutDashboard } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 
 interface TotemStatsModalProps {
@@ -202,19 +202,52 @@ export function TotemStatsModal({ isOpen, totem, onClose }: TotemStatsModalProps
                         <Cpu size={16} className="text-slate-500" />
                         <h4 className="text-xs font-black text-slate-700 uppercase tracking-widest">Telemetría de Hardware</h4>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
+                          <Cpu size={18} className="text-slate-400 mb-2" />
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">CPU Uso</span>
+                          <span className="text-sm font-black text-slate-800">
+                            {totem.ultima_telemetria.hardware?.cpu_usage_percent !== undefined ? `${totem.ultima_telemetria.hardware.cpu_usage_percent}%` : 'N/A'}
+                          </span>
+                        </div>
                         <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
                           <Cpu size={18} className="text-slate-400 mb-2" />
                           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">CPU Temp</span>
                           <span className="text-sm font-black text-slate-800">
-                            {totem.ultima_telemetria.hardware?.cpu_temperature_celsius ? `${totem.ultima_telemetria.hardware.cpu_temperature_celsius}°C` : 'N/A'}
+                            {totem.ultima_telemetria.hardware?.cpu_temperature_celsius !== undefined ? `${totem.ultima_telemetria.hardware.cpu_temperature_celsius}°C` : 'N/A'}
+                          </span>
+                        </div>
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
+                          <Database size={18} className="text-slate-400 mb-2" />
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">RAM Libre</span>
+                          <span className="text-xs font-black text-slate-800">
+                            {totem.ultima_telemetria.hardware?.ram_available_mb !== undefined && totem.ultima_telemetria.hardware?.ram_total_mb !== undefined ? `${Math.round((totem.ultima_telemetria.hardware.ram_available_mb / totem.ultima_telemetria.hardware.ram_total_mb) * 100)}% (${totem.ultima_telemetria.hardware.ram_available_mb}MB)` : 'N/A'}
+                          </span>
+                        </div>
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
+                          <HardDrive size={18} className="text-slate-400 mb-2" />
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Disco Libre</span>
+                          <span className="text-sm font-black text-slate-800">
+                            {totem.ultima_telemetria.hardware?.disk_free_percent !== undefined ? `${totem.ultima_telemetria.hardware.disk_free_percent}%` : 'N/A'}
                           </span>
                         </div>
                         <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
                           <Printer size={18} className="text-slate-400 mb-2" />
                           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Impresora</span>
-                          <span className={`text-sm font-black ${totem.ultima_telemetria.perifericos?.printer_connected === false ? 'text-red-500' : 'text-emerald-600'}`}>
-                            {totem.ultima_telemetria.perifericos?.printer_connected === false ? 'Desconectada' : (totem.ultima_telemetria.perifericos?.printer_connected ? 'Conectada' : 'N/A')}
+                          <div className="flex flex-col">
+                            <span className={`text-sm font-black ${totem.ultima_telemetria.perifericos?.printer_connected === false ? 'text-red-500' : 'text-emerald-600'}`}>
+                              {totem.ultima_telemetria.perifericos?.printer_connected === false ? 'Desconectada' : (totem.ultima_telemetria.perifericos?.printer_connected ? 'Conectada' : 'N/A')}
+                            </span>
+                            {totem.ultima_telemetria.perifericos?.printer_status && (
+                              <span className="text-[9px] text-slate-500 mt-0.5">{totem.ultima_telemetria.perifericos.printer_status}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
+                          <AlertTriangle size={18} className="text-slate-400 mb-2" />
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Error Impres.</span>
+                          <span className={`text-[10px] font-medium leading-tight ${totem.ultima_telemetria.perifericos?.printer_error_description ? 'text-red-500' : 'text-slate-400'}`}>
+                            {totem.ultima_telemetria.perifericos?.printer_error_description || 'Ninguno'}
                           </span>
                         </div>
                         <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
@@ -222,6 +255,13 @@ export function TotemStatsModal({ isOpen, totem, onClose }: TotemStatsModalProps
                           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">AnyDesk</span>
                           <span className={`text-sm font-black ${totem.ultima_telemetria.servicios_locales?.anydesk_running === false ? 'text-red-500' : 'text-emerald-600'}`}>
                             {totem.ultima_telemetria.servicios_locales?.anydesk_running === false ? 'Detenido' : (totem.ultima_telemetria.servicios_locales?.anydesk_running ? 'Corriendo' : 'N/A')}
+                          </span>
+                        </div>
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
+                          <LayoutDashboard size={18} className="text-slate-400 mb-2" />
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Kiosko App</span>
+                          <span className={`text-sm font-black ${totem.ultima_telemetria.servicios_locales?.kiosk_app_running === false ? 'text-red-500' : 'text-emerald-600'}`}>
+                            {totem.ultima_telemetria.servicios_locales?.kiosk_app_running === false ? 'Detenido' : (totem.ultima_telemetria.servicios_locales?.kiosk_app_running ? 'Corriendo' : 'N/A')}
                           </span>
                         </div>
                       </div>
