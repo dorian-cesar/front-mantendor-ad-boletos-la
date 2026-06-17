@@ -7,6 +7,7 @@ export function useTotems() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPolling, setIsPolling] = useState(false);
   // Tracks which totem IDs have a pending local status change.
   // The polling skips overwriting 'status' for these IDs for 10 seconds.
   const pendingStatusRef = useRef<Map<string, number>>(new Map());
@@ -303,6 +304,7 @@ export function useTotems() {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
+        setIsPolling(true);
         const metricsData = await apiFetch("/totems/metrics");
         if (!Array.isArray(metricsData)) return;
 
@@ -331,6 +333,9 @@ export function useTotems() {
         });
       } catch (err) {
         console.warn("Error en el refresco automático de métricas en segundo plano:", err);
+      } finally {
+        // Un pequeño retraso para evitar parpadeos bruscos en la UI
+        setTimeout(() => setIsPolling(false), 800);
       }
     }, 15_000); // Refresco cada 15 segundos
 
@@ -343,6 +348,7 @@ export function useTotems() {
     loading,
     error,
     isSaving,
+    isPolling,
     fetchTotems,
     fetchPlaylist,
     handleSave,

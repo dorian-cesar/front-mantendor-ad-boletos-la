@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
-import { Search, Plus, LayoutList, LayoutGrid, CheckCircle2, XCircle, AlertCircle, Video, BarChart3, Ticket, TrendingUp } from "lucide-react";
+import { Search, Plus, LayoutList, LayoutGrid, CheckCircle2, XCircle, AlertCircle, Video, BarChart3, Ticket, TrendingUp, RefreshCcw } from "lucide-react";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { useTotems } from "./useTotems";
 import { useVideos } from "@/features/videos/useVideos";
@@ -34,6 +34,7 @@ export function TotemDashboard() {
     loading,
     error: totemsError,
     isSaving,
+    isPolling,
     fetchTotems,
     fetchPlaylist,
     handleSave,
@@ -231,7 +232,15 @@ export function TotemDashboard() {
 
           <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-bold text-slate-800 tracking-tight mb-2">Tótems de Venta</h2>
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Tótems de Venta</h2>
+                {isPolling && (
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-[10px] font-black uppercase tracking-wider text-emerald-600 animate-pulse shadow-sm">
+                    <RefreshCcw size={10} className="animate-spin text-emerald-500" />
+                    <span>Sincronizando</span>
+                  </div>
+                )}
+              </div>
               <p className="text-slate-500 text-sm">Monitoreo en tiempo real de terminales físicos y métricas.</p>
             </div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
