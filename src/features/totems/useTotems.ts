@@ -299,36 +299,40 @@ export function useTotems() {
     }
   };
 
-  // Efecto para auto-refrescar en segundo plano cada 15 segundos
+  // Efecto para auto-refrescar las métricas/telemetría en segundo plano cada 15 segundos
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const freshTotems = await loadTotemsData();
-        
+        const metricsData = await apiFetch("/totems/metrics");
+        if (!Array.isArray(metricsData)) return;
+
         const PENDING_TTL = 10_000;
         setTotems(currentTotems => {
-          // Hacemos merge de los tótems nuevos pero respetamos el status local si hubo un cambio optimista reciente
-          const mergedTotems = freshTotems.map(fresh => {
-            const current = currentTotems.find(t => String(t.id) === String(fresh.id));
-            if (!current) return fresh;
+          return currentTotems.map(current => {
+            const freshMetric = metricsData.find(m => String(m.id) === String(current.id));
+            if (!freshMetric) return current;
 
-            const pendingTs = pendingStatusRef.current.get(String(fresh.id));
+            const pendingTs = pendingStatusRef.current.get(String(current.id));
             const hasPendingStatus = pendingTs && (Date.now() - pendingTs < PENDING_TTL);
             if (!hasPendingStatus) {
-              pendingStatusRef.current.delete(String(fresh.id));
+              pendingStatusRef.current.delete(String(current.id));
             }
 
             return {
-              ...fresh,
-              ...(hasPendingStatus ? { status: current.status } : {})
+              ...current,
+              is_online: freshMetric.is_online,
+              ultimo_login: freshMetric.last_ping || freshMetric.ultimo_login || current.ultimo_login,
+              ultima_telemetria: freshMetric.ultima_telemetria,
+              ultimo_error_critico: freshMetric.ultimo_error_critico,
+              // Mantener el status local si hay una actualización optimista pendiente
+              ...(hasPendingStatus ? {} : { status: freshMetric.status })
             };
           });
-          return mergedTotems;
         });
       } catch (err) {
-        console.warn("Error en el refresco automático de sincronización en tiempo real:", err);
+        console.warn("Error en el refresco automático de métricas en segundo plano:", err);
       }
-    }, 15_000); // 15 segundos - balance entre frescura y carga de red
+    }, 15_000); // Refresco cada 15 segundos
 
     return () => clearInterval(interval);
   }, []);

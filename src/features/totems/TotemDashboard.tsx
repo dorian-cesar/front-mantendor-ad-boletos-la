@@ -91,8 +91,12 @@ export function TotemDashboard() {
     video_ids: [] as string[]
   });
 
-  // Estado para el modal de estadísticas
-  const [statsTotem, setStatsTotem] = useState<any>(null);
+  // Estado para el modal de estadísticas (guardamos ID para mantener reactividad)
+  const [statsTotemId, setStatsTotemId] = useState<string | null>(null);
+  const statsTotem = useMemo(() => {
+    if (!statsTotemId) return null;
+    return totems.find(t => String(t.id) === String(statsTotemId)) || null;
+  }, [totems, statsTotemId]);
 
   const filteredTotems = totems.filter(t =>
     t.identificador?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -346,7 +350,7 @@ export function TotemDashboard() {
               allVideos={videos}
               availableVideos={availableVideos}
               empresas={empresas}
-              onStats={(t: any) => setStatsTotem(t)}
+              onStats={(t: any) => setStatsTotemId(t.id)}
             />
           ) : (
             <TotemGrid
@@ -365,7 +369,7 @@ export function TotemDashboard() {
               allVideos={videos}
               availableVideos={availableVideos}
               empresas={empresas}
-              onStats={(t: any) => setStatsTotem(t)}
+              onStats={(t: any) => setStatsTotemId(t.id)}
             />
           )}
         </div>
@@ -405,7 +409,7 @@ export function TotemDashboard() {
       <TotemStatsModal
         isOpen={!!statsTotem}
         totem={statsTotem}
-        onClose={() => setStatsTotem(null)}
+        onClose={() => setStatsTotemId(null)}
       />
 
       <ConfirmModal
