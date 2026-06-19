@@ -300,8 +300,10 @@ export function useTotems() {
     }
   };
 
-  // Efecto para auto-refrescar las métricas/telemetría en segundo plano cada 15 segundos
+  // Efecto para auto-refrescar las métricas/telemetría en segundo plano
+  // DESACTIVADO TEMPORALMENTE para evitar saturación de la capa gratuita de Netlify.
   useEffect(() => {
+    /*
     const interval = setInterval(async () => {
       try {
         setIsPolling(true);
@@ -346,6 +348,7 @@ export function useTotems() {
     }, 15_000); // Refresco cada 15 segundos
 
     return () => clearInterval(interval);
+    */
   }, []);
 
   return {
