@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { X, Loader2, CheckCircle2, XCircle, AlertTriangle, BarChart3, Activity, Ticket, TrendingUp, Cpu, Printer, MonitorPlay, ServerCrash, HardDrive, Database, LayoutDashboard } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { X, Loader2, CheckCircle2, XCircle, AlertTriangle, BarChart3, Activity, Ticket, TrendingUp, Cpu, Printer, MonitorPlay, ServerCrash, HardDrive, Database, LayoutDashboard, RefreshCw } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 
 interface TotemStatsModalProps {
@@ -41,6 +41,24 @@ export function TotemStatsModal({ isOpen, totem, isPolling, onClose }: TotemStat
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isFlashing, setIsFlashing] = useState(false);
+  const prevTelemetryRef = useRef<any>(null);
+
+  // Detectar actualizaciones de telemetría en tiempo real via WebSocket
+  useEffect(() => {
+    if (!totem?.ultima_telemetria) return;
+    const currentStr = JSON.stringify(totem.ultima_telemetria);
+    const prevStr = JSON.stringify(prevTelemetryRef.current);
+    if (currentStr !== prevStr) {
+      prevTelemetryRef.current = totem.ultima_telemetria;
+      setLastUpdated(new Date());
+      // Efecto de flash para indicar actualización
+      setIsFlashing(true);
+      const t = setTimeout(() => setIsFlashing(false), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [totem?.ultima_telemetria]);
 
   useEffect(() => {
     if (isOpen && totem) {
@@ -198,14 +216,30 @@ export function TotemStatsModal({ isOpen, totem, isPolling, onClose }: TotemStat
 
                   {/* Telemetría de Hardware */}
                   {totem.ultima_telemetria && (
-                    <div className="bg-white border border-slate-200 rounded-xl p-4 mt-4">
-                      <div className="flex items-center gap-2 mb-4">
+                    <div
+                      className={`border rounded-xl p-4 mt-4 transition-colors duration-700 ${
+                        isFlashing
+                          ? 'bg-emerald-50 border-emerald-200'
+                          : 'bg-white border-slate-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-4 flex-wrap">
                         <Cpu size={16} className="text-slate-500" />
                         <h4 className="text-xs font-black text-slate-700 uppercase tracking-widest">Telemetría de Hardware</h4>
-                        {isPolling && (
-                          <div className="flex items-center justify-center p-1 bg-emerald-50 text-emerald-500 rounded-full animate-pulse" title="Sincronizando métricas en segundo plano...">
+                        {isPolling ? (
+                          <div className="flex items-center justify-center p-1 bg-emerald-50 text-emerald-500 rounded-full animate-pulse" title="Sincronizando métricas...">
                             <Loader2 size={12} className="animate-spin" />
                           </div>
+                        ) : isFlashing ? (
+                          <div className="flex items-center gap-1 text-emerald-600 text-[9px] font-bold uppercase tracking-wider">
+                            <RefreshCw size={9} className="animate-spin" />
+                            Actualizado
+                          </div>
+                        ) : null}
+                        {lastUpdated && (
+                          <span className="ml-auto text-[9px] text-slate-400 font-medium">
+                            Últ. actualización: {lastUpdated.toLocaleTimeString()}
+                          </span>
                         )}
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
