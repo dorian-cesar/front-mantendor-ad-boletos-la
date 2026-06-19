@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from "react";
 import {
   Search, Plus, XCircle, Loader2, Edit, Save, X,
-  ArrowUpDown, ArrowUp, ArrowDown, ChevronDown
+  ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, RefreshCw
 } from "lucide-react";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -248,13 +248,23 @@ export function VideoDashboard() {
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 tracking-tight mb-1">Videos Subidos</h2>
               <p className="text-slate-500 text-sm">Listado de videos gestionados y procesados por el backend.</p>
             </div>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full sm:w-auto justify-center bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-black uppercase tracking-widest text-[11px] shadow-xl shadow-slate-900/20 transition-all flex items-center gap-2 active:scale-95"
-            >
-              <Plus size={16} strokeWidth={2.5} />
-              Subir Video
-            </button>
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <button
+                onClick={() => fetchVideos()}
+                disabled={loading}
+                className="w-full sm:w-auto justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl font-bold uppercase tracking-widest text-[11px] shadow-sm transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50"
+              >
+                <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+                Actualizar
+              </button>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full sm:w-auto justify-center bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-black uppercase tracking-widest text-[11px] shadow-xl shadow-slate-900/20 transition-all flex items-center gap-2 active:scale-95"
+              >
+                <Plus size={16} strokeWidth={2.5} />
+                Subir Video
+              </button>
+            </div>
           </div>
 
           {/* Filters */}

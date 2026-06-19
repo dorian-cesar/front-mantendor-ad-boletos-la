@@ -245,6 +245,14 @@ export function TotemDashboard() {
             </div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
               <button
+                onClick={() => fetchTotems()}
+                disabled={loading}
+                className="w-full sm:w-auto justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl font-bold uppercase tracking-widest text-[11px] shadow-sm transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50"
+              >
+                <RefreshCcw size={14} className={loading ? "animate-spin" : ""} />
+                Actualizar
+              </button>
+              <button
                 onClick={() => setIsCreateModalOpen(true)}
                 className="w-full sm:w-auto bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-semibold shadow-xl shadow-slate-900/20 transition-all flex items-center justify-center gap-2 transform active:scale-95 whitespace-nowrap"
               >

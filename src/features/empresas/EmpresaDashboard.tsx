@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Plus, Edit, Trash2, Hash, Save, X, Film, Loader2 } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Hash, Save, X, Film, Loader2, RefreshCw } from "lucide-react";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useEmpresas } from "./useEmpresas";
@@ -95,13 +95,23 @@ export function EmpresaDashboard() {
               <h2 className="text-3xl font-bold text-slate-800  tracking-tight mb-2 transition-colors">Empresas Registradas</h2>
               <p className="text-slate-500  text-sm transition-colors">Gestión de empresas colaboradoras, RUTs y contactos administrativos.</p>
             </div>
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="w-full sm:w-auto bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-semibold shadow-xl shadow-slate-900/20 transition-all flex items-center justify-center gap-2 transform active:scale-95 whitespace-nowrap"
-            >
-              <Plus size={18} strokeWidth={2.5} />
-              Nueva Empresa
-            </button>
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <button
+                onClick={() => fetchEmpresas()}
+                disabled={loadingEmpresas}
+                className="w-full sm:w-auto justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl font-bold uppercase tracking-widest text-[11px] shadow-sm transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50"
+              >
+                <RefreshCw size={14} className={loadingEmpresas ? "animate-spin" : ""} />
+                Actualizar
+              </button>
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="w-full sm:w-auto bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-semibold shadow-xl shadow-slate-900/20 transition-all flex items-center justify-center gap-2 transform active:scale-95 whitespace-nowrap"
+              >
+                <Plus size={18} strokeWidth={2.5} />
+                Nueva Empresa
+              </button>
+            </div>
           </div>
 
           <div className="bg-white  rounded-xl shadow-sm border border-slate-200  p-5 mb-6 transition-colors duration-300">
