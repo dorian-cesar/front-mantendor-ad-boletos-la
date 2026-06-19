@@ -306,6 +306,7 @@ export function useTotems() {
     /*
     const interval = setInterval(async () => {
       try {
+        console.log("[Polling] Refrescando métricas de tótems en segundo plano...");
         setIsPolling(true);
         const metricsData = await apiFetch("/totems/metrics");
         if (!Array.isArray(metricsData)) return;

@@ -30,6 +30,7 @@ export function useApiKeys() {
 
   useEffect(() => {
     const interval = setInterval(() => {
+      console.log("[Polling] Refrescando llaves API en segundo plano...");
       fetchApiKeys(true);
     }, 15000);
     return () => clearInterval(interval);

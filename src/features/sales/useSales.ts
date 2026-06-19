@@ -93,6 +93,7 @@ export function useSales() {
   // Auto-refresh every 15 seconds — silent so sorting/scrolling is not disrupted
   useEffect(() => {
     const interval = setInterval(() => {
+      console.log("[Polling] Refrescando ventas en segundo plano...");
       fetchSales(true);
     }, 15000);
     return () => clearInterval(interval);

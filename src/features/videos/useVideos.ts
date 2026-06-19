@@ -29,6 +29,7 @@ export function useVideos() {
 
   useEffect(() => {
     const interval = setInterval(() => {
+      console.log("[Polling] Refrescando videos en segundo plano...");
       fetchVideos(true);
     }, 15000);
     return () => clearInterval(interval);

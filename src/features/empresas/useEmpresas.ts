@@ -29,6 +29,7 @@ export function useEmpresas() {
 
   useEffect(() => {
     const interval = setInterval(() => {
+      console.log("[Polling] Refrescando empresas en segundo plano...");
       fetchEmpresas(true);
     }, 15000);
     return () => clearInterval(interval);
