@@ -73,6 +73,39 @@ export function TotemStatsModal({ isOpen, totem, isPolling, onClose }: TotemStat
     };
   }, [totem?.id]);
 
+  // Fallback: Micro-Polling HTTP (solo activo mientras el modal esté abierto)
+  useEffect(() => {
+    if (!isOpen || !totem?.id) return;
+
+    const fetchTelemetryFallback = async () => {
+      try {
+        const data = await apiFetch("/totems");
+        const totemList = Array.isArray(data) ? data : (data.totems || []);
+        const currentTotem = totemList.find((t: any) => String(t.id) === String(totem.id));
+        
+        if (currentTotem && currentTotem.ultima_telemetria) {
+          const currentStr = JSON.stringify(telemetry);
+          const newStr = JSON.stringify(currentTotem.ultima_telemetria);
+          
+          if (currentStr !== newStr) {
+            console.log("[TotemStatsModal] Nuevas métricas detectadas vía HTTP Polling (Fallback)");
+            setTelemetry(currentTotem.ultima_telemetria);
+            setLastUpdated(new Date());
+            setIsFlashing(true);
+            setTimeout(() => setIsFlashing(false), 1000);
+          }
+        }
+      } catch (err) {
+        console.warn("Error en fallback polling de telemetría:", err);
+      }
+    };
+
+    // Consultar cada 10 segundos para no saturar
+    const interval = setInterval(fetchTelemetryFallback, 10000);
+    
+    return () => clearInterval(interval);
+  }, [isOpen, totem?.id, telemetry]);
+
   useEffect(() => {
     if (isOpen && totem) {
       setLoading(true);
