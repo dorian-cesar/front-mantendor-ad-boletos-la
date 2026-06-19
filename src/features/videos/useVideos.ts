@@ -27,6 +27,8 @@ export function useVideos() {
     fetchVideos();
   }, []);
 
+  // Desactivado temporalmente para no saturar la red hasta que se implementen WebSockets en el backend.
+  /*
   useEffect(() => {
     const interval = setInterval(() => {
       console.log("[Polling] Refrescando videos en segundo plano...");
@@ -34,6 +36,7 @@ export function useVideos() {
     }, 15000);
     return () => clearInterval(interval);
   }, []);
+  */
 
   const getVideoById = async (id: string) => {
     try {

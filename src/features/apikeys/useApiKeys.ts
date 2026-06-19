@@ -28,6 +28,8 @@ export function useApiKeys() {
     fetchApiKeys();
   }, []);
 
+  // Desactivado temporalmente para no saturar la red hasta que se implementen WebSockets en el backend.
+  /*
   useEffect(() => {
     const interval = setInterval(() => {
       console.log("[Polling] Refrescando llaves API en segundo plano...");
@@ -35,6 +37,7 @@ export function useApiKeys() {
     }, 15000);
     return () => clearInterval(interval);
   }, []);
+  */
 
   const handleCreateKey = async (form: { description: string; tipo: "PLATAFORMA" | "TOTEM"; totem_id?: number | null }) => {
     try {

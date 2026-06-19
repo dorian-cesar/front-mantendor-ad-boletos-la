@@ -90,6 +90,8 @@ export function useSales() {
     fetchSales(false);
   }, [filters, fetchSales]);
 
+  // Desactivado temporalmente para no saturar la red hasta que se implementen WebSockets en el backend.
+  /*
   // Auto-refresh every 15 seconds — silent so sorting/scrolling is not disrupted
   useEffect(() => {
     const interval = setInterval(() => {
@@ -98,6 +100,7 @@ export function useSales() {
     }, 15000);
     return () => clearInterval(interval);
   }, [fetchSales]);
+  */
 
   return {
     sales,
