@@ -16,6 +16,7 @@ export function getSocket(): Socket {
       auth: {
         token: token ? `Bearer ${token}` : undefined,
       },
+      transports: ["polling"],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 2000,
