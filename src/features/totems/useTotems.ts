@@ -353,6 +353,7 @@ export function useTotems() {
 
     // D. Actualización de métricas hardware (cada ~30s por tótem activo)
     const onMetricsUpdated = (data: { totemId: string | number; metrics: any }) => {
+      console.log(`[WS] admin:metrics_updated recibido para totem ${data.totemId}:`, data.metrics);
       setIsPolling(true);
       setTotems(current =>
         current.map(t =>
