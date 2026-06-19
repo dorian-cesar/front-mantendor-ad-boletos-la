@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { apiFetch } from "@/lib/api";
+import { getSocket, disconnectSocket } from "@/lib/socketClient";
 
 export function useTotems() {
   const [totems, setTotems] = useState<any[]>([]);
@@ -300,57 +301,84 @@ export function useTotems() {
     }
   };
 
-  // Efecto para auto-refrescar las métricas/telemetría en segundo plano
-  // DESACTIVADO TEMPORALMENTE para evitar saturación de la capa gratuita de Netlify.
+  // Suscripción a eventos WebSocket en tiempo real
+  // Reemplaza el polling HTTP por eventos push del backend.
   useEffect(() => {
-    /*
-    const interval = setInterval(async () => {
-      try {
-        console.log("[Polling] Refrescando métricas de tótems en segundo plano...");
-        setIsPolling(true);
-        const metricsData = await apiFetch("/totems/metrics");
-        if (!Array.isArray(metricsData)) return;
+    const socket = getSocket();
 
-        const PENDING_TTL = 10_000;
-        setTotems(currentTotems => {
-          return currentTotems.map(current => {
-            const freshMetric = metricsData.find(m => String(m.id) === String(current.id));
-            if (!freshMetric) return current;
+    // A. Datos iniciales de métricas: actualiza campos de telemetría sobre los tótems ya cargados
+    const onInitialMetrics = (totemsArray: any[]) => {
+      if (!Array.isArray(totemsArray)) return;
+      console.log("[WS] admin:initial_metrics recibido:", totemsArray.length, "tótems");
+      setTotems(current =>
+        current.map(t => {
+          const fresh = totemsArray.find(m => String(m.id) === String(t.id));
+          if (!fresh) return t;
+          return {
+            ...t,
+            is_online: fresh.is_online,
+            status: fresh.status ?? t.status,
+            ultimo_login: fresh.last_ping || fresh.ultimo_login || t.ultimo_login,
+            ultima_telemetria: fresh.ultima_telemetria || t.ultima_telemetria,
+            ultimo_error_critico: fresh.ultimo_error_critico ?? t.ultimo_error_critico,
+          };
+        })
+      );
+      setIsPolling(false);
+    };
 
-            const pendingTs = pendingStatusRef.current.get(String(current.id));
-            const hasPendingStatus = pendingTs && (Date.now() - pendingTs < PENDING_TTL);
-            if (!hasPendingStatus) {
-              pendingStatusRef.current.delete(String(current.id));
-            }
+    // B. Tótem se conectó
+    const onTotemOnline = (data: { totemId: string | number }) => {
+      console.log(`[WS] admin:totem_online → Tótem ${data.totemId} ONLINE`);
+      setTotems(current =>
+        current.map(t =>
+          String(t.id) === String(data.totemId)
+            ? { ...t, is_online: true }
+            : t
+        )
+      );
+    };
 
-            return {
-              ...current,
-              is_online: freshMetric.is_online,
-              ultimo_login: freshMetric.last_ping || freshMetric.ultimo_login || current.ultimo_login,
-              ultima_telemetria: freshMetric.ultima_telemetria,
-              ultimo_error_critico: freshMetric.ultimo_error_critico,
-              // Mantener el status local si hay una actualización optimista pendiente
-              ...(hasPendingStatus ? {} : { status: freshMetric.status })
-            };
-          });
-        });
-      } catch (err: any) {
-        if (err.message && err.message.includes("404")) {
-          // Silencioso: El backend posiblemente aún no implementa esta ruta o hay un conflicto de rutas
-        } else if (err.message && err.message.includes("Totem no encontrado")) {
-          // Silencioso: Conflicto de rutas en el backend (interpreta 'metrics' como ID)
-        } else {
-          console.warn("Error en el refresco automático de métricas en segundo plano:", err);
-        }
-      } finally {
-        // Un pequeño retraso para evitar parpadeos bruscos en la UI
-        setTimeout(() => setIsPolling(false), 800);
-      }
-    }, 15_000); // Refresco cada 15 segundos
+    // C. Tótem se desconectó
+    const onTotemOffline = (data: { totemId: string | number }) => {
+      console.log(`[WS] admin:totem_offline → Tótem ${data.totemId} OFFLINE`);
+      setTotems(current =>
+        current.map(t =>
+          String(t.id) === String(data.totemId)
+            ? { ...t, is_online: false }
+            : t
+        )
+      );
+    };
 
-    return () => clearInterval(interval);
-    */
+    // D. Actualización de métricas hardware (cada ~30s por tótem activo)
+    const onMetricsUpdated = (data: { totemId: string | number; metrics: any }) => {
+      setIsPolling(true);
+      setTotems(current =>
+        current.map(t =>
+          String(t.id) === String(data.totemId)
+            ? { ...t, ultima_telemetria: data.metrics }
+            : t
+        )
+      );
+      // Quitar el indicador tras un momento para evitar parpadeos
+      setTimeout(() => setIsPolling(false), 800);
+    };
+
+    socket.on("admin:initial_metrics", onInitialMetrics);
+    socket.on("admin:totem_online", onTotemOnline);
+    socket.on("admin:totem_offline", onTotemOffline);
+    socket.on("admin:metrics_updated", onMetricsUpdated);
+
+    return () => {
+      // Limpiar listeners pero mantener el socket vivo (es un singleton)
+      socket.off("admin:initial_metrics", onInitialMetrics);
+      socket.off("admin:totem_online", onTotemOnline);
+      socket.off("admin:totem_offline", onTotemOffline);
+      socket.off("admin:metrics_updated", onMetricsUpdated);
+    };
   }, []);
+
 
   return {
     totems,

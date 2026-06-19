@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { disconnectSocket } from "@/lib/socketClient";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -13,12 +14,15 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     // Si estamos en la página de login o en una ruta pública como la API,
     // no hacemos la validación de token y dejamos pasar.
     if (pathname === "/login" || pathname?.startsWith("/api")) {
+      // Si llegamos al login, desconectamos el socket por si quedó activo.
+      disconnectSocket();
       setIsAuthenticated(true);
       return;
     }
 
     const token = localStorage.getItem("token");
     if (!token) {
+      disconnectSocket();
       router.replace("/login");
     } else {
       setIsAuthenticated(true);
@@ -36,3 +40,4 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
+
