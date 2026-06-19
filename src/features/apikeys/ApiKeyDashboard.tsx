@@ -97,7 +97,7 @@ export function ApiKeyDashboard() {
                 disabled={loading}
                 className="w-full sm:w-auto justify-center flex items-center gap-2.5 px-6 py-3.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-2xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-95 shadow-sm whitespace-nowrap disabled:opacity-50"
               >
-                <RefreshCw size={16} className={loading ? "animate-spin" : ""} strokeWidth={2.5} />
+                <RefreshCcw size={16} className={loading ? "animate-spin" : ""} strokeWidth={2.5} />
                 Actualizar
               </button>
               <button

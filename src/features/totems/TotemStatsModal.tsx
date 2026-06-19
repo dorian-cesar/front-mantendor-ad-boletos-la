@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { X, Loader2, CheckCircle2, XCircle, AlertTriangle, BarChart3, Activity, Ticket, TrendingUp, Cpu, Printer, MonitorPlay, ServerCrash, HardDrive, Database, LayoutDashboard, RefreshCw } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { getSocket } from "@/lib/socketClient";
 
 interface TotemStatsModalProps {
   isOpen: boolean;
@@ -43,22 +44,34 @@ export function TotemStatsModal({ isOpen, totem, isPolling, onClose }: TotemStat
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isFlashing, setIsFlashing] = useState(false);
-  const prevTelemetryRef = useRef<any>(null);
+  const [telemetry, setTelemetry] = useState<any>(totem?.ultima_telemetria || null);
 
-  // Detectar actualizaciones de telemetría en tiempo real via WebSocket
+  // Escuchar WebSocket directamente en el componente para actualización en tiempo real
   useEffect(() => {
-    if (!totem?.ultima_telemetria) return;
-    const currentStr = JSON.stringify(totem.ultima_telemetria);
-    const prevStr = JSON.stringify(prevTelemetryRef.current);
-    if (currentStr !== prevStr) {
-      prevTelemetryRef.current = totem.ultima_telemetria;
-      setLastUpdated(new Date());
-      // Efecto de flash para indicar actualización
-      setIsFlashing(true);
-      const t = setTimeout(() => setIsFlashing(false), 1000);
-      return () => clearTimeout(t);
+    if (!totem) return;
+
+    if (totem.ultima_telemetria && !telemetry) {
+      setTelemetry(totem.ultima_telemetria);
     }
-  }, [totem?.ultima_telemetria]);
+
+    const socket = getSocket();
+
+    const onMetricsUpdated = (data: { totemId: string | number; metrics: any }) => {
+      if (String(data.totemId) === String(totem.id)) {
+        console.log("[TotemStatsModal] Nuevas métricas recibidas vía WS", data.metrics);
+        setTelemetry(data.metrics);
+        setLastUpdated(new Date());
+        setIsFlashing(true);
+        setTimeout(() => setIsFlashing(false), 1000);
+      }
+    };
+
+    socket.on("admin:metrics_updated", onMetricsUpdated);
+
+    return () => {
+      socket.off("admin:metrics_updated", onMetricsUpdated);
+    };
+  }, [totem?.id]);
 
   useEffect(() => {
     if (isOpen && totem) {
@@ -215,7 +228,7 @@ export function TotemStatsModal({ isOpen, totem, isPolling, onClose }: TotemStat
                   </div>
 
                   {/* Telemetría de Hardware */}
-                  {totem.ultima_telemetria && (
+                  {telemetry && (
                     <div
                       className={`border rounded-xl p-4 mt-4 transition-colors duration-700 ${
                         isFlashing
@@ -247,61 +260,61 @@ export function TotemStatsModal({ isOpen, totem, isPolling, onClose }: TotemStat
                           <Cpu size={18} className="text-slate-400 mb-2" />
                           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">CPU Uso</span>
                           <span className="text-sm font-black text-slate-800">
-                            {totem.ultima_telemetria.hardware?.cpu_usage_percent !== undefined ? `${totem.ultima_telemetria.hardware.cpu_usage_percent}%` : 'N/A'}
+                            {telemetry.hardware?.cpu_usage_percent !== undefined ? `${telemetry.hardware.cpu_usage_percent}%` : 'N/A'}
                           </span>
                         </div>
                         <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
                           <Cpu size={18} className="text-slate-400 mb-2" />
                           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">CPU Temp</span>
                           <span className="text-sm font-black text-slate-800">
-                            {totem.ultima_telemetria.hardware?.cpu_temperature_celsius !== undefined ? `${totem.ultima_telemetria.hardware.cpu_temperature_celsius}°C` : 'N/A'}
+                            {telemetry.hardware?.cpu_temperature_celsius !== undefined ? `${telemetry.hardware.cpu_temperature_celsius}°C` : 'N/A'}
                           </span>
                         </div>
                         <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
                           <Database size={18} className="text-slate-400 mb-2" />
                           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">RAM Libre</span>
                           <span className="text-xs font-black text-slate-800">
-                            {totem.ultima_telemetria.hardware?.ram_available_mb !== undefined && totem.ultima_telemetria.hardware?.ram_total_mb !== undefined ? `${Math.round((totem.ultima_telemetria.hardware.ram_available_mb / totem.ultima_telemetria.hardware.ram_total_mb) * 100)}% (${totem.ultima_telemetria.hardware.ram_available_mb}MB)` : 'N/A'}
+                            {telemetry.hardware?.ram_available_mb !== undefined && telemetry.hardware?.ram_total_mb !== undefined ? `${Math.round((telemetry.hardware.ram_available_mb / telemetry.hardware.ram_total_mb) * 100)}% (${telemetry.hardware.ram_available_mb}MB)` : 'N/A'}
                           </span>
                         </div>
                         <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
                           <HardDrive size={18} className="text-slate-400 mb-2" />
                           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Disco Libre</span>
                           <span className="text-sm font-black text-slate-800">
-                            {totem.ultima_telemetria.hardware?.disk_free_percent !== undefined ? `${totem.ultima_telemetria.hardware.disk_free_percent}%` : 'N/A'}
+                            {telemetry.hardware?.disk_free_percent !== undefined ? `${telemetry.hardware.disk_free_percent}%` : 'N/A'}
                           </span>
                         </div>
                         <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
                           <Printer size={18} className="text-slate-400 mb-2" />
                           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Impresora</span>
                           <div className="flex flex-col">
-                            <span className={`text-sm font-black ${totem.ultima_telemetria.perifericos?.printer_connected === false ? 'text-red-500' : 'text-emerald-600'}`}>
-                              {totem.ultima_telemetria.perifericos?.printer_connected === false ? 'Desconectada' : (totem.ultima_telemetria.perifericos?.printer_connected ? 'Conectada' : 'N/A')}
+                            <span className={`text-sm font-black ${telemetry.perifericos?.printer_connected === false ? 'text-red-500' : 'text-emerald-600'}`}>
+                              {telemetry.perifericos?.printer_connected === false ? 'Desconectada' : (telemetry.perifericos?.printer_connected ? 'Conectada' : 'N/A')}
                             </span>
-                            {totem.ultima_telemetria.perifericos?.printer_status && (
-                              <span className="text-[9px] text-slate-500 mt-0.5">{totem.ultima_telemetria.perifericos.printer_status}</span>
+                            {telemetry.perifericos?.printer_status && (
+                              <span className="text-[9px] text-slate-500 mt-0.5">{telemetry.perifericos.printer_status}</span>
                             )}
                           </div>
                         </div>
                         <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
                           <AlertTriangle size={18} className="text-slate-400 mb-2" />
                           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Error Impres.</span>
-                          <span className={`text-[10px] font-medium leading-tight ${totem.ultima_telemetria.perifericos?.printer_error_description ? 'text-red-500' : 'text-slate-400'}`}>
-                            {totem.ultima_telemetria.perifericos?.printer_error_description || 'Ninguno'}
+                          <span className={`text-[10px] font-medium leading-tight ${telemetry.perifericos?.printer_error_description ? 'text-red-500' : 'text-slate-400'}`}>
+                            {telemetry.perifericos?.printer_error_description || 'Ninguno'}
                           </span>
                         </div>
                         <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
                           <MonitorPlay size={18} className="text-slate-400 mb-2" />
                           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">AnyDesk</span>
-                          <span className={`text-sm font-black ${totem.ultima_telemetria.servicios_locales?.anydesk_running === false ? 'text-red-500' : 'text-emerald-600'}`}>
-                            {totem.ultima_telemetria.servicios_locales?.anydesk_running === false ? 'Detenido' : (totem.ultima_telemetria.servicios_locales?.anydesk_running ? 'Corriendo' : 'N/A')}
+                          <span className={`text-sm font-black ${telemetry.servicios_locales?.anydesk_running === false ? 'text-red-500' : 'text-emerald-600'}`}>
+                            {telemetry.servicios_locales?.anydesk_running === false ? 'Detenido' : (telemetry.servicios_locales?.anydesk_running ? 'Corriendo' : 'N/A')}
                           </span>
                         </div>
                         <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 flex flex-col items-center text-center">
                           <LayoutDashboard size={18} className="text-slate-400 mb-2" />
                           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Kiosko App</span>
-                          <span className={`text-sm font-black ${totem.ultima_telemetria.servicios_locales?.kiosk_app_running === false ? 'text-red-500' : 'text-emerald-600'}`}>
-                            {totem.ultima_telemetria.servicios_locales?.kiosk_app_running === false ? 'Detenido' : (totem.ultima_telemetria.servicios_locales?.kiosk_app_running ? 'Corriendo' : 'N/A')}
+                          <span className={`text-sm font-black ${telemetry.servicios_locales?.kiosk_app_running === false ? 'text-red-500' : 'text-emerald-600'}`}>
+                            {telemetry.servicios_locales?.kiosk_app_running === false ? 'Detenido' : (telemetry.servicios_locales?.kiosk_app_running ? 'Corriendo' : 'N/A')}
                           </span>
                         </div>
                       </div>
