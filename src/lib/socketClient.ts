@@ -1,6 +1,6 @@
 import { io, Socket } from "socket.io-client";
 
-const BACKEND_URL = "https://backend-boletos-publicidad.dev-wit.com";
+const BACKEND_URL = process.env.NEXT_PUBLIC_WS_URL;
 
 let socket: Socket | null = null;
 
