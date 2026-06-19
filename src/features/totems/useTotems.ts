@@ -371,12 +371,19 @@ export function useTotems() {
     socket.on("admin:totem_offline", onTotemOffline);
     socket.on("admin:metrics_updated", onMetricsUpdated);
 
+    // 🔍 DIAGNÓSTICO: Captura TODOS los eventos del backend para depuración
+    const onAnyEvent = (eventName: string, ...args: any[]) => {
+      console.log(`🔍 [WS:DEBUG] Evento recibido → "${eventName}"`, args);
+    };
+    socket.onAny(onAnyEvent);
+
     return () => {
       // Limpiar listeners pero mantener el socket vivo (es un singleton)
       socket.off("admin:initial_metrics", onInitialMetrics);
       socket.off("admin:totem_online", onTotemOnline);
       socket.off("admin:totem_offline", onTotemOffline);
       socket.off("admin:metrics_updated", onMetricsUpdated);
+      socket.offAny(onAnyEvent);
     };
   }, []);
 
