@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { apiFetch } from "@/lib/api";
+import { getSocket } from "@/lib/socketClient";
 
 export function useApiKeys() {
   const [apiKeys, setApiKeys] = useState<any[]>([]);
@@ -28,16 +29,20 @@ export function useApiKeys() {
     fetchApiKeys();
   }, []);
 
-  // Desactivado temporalmente para no saturar la red hasta que se implementen WebSockets en el backend.
-  /*
+  // Escuchar actualizaciones en tiempo real vía WebSockets
   useEffect(() => {
-    const interval = setInterval(() => {
-      console.log("[Polling] Refrescando llaves API en segundo plano...");
-      fetchApiKeys(true);
-    }, 15000);
-    return () => clearInterval(interval);
+    const socket = getSocket();
+    const handleApiKeysUpdated = (newKeys: any[]) => {
+      console.log("🔍 [WS:DEBUG] Evento recibido → 'admin:apikeys_updated'", newKeys);
+      setApiKeys(Array.isArray(newKeys) ? newKeys : []);
+    };
+
+    socket.on("admin:apikeys_updated", handleApiKeysUpdated);
+
+    return () => {
+      socket.off("admin:apikeys_updated", handleApiKeysUpdated);
+    };
   }, []);
-  */
 
   const handleCreateKey = async (form: { description: string; tipo: "PLATAFORMA" | "TOTEM"; totem_id?: number | null }) => {
     try {

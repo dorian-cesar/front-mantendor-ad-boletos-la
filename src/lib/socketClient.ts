@@ -11,7 +11,7 @@ let socket: Socket | null = null;
 export function getSocket(): Socket {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-  if (!socket || !socket.connected) {
+  if (!socket) {
     socket = io(BACKEND_URL, {
       auth: {
         token: token, // Backend might expect raw token
@@ -20,7 +20,7 @@ export function getSocket(): Socket {
       extraHeaders: {
         Authorization: token ? `Bearer ${token}` : "",
       },
-      transports: ["polling", "websocket"], // Fallback to polling first to allow extraHeaders to be sent
+      transports: ["websocket"], // FORZAR WEBSOCKET para evitar fallos de polling POST con Apache
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 2000,

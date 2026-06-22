@@ -119,8 +119,6 @@ export function useTotems(options?: UseTotemsOptions) {
 
   useEffect(() => {
     fetchTotems();
-    const intervalId = setInterval(() => fetchTotemsBackground(), 10000);
-    return () => clearInterval(intervalId);
   }, []);
 
   const fetchPlaylist = async (totemId: string): Promise<any[]> => {
@@ -381,12 +379,19 @@ export function useTotems(options?: UseTotemsOptions) {
       );
     };
 
+    const handleDataUpdated = () => {
+      console.log("🔍 [WS:DEBUG] Evento recibido → actualizando datos de tótems silenciosamente...");
+      fetchTotemsBackground();
+    };
+
     socket.on("admin:initial_metrics", onInitialMetrics);
     socket.on("admin:totem_online", onTotemOnline);
     socket.on("admin:totem_offline", onTotemOffline);
     socket.on("admin:metrics_updated", onMetricsUpdated);
     socket.on("totem_status", onTotemStatus);
     socket.on("admin:totem_status", onTotemStatus);
+    socket.on("admin:ventas_updated", handleDataUpdated);
+    socket.on("admin:totems_updated", handleDataUpdated);
 
     return () => {
       socket.off("admin:initial_metrics", onInitialMetrics);
@@ -395,6 +400,8 @@ export function useTotems(options?: UseTotemsOptions) {
       socket.off("admin:metrics_updated", onMetricsUpdated);
       socket.off("totem_status", onTotemStatus);
       socket.off("admin:totem_status", onTotemStatus);
+      socket.off("admin:ventas_updated", handleDataUpdated);
+      socket.off("admin:totems_updated", handleDataUpdated);
     };
   }, [options]);
 

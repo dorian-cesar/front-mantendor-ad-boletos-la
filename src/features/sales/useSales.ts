@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { apiFetch } from "@/lib/api";
+import { getSocket } from "@/lib/socketClient";
 
 export interface SalesSummary {
   total_ventas: number;
@@ -90,17 +91,20 @@ export function useSales() {
     fetchSales(false);
   }, [filters, fetchSales]);
 
-  // Desactivado temporalmente para no saturar la red hasta que se implementen WebSockets en el backend.
-  /*
-  // Auto-refresh every 15 seconds — silent so sorting/scrolling is not disrupted
+  // Escuchar actualizaciones en tiempo real vía WebSockets
   useEffect(() => {
-    const interval = setInterval(() => {
-      console.log("[Polling] Refrescando ventas en segundo plano...");
+    const socket = getSocket();
+    const handleVentasUpdated = () => {
+      console.log("🔍 [WS:DEBUG] Evento recibido → 'admin:ventas_updated', refrescando silenciosamente...");
       fetchSales(true);
-    }, 15000);
-    return () => clearInterval(interval);
+    };
+
+    socket.on("admin:ventas_updated", handleVentasUpdated);
+
+    return () => {
+      socket.off("admin:ventas_updated", handleVentasUpdated);
+    };
   }, [fetchSales]);
-  */
 
   return {
     sales,
