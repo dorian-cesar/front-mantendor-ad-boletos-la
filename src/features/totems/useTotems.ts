@@ -88,8 +88,37 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
     }
   };
 
+  const fetchTotemsBackground = async () => {
+    try {
+      // Mismo proceso pero SIN setLoading(true) para no bloquear la UI con spinners
+      const totemsWithData = await loadTotemsData();
+      setTotems(prev => {
+        // Fusionar datos respetando los updates locales optimistas (como el toggle de estado)
+        return totemsWithData.map(newT => {
+          const pendingTime = pendingStatusRef.current.get(String(newT.id));
+          if (pendingTime && Date.now() - pendingTime < 10000) {
+            const oldT = prev.find(t => String(t.id) === String(newT.id));
+            if (oldT) return { ...newT, status: oldT.status };
+          } else if (pendingTime) {
+            pendingStatusRef.current.delete(String(newT.id));
+          }
+          return newT;
+        });
+      });
+    } catch (err) {
+      console.warn("Background polling for totems failed", err);
+    }
+  };
+
   useEffect(() => {
     fetchTotems();
+    
+    // Polling en segundo plano cada 10 segundos como respaldo a los WebSockets
+    const intervalId = setInterval(() => {
+      fetchTotemsBackground();
+    }, 10000);
+    
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleSave = async (id: string, editForm: any) => {
