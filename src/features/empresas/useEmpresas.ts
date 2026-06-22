@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { apiFetch } from "@/lib/api";
+import { getSocket } from "@/lib/socketClient";
 
 export function useEmpresas() {
   const [empresas, setEmpresas] = useState<any[]>([]);
@@ -25,6 +26,21 @@ export function useEmpresas() {
 
   useEffect(() => {
     fetchEmpresas();
+  }, []);
+
+  // Escuchar actualizaciones en tiempo real vía WebSockets
+  useEffect(() => {
+    const socket = getSocket();
+    const handleEmpresasUpdated = (newEmpresas: any[]) => {
+      console.log("🔍 [WS:DEBUG] Evento recibido → 'admin:empresas_updated'", newEmpresas);
+      setEmpresas(Array.isArray(newEmpresas) ? newEmpresas : []);
+    };
+
+    socket.on("admin:empresas_updated", handleEmpresasUpdated);
+
+    return () => {
+      socket.off("admin:empresas_updated", handleEmpresasUpdated);
+    };
   }, []);
 
   // Desactivado temporalmente para no saturar la red hasta que se implementen WebSockets en el backend.

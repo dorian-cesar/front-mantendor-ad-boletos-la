@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { apiFetch } from "@/lib/api";
+import { getSocket } from "@/lib/socketClient";
 
 export function useVideos() {
   const [videos, setVideos] = useState<any[]>([]);
@@ -25,6 +26,21 @@ export function useVideos() {
 
   useEffect(() => {
     fetchVideos();
+  }, []);
+
+  // Escuchar actualizaciones en tiempo real vía WebSockets
+  useEffect(() => {
+    const socket = getSocket();
+    const handleVideosUpdated = (newVideos: any[]) => {
+      console.log("🔍 [WS:DEBUG] Evento recibido → 'admin:videos_updated'", newVideos);
+      setVideos(Array.isArray(newVideos) ? newVideos : []);
+    };
+
+    socket.on("admin:videos_updated", handleVideosUpdated);
+
+    return () => {
+      socket.off("admin:videos_updated", handleVideosUpdated);
+    };
   }, []);
 
   // Desactivado temporalmente para no saturar la red hasta que se implementen WebSockets en el backend.
