@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Edit, Power, ChevronDown, ChevronUp, Hash, DollarSign, Terminal, Loader2, Film, Video, Building, Save, BarChart3, Ticket, AlertTriangle } from "lucide-react";
+import { Edit, Power, ChevronDown, ChevronUp, Hash, DollarSign, Terminal, Loader2, Film, Video, Building, Save, BarChart3, Ticket, AlertTriangle, Cpu, Database } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { VideosListDisplay } from "./VideosListDisplay";
 import { VideoSelector } from "./VideoSelector";
@@ -78,6 +78,7 @@ export function TotemList({
             <th className="py-3 px-5 font-semibold w-12 text-center"></th>
             <th className="py-3 px-5 font-semibold w-24">ID</th>
             <th className="py-3 px-5 font-semibold">TERMINAL / UBICACIÓN</th>
+            <th className="py-3 px-5 font-semibold w-44 text-center">TELEMETRÍA (HW)</th>
             <th className="py-3 px-5 font-semibold w-24 text-center text-[10px] uppercase leading-tight">Bloquear<br/>Protector</th>
             <th className="py-3 px-5 font-semibold w-40 text-center">CONEXIÓN</th>
             <th className="py-3 px-5 font-semibold w-40 text-right pr-6">TICKETS HOY</th>
@@ -115,6 +116,29 @@ export function TotemList({
                     <span className="font-bold text-slate-800 ">{t.identificador}</span>
                     <span className="text-[10px] text-slate-400  font-bold uppercase">{t.direccion}</span>
                   </div>
+                </td>
+                <td className="py-3.5 px-5">
+                  {t.ultima_telemetria ? (
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="flex items-center justify-center gap-2.5 text-[10px] font-bold">
+                        <div className="flex items-center gap-1 text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded shadow-sm" title="Uso de CPU">
+                          <Cpu size={12} className="text-slate-400" /> 
+                          {t.ultima_telemetria.hardware?.cpu_usage_percent !== undefined ? `${t.ultima_telemetria.hardware.cpu_usage_percent}%` : '--'}
+                        </div>
+                        <div className="flex items-center gap-1 text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded shadow-sm" title="Uso de RAM">
+                          <Database size={12} className="text-slate-400" />
+                          {t.ultima_telemetria.hardware?.ram_total_mb && t.ultima_telemetria.hardware?.ram_available_mb 
+                            ? `${Math.round(((t.ultima_telemetria.hardware.ram_total_mb - t.ultima_telemetria.hardware.ram_available_mb) / t.ultima_telemetria.hardware.ram_total_mb) * 100)}%` 
+                            : '--'}
+                        </div>
+                      </div>
+                      <div className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-sm w-full text-center tracking-wider ${t.ultima_telemetria.perifericos?.printer_connected === false ? 'bg-red-50 text-red-500 border border-red-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
+                        {t.ultima_telemetria.perifericos?.printer_connected === false ? '⚠️ Impresora Error' : '🖨️ Impresora OK'}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-[10px] text-slate-400 font-medium text-center italic px-3 py-1 bg-slate-50 rounded-full border border-slate-100">Sin datos</div>
+                  )}
                 </td>
                 <td className="py-3.5 px-5">
                   <div className="flex justify-center items-center">
@@ -176,7 +200,7 @@ export function TotemList({
               </tr>
               {expandedId === t.id && (
                 <tr className="bg-slate-50/50 border-b border-slate-200">
-                  <td colSpan={9} className="p-0">
+                  <td colSpan={10} className="p-0">
                     {editingId === t.id ? (
                       <div className="px-4 md:px-16 py-8 animate-in slide-in-from-top-2 duration-200 fade-in">
                         <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-4 md:p-6 max-w-4xl mx-auto flex flex-col gap-6">
