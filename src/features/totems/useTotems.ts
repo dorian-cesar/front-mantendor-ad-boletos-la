@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { apiFetch } from "@/lib/api";
 import { getSocket, disconnectSocket } from "@/lib/socketClient";
 
-export function useTotems() {
+export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'info'|'warning') => void) {
   const [totems, setTotems] = useState<any[]>([]);
   const [resumenGlobal, setResumenGlobal] = useState<any>({ total_transacciones: 0, boletos_vendidos: 0 });
   const [loading, setLoading] = useState(true);
@@ -328,37 +328,48 @@ export function useTotems() {
     };
 
     // B. Tótem se conectó
-    const onTotemOnline = (data: { totemId: string | number }) => {
-      console.log(`[WS] admin:totem_online → Tótem ${data.totemId} ONLINE`);
-      setTotems(current =>
-        current.map(t =>
-          String(t.id) === String(data.totemId)
-            ? { ...t, is_online: true }
-            : t
-        )
-      );
+    const onTotemOnline = (data: any) => {
+      const tId = data?.totemId || data?.totem_id || data?.id;
+      console.log(`[WS] admin:totem_online → Tótem ${tId} ONLINE`);
+      setTotems(current => {
+        return current.map(t => {
+          if (String(t.id) === String(tId)) {
+            if (!t.is_online && showToast) {
+              showToast(`Tótem ${t.identificador || tId} se ha conectado`, "success");
+            }
+            return { ...t, is_online: true };
+          }
+          return t;
+        });
+      });
     };
 
     // C. Tótem se desconectó
-    const onTotemOffline = (data: { totemId: string | number }) => {
-      console.log(`[WS] admin:totem_offline → Tótem ${data.totemId} OFFLINE`);
-      setTotems(current =>
-        current.map(t =>
-          String(t.id) === String(data.totemId)
-            ? { ...t, is_online: false }
-            : t
-        )
-      );
+    const onTotemOffline = (data: any) => {
+      const tId = data?.totemId || data?.totem_id || data?.id;
+      console.log(`[WS] admin:totem_offline → Tótem ${tId} OFFLINE`);
+      setTotems(current => {
+        return current.map(t => {
+          if (String(t.id) === String(tId)) {
+            if (t.is_online && showToast) {
+              showToast(`Tótem ${t.identificador || tId} se ha desconectado`, "error");
+            }
+            return { ...t, is_online: false };
+          }
+          return t;
+        });
+      });
     };
 
     // D. Actualización de métricas hardware (cada ~30s por tótem activo)
-    const onMetricsUpdated = (data: { totemId: string | number; metrics: any }) => {
-      console.log(`[WS] admin:metrics_updated recibido para totem ${data.totemId}:`, data.metrics);
+    const onMetricsUpdated = (data: any) => {
+      const tId = data?.totemId || data?.totem_id || data?.id;
+      console.log(`[WS] admin:metrics_updated recibido para totem ${tId}:`, data?.metrics || data);
       setIsPolling(true);
       setTotems(current =>
         current.map(t =>
-          String(t.id) === String(data.totemId)
-            ? { ...t, ultima_telemetria: data.metrics }
+          String(t.id) === String(tId)
+            ? { ...t, ultima_telemetria: data?.metrics || data }
             : t
         )
       );
@@ -366,10 +377,26 @@ export function useTotems() {
       setTimeout(() => setIsPolling(false), 800);
     };
 
+    // E. Alternativa general de status (por si el backend envía uno genérico)
+    const onTotemStatus = (data: any) => {
+      const tId = data?.totemId || data?.totem_id || data?.id;
+      const isOnline = data?.is_online !== undefined ? data.is_online : data?.status === 'online';
+      console.log(`[WS] totem_status → Tótem ${tId} ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
+      setTotems(current =>
+        current.map(t =>
+          String(t.id) === String(tId)
+            ? { ...t, is_online: isOnline }
+            : t
+        )
+      );
+    };
+
     socket.on("admin:initial_metrics", onInitialMetrics);
     socket.on("admin:totem_online", onTotemOnline);
     socket.on("admin:totem_offline", onTotemOffline);
     socket.on("admin:metrics_updated", onMetricsUpdated);
+    socket.on("totem_status", onTotemStatus);
+    socket.on("admin:totem_status", onTotemStatus);
 
     // 🔍 DIAGNÓSTICO: Captura TODOS los eventos del backend para depuración
     const onAnyEvent = (eventName: string, ...args: any[]) => {

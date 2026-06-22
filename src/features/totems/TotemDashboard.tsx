@@ -42,7 +42,7 @@ export function TotemDashboard() {
     handleDelete,
     toggleBlockScreenSaver,
     toggleStatus
-  } = useTotems();
+  } = useTotems(showToast);
 
   const { videos, loading: videosLoading, error: videosError, fetchVideos } = useVideos();
   const { empresas, loading: empresasLoading, error: empresasError, fetchEmpresas } = useEmpresas();
