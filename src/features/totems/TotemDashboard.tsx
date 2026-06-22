@@ -6,12 +6,15 @@ import { Sidebar } from "@/components/ui/Sidebar";
 import { useTotems } from "./useTotems";
 import { useVideos } from "@/features/videos/useVideos";
 import { useEmpresas } from "../empresas/useEmpresas";
+import dynamic from "next/dynamic";
 import { TotemList } from "./TotemList";
 import { TotemGrid } from "./TotemGrid";
-import { TotemModal } from "./TotemModal";
-import { CompanyVideoPickerModal } from "./CompanyVideoPickerModal";
-import { TotemStatsModal } from "./TotemStatsModal";
-import { ConfirmModal } from "@/components/ui/ConfirmModal";
+
+// Lazy Load de Modales para reducir el tamaño del bundle inicial (Performance Optimization)
+const TotemModal = dynamic(() => import("./TotemModal").then(m => m.TotemModal), { ssr: false });
+const CompanyVideoPickerModal = dynamic(() => import("./CompanyVideoPickerModal").then(m => m.CompanyVideoPickerModal), { ssr: false });
+const TotemStatsModal = dynamic(() => import("./TotemStatsModal").then(m => m.TotemStatsModal), { ssr: false });
+const ConfirmModal = dynamic(() => import("@/components/ui/ConfirmModal").then(m => m.ConfirmModal), { ssr: false });
 import { useToast } from "@/components/ui/Toast";
 
 export function TotemDashboard() {
@@ -42,7 +45,10 @@ export function TotemDashboard() {
     handleDelete,
     toggleBlockScreenSaver,
     toggleStatus
-  } = useTotems(showToast);
+  } = useTotems({
+    onTotemConnect: (t) => showToast(`Tótem ${t.identificador || t.id} se ha conectado`, "success"),
+    onTotemDisconnect: (t) => showToast(`Tótem ${t.identificador || t.id} se ha desconectado`, "error")
+  });
 
   const { videos, loading: videosLoading, error: videosError, fetchVideos } = useVideos();
   const { empresas, loading: empresasLoading, error: empresasError, fetchEmpresas } = useEmpresas();
@@ -99,10 +105,12 @@ export function TotemDashboard() {
     return totems.find(t => String(t.id) === String(statsTotemId)) || null;
   }, [totems, statsTotemId]);
 
-  const filteredTotems = totems.filter(t =>
-    t.identificador?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    t.direccion?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTotems = useMemo(() => {
+    return totems.filter(t =>
+      t.identificador?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.direccion?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [totems, searchTerm]);
 
   // Videos exclusivos: excluir los que ya están asignados a OTROS tótems
   const availableVideos = useMemo(() => {

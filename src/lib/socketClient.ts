@@ -14,9 +14,13 @@ export function getSocket(): Socket {
   if (!socket || !socket.connected) {
     socket = io(BACKEND_URL, {
       auth: {
-        token: token ? `Bearer ${token}` : undefined,
+        token: token, // Backend might expect raw token
+        authorization: token ? `Bearer ${token}` : undefined,
       },
-      transports: ["websocket", "polling"],
+      extraHeaders: {
+        Authorization: token ? `Bearer ${token}` : "",
+      },
+      transports: ["polling", "websocket"], // Fallback to polling first to allow extraHeaders to be sent
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 2000,

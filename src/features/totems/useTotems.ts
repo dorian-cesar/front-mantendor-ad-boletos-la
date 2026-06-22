@@ -1,21 +1,71 @@
 import { useState, useEffect, useRef } from "react";
 import { apiFetch } from "@/lib/api";
 import { getSocket, disconnectSocket } from "@/lib/socketClient";
+import { Totem, ResumenGlobal, TotemForm, UseTotemsOptions } from "./types";
 
-export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'info'|'warning') => void) {
-  const [totems, setTotems] = useState<any[]>([]);
-  const [resumenGlobal, setResumenGlobal] = useState<any>({ total_transacciones: 0, boletos_vendidos: 0 });
+// ============================================================================
+// Helpers & Utilities
+// ============================================================================
+
+const fetchTotemPlaylist = async (totemId: string | number, token: string | null) => {
+  try {
+    const res = await fetch(`/api/proxy/totems/${totemId}/playlist`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (res.ok) {
+      const playlistData = await res.json();
+      return [...(playlistData.playlist || [])].sort(
+        (a: any, b: any) => (a.orden ?? 0) - (b.orden ?? 0)
+      );
+    }
+  } catch { /* silencioso */ }
+  return [];
+};
+
+const buildTotemsWithData = async (totemList: Totem[], salesData: any[]): Promise<Totem[]> => {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  return await Promise.all(
+    totemList.map(async (totem) => {
+      const playlist = await fetchTotemPlaylist(totem.id, token);
+      const mySales = salesData.filter((s: any) => String(s.totem_id) === String(totem.id));
+      const totalRevenue = mySales.reduce((acc: number, curr: any) => acc + (Number(curr.total_amount) || 0), 0);
+      const totalTickets = mySales.reduce((acc: number, curr: any) => acc + (curr.ticket_numbers?.length || 0), 0);
+
+      return { 
+        ...totem, 
+        playlist,
+        revenue: totalRevenue,
+        sales: totalTickets
+      };
+    })
+  );
+};
+
+const getTotemIdFromEvent = (data: any): string => {
+  return String(data?.totemId || data?.totem_id || data?.id || "");
+};
+
+// ============================================================================
+// Custom Hook
+// ============================================================================
+
+export function useTotems(options?: UseTotemsOptions) {
+  const [totems, setTotems] = useState<Totem[]>([]);
+  const [resumenGlobal, setResumenGlobal] = useState<ResumenGlobal>({ total_transacciones: 0, boletos_vendidos: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
-  // Tracks which totem IDs have a pending local status change.
-  // The polling skips overwriting 'status' for these IDs for 10 seconds.
+  
+  // Tracks pending local status changes to avoid overwriting optimistic updates
   const pendingStatusRef = useRef<Map<string, number>>(new Map());
 
   const loadTotemsData = async () => {
     const data = await apiFetch("/totems");
-    const totemList = Array.isArray(data) ? data : (data.totems || []);
+    const totemList: Totem[] = Array.isArray(data) ? data : (data.totems || []);
     
     if (data.resumen_global) {
       setResumenGlobal(data.resumen_global);
@@ -29,39 +79,7 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
       console.warn("No se pudieron cargar las ventas para el dashboard de tótems", salesErr);
     }
 
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    const totemsWithData = await Promise.all(
-      totemList.map(async (totem: any) => {
-        let playlist: any[] = [];
-        try {
-          const res = await fetch(`/api/proxy/totems/${totem.id}/playlist`, {
-            headers: {
-              "Content-Type": "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-          });
-          if (res.ok) {
-            const playlistData = await res.json();
-            playlist = [...(playlistData.playlist || [])].sort(
-              (a: any, b: any) => (a.orden ?? 0) - (b.orden ?? 0)
-            );
-          }
-        } catch { /* silencioso */ }
-
-        const mySales = salesData.filter((s: any) => String(s.totem_id) === String(totem.id));
-        const totalRevenue = mySales.reduce((acc: number, curr: any) => acc + (Number(curr.total_amount) || 0), 0);
-        const totalTickets = mySales.reduce((acc: number, curr: any) => acc + (curr.ticket_numbers?.length || 0), 0);
-
-        return { 
-          ...totem, 
-          playlist,
-          revenue: totalRevenue,
-          sales: totalTickets
-        };
-      })
-    );
-    
-    return totemsWithData;
+    return await buildTotemsWithData(totemList, salesData);
   };
 
   const fetchTotems = async () => {
@@ -79,21 +97,10 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
     }
   };
 
-  const fetchPlaylist = async (totemId: string): Promise<any[]> => {
-    try {
-      const data = await apiFetch(`/totems/${totemId}/playlist`);
-      return data.playlist || [];
-    } catch {
-      return [];
-    }
-  };
-
   const fetchTotemsBackground = async () => {
     try {
-      // Mismo proceso pero SIN setLoading(true) para no bloquear la UI con spinners
       const totemsWithData = await loadTotemsData();
       setTotems(prev => {
-        // Fusionar datos respetando los updates locales optimistas (como el toggle de estado)
         return totemsWithData.map(newT => {
           const pendingTime = pendingStatusRef.current.get(String(newT.id));
           if (pendingTime && Date.now() - pendingTime < 10000) {
@@ -112,25 +119,26 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
 
   useEffect(() => {
     fetchTotems();
-    
-    // Polling en segundo plano cada 10 segundos como respaldo a los WebSockets
-    const intervalId = setInterval(() => {
-      fetchTotemsBackground();
-    }, 10000);
-    
+    const intervalId = setInterval(() => fetchTotemsBackground(), 10000);
     return () => clearInterval(intervalId);
   }, []);
 
-  const handleSave = async (id: string, editForm: any) => {
+  const fetchPlaylist = async (totemId: string): Promise<any[]> => {
+    try {
+      const data = await apiFetch(`/totems/${totemId}/playlist`);
+      return data.playlist || [];
+    } catch {
+      return [];
+    }
+  };
+
+  const handleSave = async (id: string, editForm: TotemForm) => {
     try {
       setIsSaving(true);
-
-      // IDs deseados como enteros simples (formato del Swagger)
       const desiredIds: number[] = (editForm.video_ids || []).map((vId: any) =>
         typeof vId === 'object' ? Number(vId.id) : Number(vId)
       ).filter((n: number) => !isNaN(n));
 
-      // IDs actuales del tótem
       const currentTotem = totems.find(t => String(t.id) === String(id));
       const currentIds: number[] = (
         currentTotem?.playlist?.map((v: any) => Number(v.id)) ||
@@ -139,38 +147,24 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
         []
       );
 
-      // Calcular diferencias
       const videosToAdd = desiredIds.filter(dId => !currentIds.includes(dId));
       const videosToRemove = currentIds.filter(cId => !desiredIds.includes(cId));
 
-      console.log(">>> Guardando tótem", id);
-      console.log("   Actuales:", currentIds, "→ Deseados:", desiredIds);
-      console.log("   Agregar:", videosToAdd, "| Quitar:", videosToRemove);
-
-      // 1. POST /totems/{id}/videos - Agregar videos nuevos
       if (videosToAdd.length > 0) {
-        console.log(">>> [1] POST /totems/{id}/videos:", { video_ids: videosToAdd });
         await apiFetch(`/totems/${id}/videos`, {
           method: "POST",
           body: JSON.stringify({ video_ids: videosToAdd }),
         });
-        console.log("   ✅ Videos agregados");
       }
 
-      // 2. DELETE /totems/{id}/videos/{videoId} - Quitar videos removidos
       for (const videoId of videosToRemove) {
-        console.log(`>>> [2] DELETE /totems/{id}/videos/${videoId}`);
         try {
           await apiFetch(`/totems/${id}/videos/${videoId}`, { method: "DELETE" });
-          console.log(`   ✅ Video ${videoId} removido`);
         } catch {
-          console.warn(`   ⚠️ No se pudo quitar video ${videoId}`);
+          console.warn(`⚠️ No se pudo quitar video ${videoId}`);
         }
       }
 
-      // 3. PUT /totems/{id} - Solo datos básicos (sin status ni video_ids para evitar conflictos)
-      // NOTA: No enviamos 'status' aquí porque el backend lo vincula con is_online.
-      // El status (Activo/Inactivo como habilitación) se gestiona con toggleStatus por separado.
       const putPayload = {
         identificador: editForm.identificador,
         direccion: editForm.direccion,
@@ -178,40 +172,30 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
         longitud: editForm.longitud || 0,
       };
 
-      console.log(">>> [3] PUT /totems/{id}:", putPayload);
       await apiFetch(`/totems/${id}`, {
         method: "PUT",
         body: JSON.stringify(putPayload),
       });
-      console.log("   ✅ Tótem actualizado");
 
-      // 4. PATCH /totems/{id} - Enviar video_ids en el ORDEN deseado
-      //    El backend debería respetar el orden del array para la tabla totem_videos
       if (desiredIds.length > 0) {
         const patchPayload = { video_ids: desiredIds };
-        console.log(">>> [4] PATCH /totems/{id}:", patchPayload);
         try {
           await apiFetch(`/totems/${id}`, {
             method: "PATCH",
             body: JSON.stringify(patchPayload),
           });
-          console.log("   ✅ Orden de playlist actualizado vía PATCH");
         } catch (patchError) {
-          console.warn("   ⚠️ PATCH falló, intentando con PUT + video_ids:", patchError);
-          // Fallback: intentar PUT con video_ids
           try {
             await apiFetch(`/totems/${id}`, {
               method: "PUT",
               body: JSON.stringify({ ...putPayload, video_ids: desiredIds }),
             });
-            console.log("   ✅ Orden actualizado vía PUT fallback");
           } catch (putError) {
-            console.warn("   ⚠️ PUT fallback también falló:", putError);
+            console.warn("⚠️ PUT fallback falló:", putError);
           }
         }
       }
 
-      // 5. POST /videos/reorder - Persistir el campo 'orden' en la tabla videos
       if (desiredIds.length > 0) {
         const reorderPayload = {
           videos: desiredIds.map((videoId, index) => ({
@@ -219,15 +203,13 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
             orden: index + 1,
           })),
         };
-        console.log(">>> [5] POST /videos/reorder:", reorderPayload);
         try {
           await apiFetch("/videos/reorder", {
             method: "POST",
             body: JSON.stringify(reorderPayload),
           });
-          console.log("   ✅ Orden global de videos actualizado");
         } catch (reorderError) {
-          console.warn("   ⚠️ No se pudo actualizar el orden global:", reorderError);
+          console.warn("⚠️ No se pudo actualizar el orden global:", reorderError);
         }
       }
 
@@ -241,10 +223,9 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
     }
   };
 
-  const handleCreate = async (createForm: any) => {
+  const handleCreate = async (createForm: TotemForm) => {
     try {
       setIsSaving(true);
-
       const videoIds = (createForm.video_ids || []).map((v: any) => Number(v)).filter((n: number) => !isNaN(n));
 
       await apiFetch("/totems", {
@@ -281,12 +262,8 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
 
   const toggleStatus = async (id: string, currentStatus: boolean) => {
     const newStatus = !currentStatus;
-    
-    // Mark this totem as having a pending status change for 10 seconds
-    // so the polling doesn't immediately revert our optimistic update.
     pendingStatusRef.current.set(String(id), Date.now())
 
-    // Optimistic local update
     setTotems((prev) => 
       prev.map(t => String(t.id) === String(id) ? { ...t, status: newStatus } : t)
     );
@@ -297,8 +274,6 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
         body: JSON.stringify({ status: newStatus }),
       });
     } catch (error) {
-      console.error("Error toggling status:", error);
-      // Revert on error
       pendingStatusRef.current.delete(String(id))
       setTotems((prev) => 
         prev.map(t => String(t.id) === String(id) ? { ...t, status: currentStatus } : t)
@@ -309,8 +284,6 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
 
   const toggleBlockScreenSaver = async (id: string, currentValue: boolean) => {
     const newValue = !currentValue;
-    
-    // Actualización optimista local
     setTotems((prev) => 
       prev.map(t => String(t.id) === String(id) ? { ...t, block_screen_saver: newValue } : t)
     );
@@ -321,8 +294,6 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
         body: JSON.stringify({ block_screen_saver: newValue }),
       });
     } catch (error) {
-      console.error("Error toggling block_screen_saver:", error);
-      // Revertir en caso de error
       setTotems((prev) => 
         prev.map(t => String(t.id) === String(id) ? { ...t, block_screen_saver: currentValue } : t)
       );
@@ -330,15 +301,14 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
     }
   };
 
-  // Suscripción a eventos WebSocket en tiempo real
-  // Reemplaza el polling HTTP por eventos push del backend.
+  // ============================================================================
+  // WebSocket Listeners
+  // ============================================================================
   useEffect(() => {
     const socket = getSocket();
 
-    // A. Datos iniciales de métricas: actualiza campos de telemetría sobre los tótems ya cargados
     const onInitialMetrics = (totemsArray: any[]) => {
       if (!Array.isArray(totemsArray)) return;
-      console.log("[WS] admin:initial_metrics recibido:", totemsArray.length, "tótems");
       setTotems(current =>
         current.map(t => {
           const fresh = totemsArray.find(m => String(m.id) === String(t.id));
@@ -356,15 +326,13 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
       setIsPolling(false);
     };
 
-    // B. Tótem se conectó
     const onTotemOnline = (data: any) => {
-      const tId = data?.totemId || data?.totem_id || data?.id;
-      console.log(`[WS] admin:totem_online → Tótem ${tId} ONLINE`);
+      const tId = getTotemIdFromEvent(data);
       setTotems(current => {
         return current.map(t => {
-          if (String(t.id) === String(tId)) {
-            if (!t.is_online && showToast) {
-              showToast(`Tótem ${t.identificador || tId} se ha conectado`, "success");
+          if (String(t.id) === tId) {
+            if (!t.is_online && options?.onTotemConnect) {
+              options.onTotemConnect(t, tId);
             }
             return { ...t, is_online: true };
           }
@@ -373,15 +341,13 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
       });
     };
 
-    // C. Tótem se desconectó
     const onTotemOffline = (data: any) => {
-      const tId = data?.totemId || data?.totem_id || data?.id;
-      console.log(`[WS] admin:totem_offline → Tótem ${tId} OFFLINE`);
+      const tId = getTotemIdFromEvent(data);
       setTotems(current => {
         return current.map(t => {
-          if (String(t.id) === String(tId)) {
-            if (t.is_online && showToast) {
-              showToast(`Tótem ${t.identificador || tId} se ha desconectado`, "error");
+          if (String(t.id) === tId) {
+            if (t.is_online && options?.onTotemDisconnect) {
+              options.onTotemDisconnect(t, tId);
             }
             return { ...t, is_online: false };
           }
@@ -390,30 +356,25 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
       });
     };
 
-    // D. Actualización de métricas hardware (cada ~30s por tótem activo)
     const onMetricsUpdated = (data: any) => {
-      const tId = data?.totemId || data?.totem_id || data?.id;
-      console.log(`[WS] admin:metrics_updated recibido para totem ${tId}:`, data?.metrics || data);
+      const tId = getTotemIdFromEvent(data);
       setIsPolling(true);
       setTotems(current =>
         current.map(t =>
-          String(t.id) === String(tId)
+          String(t.id) === tId
             ? { ...t, ultima_telemetria: data?.metrics || data }
             : t
         )
       );
-      // Quitar el indicador tras un momento para evitar parpadeos
       setTimeout(() => setIsPolling(false), 800);
     };
 
-    // E. Alternativa general de status (por si el backend envía uno genérico)
     const onTotemStatus = (data: any) => {
-      const tId = data?.totemId || data?.totem_id || data?.id;
+      const tId = getTotemIdFromEvent(data);
       const isOnline = data?.is_online !== undefined ? data.is_online : data?.status === 'online';
-      console.log(`[WS] totem_status → Tótem ${tId} ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
       setTotems(current =>
         current.map(t =>
-          String(t.id) === String(tId)
+          String(t.id) === tId
             ? { ...t, is_online: isOnline }
             : t
         )
@@ -427,22 +388,15 @@ export function useTotems(showToast?: (msg: string, type: 'success'|'error'|'inf
     socket.on("totem_status", onTotemStatus);
     socket.on("admin:totem_status", onTotemStatus);
 
-    // 🔍 DIAGNÓSTICO: Captura TODOS los eventos del backend para depuración
-    const onAnyEvent = (eventName: string, ...args: any[]) => {
-      console.log(`🔍 [WS:DEBUG] Evento recibido → "${eventName}"`, args);
-    };
-    socket.onAny(onAnyEvent);
-
     return () => {
-      // Limpiar listeners pero mantener el socket vivo (es un singleton)
       socket.off("admin:initial_metrics", onInitialMetrics);
       socket.off("admin:totem_online", onTotemOnline);
       socket.off("admin:totem_offline", onTotemOffline);
       socket.off("admin:metrics_updated", onMetricsUpdated);
-      socket.offAny(onAnyEvent);
+      socket.off("totem_status", onTotemStatus);
+      socket.off("admin:totem_status", onTotemStatus);
     };
-  }, []);
-
+  }, [options]);
 
   return {
     totems,
