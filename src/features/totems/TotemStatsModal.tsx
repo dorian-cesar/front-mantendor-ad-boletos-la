@@ -114,9 +114,9 @@ export function TotemStatsModal({ isOpen, totem, isPolling, onClose }: TotemStat
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden mx-4 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden mx-4 max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
+        <div className="bg-slate-900 text-white p-5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white/10 rounded-xl">
               <BarChart3 size={22} />
@@ -131,7 +131,9 @@ export function TotemStatsModal({ isOpen, totem, isPolling, onClose }: TotemStat
           </button>
         </div>
 
-        {totem.ultimo_error_critico && (
+        {/* Contenido scrolleable */}
+        <div className="flex-1 overflow-y-auto">
+          {totem.ultimo_error_critico && (
           <div className="bg-red-500 text-white p-3 px-5 flex items-start gap-3">
             <ServerCrash size={20} className="mt-0.5 shrink-0" />
             <div>
@@ -374,9 +376,10 @@ export function TotemStatsModal({ isOpen, totem, isPolling, onClose }: TotemStat
             )}
           </div>
         )}
+        </div>
 
         {/* Footer */}
-        <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+        <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end shrink-0">
           <button
             onClick={onClose}
             className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-black transition-all active:scale-95 shadow-lg shadow-slate-900/20"

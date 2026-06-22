@@ -360,7 +360,7 @@ export function useTotems(options?: UseTotemsOptions) {
       setTotems(current =>
         current.map(t =>
           String(t.id) === tId
-            ? { ...t, ultima_telemetria: data?.metrics || data }
+            ? { ...t, ultima_telemetria: data?.metrics || data, ultima_telemetria_ts: Date.now() }
             : t
         )
       );

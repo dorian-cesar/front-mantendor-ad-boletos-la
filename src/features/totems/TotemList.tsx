@@ -132,8 +132,17 @@ export function TotemList({
                             : '--'}
                         </div>
                       </div>
-                      <div className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-sm w-full text-center tracking-wider ${t.ultima_telemetria.perifericos?.printer_connected === false ? 'bg-red-50 text-red-500 border border-red-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
-                        {t.ultima_telemetria.perifericos?.printer_connected === false ? '⚠️ Impresora Error' : '🖨️ Impresora OK'}
+                      <div className="flex items-center justify-between w-full gap-1">
+                        <div className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-sm w-full text-center tracking-wider ${t.ultima_telemetria.perifericos?.printer_connected === false ? 'bg-red-50 text-red-500 border border-red-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
+                          {t.ultima_telemetria.perifericos?.printer_connected === false ? '⚠️ Impresora Error' : '🖨️ Impresora OK'}
+                        </div>
+                        {t.ultima_telemetria_ts && (
+                          <div 
+                            key={t.ultima_telemetria_ts} 
+                            className="w-2 h-2 rounded-full bg-emerald-500 animate-ping flex-shrink-0" 
+                            title={`Actualizado: ${new Date(t.ultima_telemetria_ts).toLocaleTimeString()}`}
+                          />
+                        )}
                       </div>
                     </div>
                   ) : (
