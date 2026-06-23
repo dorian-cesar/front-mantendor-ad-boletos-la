@@ -72,6 +72,9 @@ export function SalesDashboard() {
   const { sales, summary, loading, isRefreshing, error, lastRefreshed, filters, setFilters, fetchSales } = useSales();
   const { totems } = useTotems();
   const [localFilters, setLocalFilters] = useState({ start: "", end: "", totem_id: "" });
+  const [isTotemDropdownOpen, setIsTotemDropdownOpen] = useState(false);
+
+  const selectedTotems = localFilters.totem_id ? localFilters.totem_id.split(",") : [];
 
   // Column sort state
   const [tableSort, setTableSort] = useState<{ field: SortField; direction: SortDir }>({
@@ -278,25 +281,62 @@ export function SalesDashboard() {
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1">Tótem</label>
                     <div className="relative">
-                      <select
-                        value={localFilters.totem_id}
-                        onChange={(e) => {
-                          const newTotemId = e.target.value;
-                          setLocalFilters({ ...localFilters, totem_id: newTotemId });
-                          setFilters((prev) => ({ ...prev, totem_id: newTotemId }));
-                        }}
-                        className="w-[180px] px-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 outline-none transition-all appearance-none cursor-pointer"
+                      <button
+                        onClick={() => setIsTotemDropdownOpen(!isTotemDropdownOpen)}
+                        className="w-[200px] px-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 outline-none transition-all flex items-center justify-between"
                       >
-                        <option value="">Todos los Tótems</option>
-                        {totems.map((t) => (
-                          <option key={t.id} value={t.id}>
-                            {t.identificador}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 dark:text-slate-500">
-                        <ArrowUpDown size={14} />
-                      </div>
+                        <span className="truncate">
+                          {selectedTotems.length === 0 
+                            ? "Todos los Tótems" 
+                            : selectedTotems.length === totems.length
+                            ? "Todos los Tótems"
+                            : `${selectedTotems.length} Seleccionados`}
+                        </span>
+                        <ArrowUpDown size={14} className="text-slate-400" />
+                      </button>
+
+                      {isTotemDropdownOpen && (
+                        <div className="absolute top-full left-0 mt-2 w-[250px] max-h-[300px] overflow-y-auto bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl z-50 p-2 custom-scrollbar">
+                          <label className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-800 rounded-xl transition-colors">
+                            <input 
+                              type="checkbox"
+                              checked={selectedTotems.length === 0 || selectedTotems.length === totems.length}
+                              onChange={() => {
+                                setLocalFilters({ ...localFilters, totem_id: "" });
+                                setFilters((prev) => ({ ...prev, totem_id: "" }));
+                              }}
+                              className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 dark:border-zinc-700 dark:bg-zinc-950"
+                            />
+                            <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                              Todos los Tótems
+                            </span>
+                          </label>
+                          <div className="h-px bg-slate-100 dark:bg-zinc-800 my-1 mx-2" />
+                          {totems.map((t) => {
+                            const isSelected = selectedTotems.includes(t.id.toString());
+                            return (
+                              <label key={t.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-800 rounded-xl transition-colors">
+                                <input 
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => {
+                                    const newSelected = isSelected 
+                                      ? selectedTotems.filter(id => id !== t.id.toString())
+                                      : [...selectedTotems, t.id.toString()];
+                                    const newValue = newSelected.join(",");
+                                    setLocalFilters({ ...localFilters, totem_id: newValue });
+                                    setFilters((prev) => ({ ...prev, totem_id: newValue }));
+                                  }}
+                                  className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 dark:border-zinc-700 dark:bg-zinc-950"
+                                />
+                                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                                  {t.identificador}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
