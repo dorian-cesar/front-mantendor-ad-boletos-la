@@ -45,13 +45,13 @@ export function useSales() {
     filtersRef.current = filters;
   }, [filters]);
 
-  const fetchSales = useCallback(async (silent = false) => {
+  const fetchSales = useCallback(async (silent = false, currentFilters = filtersRef.current) => {
     try {
       if (!silent) setLoading(true);
       else setIsRefreshing(true);
       setError(null);
 
-      const { startDate, endDate, totem_id } = filtersRef.current;
+      const { startDate, endDate, totem_id } = currentFilters;
       const params = new URLSearchParams();
       if (startDate) params.append("fecha_inicio", startDate);
       if (endDate) params.append("fecha_fin", endDate);
@@ -93,7 +93,7 @@ export function useSales() {
 
   // Initial load + re-fetch whenever filters change (non-silent, shows spinner)
   useEffect(() => {
-    fetchSales(false);
+    fetchSales(false, filters);
   }, [filters, fetchSales]);
 
   // Escuchar actualizaciones en tiempo real vía WebSockets
@@ -120,6 +120,6 @@ export function useSales() {
     lastRefreshed,
     filters,
     setFilters,
-    fetchSales: () => fetchSales(false),
+    fetchSales: () => fetchSales(false, filtersRef.current),
   };
 }

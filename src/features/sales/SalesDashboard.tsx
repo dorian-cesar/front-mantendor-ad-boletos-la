@@ -265,7 +265,11 @@ export function SalesDashboard() {
                     <div className="relative">
                       <select
                         value={localFilters.totem_id}
-                        onChange={(e) => setLocalFilters({ ...localFilters, totem_id: e.target.value })}
+                        onChange={(e) => {
+                          const newTotemId = e.target.value;
+                          setLocalFilters({ ...localFilters, totem_id: newTotemId });
+                          setFilters((prev) => ({ ...prev, totem_id: newTotemId }));
+                        }}
                         className="w-[180px] px-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 outline-none transition-all appearance-none cursor-pointer"
                       >
                         <option value="">Todos los Tótems</option>
