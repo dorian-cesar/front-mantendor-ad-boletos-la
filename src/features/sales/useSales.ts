@@ -20,6 +20,10 @@ export interface Sale {
   operation: string;
   provider: string;
   timestamp_operacion: string;
+  totem?: {
+    identificador: string;
+    direccion: string;
+  };
 }
 
 export function useSales() {
@@ -32,6 +36,7 @@ export function useSales() {
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
+    totem_id: "",
   });
 
   // Keep a ref to current filters so the interval always reads the latest value
@@ -46,15 +51,15 @@ export function useSales() {
       else setIsRefreshing(true);
       setError(null);
 
-      const { startDate, endDate } = filtersRef.current;
-      let query = "";
-      if (startDate && endDate) {
-        query = `?startDate=${startDate}&endDate=${endDate}`;
-      } else if (startDate) {
-        query = `?startDate=${startDate}`;
-      }
+      const { startDate, endDate, totem_id } = filtersRef.current;
+      const params = new URLSearchParams();
+      if (startDate) params.append("fecha_inicio", startDate);
+      if (endDate) params.append("fecha_fin", endDate);
+      if (totem_id) params.append("totem_id", totem_id);
+      
+      const queryStr = params.toString() ? `?${params.toString()}` : "";
 
-      const data = await apiFetch(`/ventas/auditoria${query}`);
+      const data = await apiFetch(`/ventas/auditoria${queryStr}`);
       const newSales: Sale[] = data.ventas || [];
 
       if (silent) {

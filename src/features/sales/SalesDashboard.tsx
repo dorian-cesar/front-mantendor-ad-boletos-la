@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { useSales } from "./useSales";
+import { useTotems } from "@/features/totems/useTotems";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { exportToCSV } from "@/lib/exportUtils";
@@ -67,7 +68,8 @@ function SortableHeader({
 // ─── Component ─────────────────────────────────────────────────────────────────
 export function SalesDashboard() {
   const { sales, summary, loading, isRefreshing, error, lastRefreshed, filters, setFilters, fetchSales } = useSales();
-  const [dateRange, setDateRange] = useState({ start: "", end: "" });
+  const { totems } = useTotems();
+  const [localFilters, setLocalFilters] = useState({ start: "", end: "", totem_id: "" });
 
   // Column sort state
   const [tableSort, setTableSort] = useState<{ field: SortField; direction: SortDir }>({
@@ -83,7 +85,7 @@ export function SalesDashboard() {
   };
 
   const handleSearch = () => {
-    setFilters({ startDate: dateRange.start, endDate: dateRange.end });
+    setFilters({ startDate: localFilters.start, endDate: localFilters.end, totem_id: localFilters.totem_id });
   };
 
   const quickFilter = (type: string) => {
@@ -100,8 +102,8 @@ export function SalesDashboard() {
     }
     const startStr = start.toISOString().split("T")[0];
     const endStr = today.toISOString().split("T")[0];
-    setDateRange({ start: startStr, end: endStr });
-    setFilters({ startDate: startStr, endDate: endStr });
+    setLocalFilters((prev) => ({ ...prev, start: startStr, end: endStr }));
+    setFilters({ startDate: startStr, endDate: endStr, totem_id: localFilters.totem_id });
   };
 
   const handleExport = () => {
@@ -112,6 +114,7 @@ export function SalesDashboard() {
 
     const dataToExport = sortedSales.map((sale) => ({
       "ID Operación": sale.id,
+      "Tótem": sale.totem?.identificador || `Tótem ${sale.totem_id}`,
       "Tótem ID": sale.totem_id,
       "Tickets": (sale.ticket_numbers || []).join(" | "),
       "Monto (Gs)": sale.total_amount || 0,
@@ -239,9 +242,9 @@ export function SalesDashboard() {
                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4" />
                       <input
                         type="date"
-                        value={dateRange.start}
-                        onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                        className="w-[170px] pl-10 pr-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 outline-none transition-all color-scheme-dark"
+                        value={localFilters.start}
+                        onChange={(e) => setLocalFilters({ ...localFilters, start: e.target.value })}
+                        className="w-[150px] pl-10 pr-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 outline-none transition-all color-scheme-dark"
                       />
                     </div>
                   </div>
@@ -251,10 +254,30 @@ export function SalesDashboard() {
                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4" />
                       <input
                         type="date"
-                        value={dateRange.end}
-                        onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                        className="w-[170px] pl-10 pr-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 outline-none transition-all color-scheme-dark"
+                        value={localFilters.end}
+                        onChange={(e) => setLocalFilters({ ...localFilters, end: e.target.value })}
+                        className="w-[150px] pl-10 pr-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 outline-none transition-all color-scheme-dark"
                       />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase ml-1">Tótem</label>
+                    <div className="relative">
+                      <select
+                        value={localFilters.totem_id}
+                        onChange={(e) => setLocalFilters({ ...localFilters, totem_id: e.target.value })}
+                        className="w-[180px] px-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 outline-none transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="">Todos los Tótems</option>
+                        {totems.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.identificador}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 dark:text-slate-500">
+                        <ArrowUpDown size={14} />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -362,7 +385,14 @@ export function SalesDashboard() {
                           </div>
                         </td>
                         <td className="px-8 py-5">
-                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Tótem {sale.totem_id}</span>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                              {sale.totem?.identificador || `Tótem ${sale.totem_id}`}
+                            </span>
+                            <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+                              ID: {sale.totem_id}
+                            </span>
+                          </div>
                         </td>
                         <td className="px-8 py-5">
                           <div className="flex flex-wrap gap-1">
