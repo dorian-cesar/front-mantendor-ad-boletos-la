@@ -40,6 +40,11 @@ export function useEmpresas() {
 
   useEffect(() => {
     fetchEmpresas();
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, []);
 
   // Escuchar actualizaciones en tiempo real vía WebSockets

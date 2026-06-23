@@ -41,6 +41,11 @@ export function useApiKeys() {
 
   useEffect(() => {
     fetchApiKeys();
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, []);
 
   // Escuchar actualizaciones en tiempo real vía WebSockets

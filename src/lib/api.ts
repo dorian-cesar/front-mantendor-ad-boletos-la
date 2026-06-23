@@ -45,8 +45,8 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
       }
 
       // Si es un error temporal (ej. proxy caído o red inestable), lanzamos error para forzar reintento
-      if (response.status >= 502 && response.status <= 504) {
-        throw new Error(`Error temporal de red o servidor (${response.status})`);
+      if (response.status >= 500 && response.status <= 504) {
+        throw new Error(`Error del servidor (${response.status})`);
       }
 
       if (!response.ok) {
@@ -73,7 +73,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
       lastError = err;
       
       // Solo reintentamos si es un error de conexión pura (TypeError de fetch) o un error de proxy/gateway (50x)
-      const isNetworkError = err.name === "TypeError" || err.message.includes("fetch failed") || err.message.includes("temporal de red");
+      const isNetworkError = err.name === "TypeError" || err.message.includes("fetch failed") || err.message.includes("temporal de red") || err.message.includes("Error del servidor");
       
       // No reintentamos errores de cliente (400, 404, etc.)
       const isClientError = err.status && err.status >= 400 && err.status < 500;

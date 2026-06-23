@@ -130,6 +130,11 @@ export function useTotems(options?: UseTotemsOptions) {
 
   useEffect(() => {
     fetchTotems();
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, []);
 
   const fetchPlaylist = async (totemId: string): Promise<any[]> => {
