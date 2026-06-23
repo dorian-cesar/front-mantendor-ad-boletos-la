@@ -10,6 +10,7 @@ interface TotemStatsModalProps {
   totem: any;
   isPolling?: boolean;
   onClose: () => void;
+  onCommand?: (id: string, command: string) => void;
 }
 
 interface StatsData {
@@ -38,7 +39,7 @@ const PASO_COLORS: Record<string, string> = {
   impresion: "bg-purple-500",
 };
 
-export function TotemStatsModal({ isOpen, totem, isPolling, onClose }: TotemStatsModalProps) {
+export function TotemStatsModal({ isOpen, totem, isPolling, onClose, onCommand }: TotemStatsModalProps) {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -151,14 +152,63 @@ export function TotemStatsModal({ isOpen, totem, isPolling, onClose }: TotemStat
         ) : (
           <div className="p-5 space-y-5">
             {/* Info del tótem */}
-            <div className="flex flex-wrap gap-3">
-              <div className="flex items-center gap-1.5">
-                <div className={`w-2.5 h-2.5 rounded-full ${totem.is_online ? "bg-emerald-500 animate-pulse" : "bg-red-400"}`} />
-                <span className={`text-xs font-bold ${totem.is_online ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
-                  {totem.is_online ? "En Línea" : "Fuera de Línea"}
-                </span>
+            {/* Info del tótem y Acciones Rápidas */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-3 items-center">
+                {(() => {
+                  const isOnline = totem.is_online;
+                  let isSleeping = false;
+                  try {
+                    const telem = typeof telemetry === 'string' ? JSON.parse(telemetry) : telemetry;
+                    if (telem?.servicios_locales?.kiosk_app_responding === false) isSleeping = true;
+                  } catch {}
+
+                  if (!isOnline) {
+                    return (
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                        <span className="text-xs font-bold text-red-500 dark:text-red-400">Fuera de Línea</span>
+                      </div>
+                    );
+                  }
+                  
+                  if (isSleeping) {
+                    return (
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                        <span className="text-xs font-bold text-amber-600 dark:text-amber-400">En Reposo (Inactivo)</span>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">En Línea (Activo)</span>
+                    </div>
+                  );
+                })()}
+                
+                <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">{totem.direccion}</span>
               </div>
-              <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">{totem.direccion}</span>
+              
+              {/* Remote Control Actions */}
+              {totem.is_online && onCommand && (
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => {
+                      if (confirm("¿Estás seguro de que deseas forzar un F5 (Recargar) en el frontend de este Tótem?")) {
+                        onCommand(String(totem.id), 'refresh');
+                      }
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg text-[11px] font-black uppercase tracking-wider transition-colors border border-indigo-200 dark:border-indigo-800"
+                    title="Forzar al tótem a recargar su página"
+                  >
+                    <RefreshCw size={12} />
+                    <span>Reiniciar (F5)</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Métricas principales */}

@@ -435,5 +435,11 @@ export function useTotems(options?: UseTotemsOptions) {
     handleDelete,
     toggleBlockScreenSaver,
     toggleStatus,
+    sendTotemCommand: (totemId: string | number, command: string) => {
+      const socket = getSocket();
+      if (socket) {
+        socket.emit("admin:command_totem", { totemId, command });
+      }
+    },
   };
 }

@@ -166,10 +166,36 @@ export function TotemList({
                 <td className="py-3.5 px-5">
                   <div className="flex flex-col items-center gap-1">
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${t.is_online ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]'}`} />
-                      <span className={`text-[10px] font-black uppercase tracking-tighter ${t.is_online ? 'text-emerald-600' : 'text-red-500'}`}>
-                        {t.is_online ? 'Online' : 'Offline'}
-                      </span>
+                      {(() => {
+                        let isSleeping = false;
+                        try {
+                          const telem = typeof t.ultima_telemetria === 'string' ? JSON.parse(t.ultima_telemetria) : t.ultima_telemetria;
+                          if (telem?.servicios_locales?.kiosk_app_responding === false) isSleeping = true;
+                        } catch {}
+
+                        if (!t.is_online) {
+                          return (
+                            <>
+                              <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                              <span className="text-[10px] font-black uppercase tracking-tighter text-red-500">Offline</span>
+                            </>
+                          );
+                        }
+                        if (isSleeping) {
+                          return (
+                            <>
+                              <div className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+                              <span className="text-[10px] font-black uppercase tracking-tighter text-amber-500">Reposo</span>
+                            </>
+                          );
+                        }
+                        return (
+                          <>
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+                            <span className="text-[10px] font-black uppercase tracking-tighter text-emerald-600">Online</span>
+                          </>
+                        );
+                      })()}
                     </div>
                     {t.ultimo_login && !t.is_online && (
                       <span className="text-[9px] text-slate-400 font-medium">

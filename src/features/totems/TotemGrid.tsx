@@ -180,10 +180,36 @@ export function TotemGrid({
                           )}
                         </div>
                         <div className="flex items-center gap-1.5 ml-1">
-                          <div className={`w-2 h-2 rounded-full ${t.is_online ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-red-400'}`} />
-                          <span className={`text-[9px] font-black uppercase tracking-tighter ${t.is_online ? 'text-emerald-600' : 'text-red-500'}`}>
-                            {t.is_online ? 'Online' : 'Offline'}
-                          </span>
+                          {(() => {
+                            let isSleeping = false;
+                            try {
+                              const telem = typeof t.ultima_telemetria === 'string' ? JSON.parse(t.ultima_telemetria) : t.ultima_telemetria;
+                              if (telem?.servicios_locales?.kiosk_app_responding === false) isSleeping = true;
+                            } catch {}
+
+                            if (!t.is_online) {
+                              return (
+                                <>
+                                  <div className="w-2 h-2 rounded-full bg-red-400" />
+                                  <span className="text-[9px] font-black uppercase tracking-tighter text-red-500">Offline</span>
+                                </>
+                              );
+                            }
+                            if (isSleeping) {
+                              return (
+                                <>
+                                  <div className="w-2 h-2 rounded-full bg-amber-400" />
+                                  <span className="text-[9px] font-black uppercase tracking-tighter text-amber-500">Reposo</span>
+                                </>
+                              );
+                            }
+                            return (
+                              <>
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+                                <span className="text-[9px] font-black uppercase tracking-tighter text-emerald-600">Online</span>
+                              </>
+                            );
+                          })()}
                         </div>
                       </div>
                       <div className="flex flex-col items-end">

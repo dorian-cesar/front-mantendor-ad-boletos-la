@@ -44,7 +44,8 @@ export function TotemDashboard() {
     handleCreate,
     handleDelete,
     toggleBlockScreenSaver,
-    toggleStatus
+    toggleStatus,
+    sendTotemCommand
   } = useTotems({
     onTotemConnect: (t) => showToast(`Tótem ${t.identificador || t.id} se ha conectado`, "success"),
     onTotemDisconnect: (t) => showToast(`Tótem ${t.identificador || t.id} se ha desconectado`, "error")
@@ -117,7 +118,18 @@ export function TotemDashboard() {
       if (kpiFilter === "all") return true;
       if (kpiFilter === "activos") return t.status === "Activo" || t.status === true;
       if (kpiFilter === "inactivos") return t.status !== "Activo" && t.status !== true;
-      if (kpiFilter === "online") return t.is_online === true;
+      
+      const getIsTotemSleepingFilter = (t: Totem) => {
+        if (!t.is_online) return false;
+        let telem;
+        try {
+          telem = typeof t.ultima_telemetria === 'string' ? JSON.parse(t.ultima_telemetria) : t.ultima_telemetria;
+        } catch { return false; }
+        return telem?.servicios_locales?.kiosk_app_responding === false;
+      };
+
+      if (kpiFilter === "online") return t.is_online === true && !getIsTotemSleepingFilter(t);
+      if (kpiFilter === "reposo") return t.is_online === true && getIsTotemSleepingFilter(t);
       if (kpiFilter === "offline") return t.is_online !== true;
 
       return true;
@@ -127,8 +139,19 @@ export function TotemDashboard() {
   // KPIs calculados
   const totemsActivos = totems.filter(t => t.status === "Activo" || t.status === true).length;
   const totemsInactivos = totems.length - totemsActivos;
-  const totemsOnline = totems.filter(t => t.is_online).length;
-  const totemsOffline = totems.length - totemsOnline;
+
+  const getIsTotemSleeping = (t: Totem) => {
+    if (!t.is_online) return false;
+    let telem;
+    try {
+      telem = typeof t.ultima_telemetria === 'string' ? JSON.parse(t.ultima_telemetria) : t.ultima_telemetria;
+    } catch { return false; }
+    return telem?.servicios_locales?.kiosk_app_responding === false;
+  };
+
+  const totemsOnline = totems.filter(t => t.is_online && !getIsTotemSleeping(t)).length;
+  const totemsEnReposo = totems.filter(t => t.is_online && getIsTotemSleeping(t)).length;
+  const totemsOffline = totems.length - (totemsOnline + totemsEnReposo);
 
   // Alertas activas
   const offlineMoreThan20Mins = totems.filter(t => {
@@ -337,7 +360,7 @@ export function TotemDashboard() {
           </div>
 
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-6 mb-6">
             <KpiCard
               title="Activos"
               value={totemsActivos}
@@ -359,14 +382,24 @@ export function TotemDashboard() {
               onClick={() => setKpiFilter(prev => prev === "inactivos" ? "all" : "inactivos")}
             />
             <KpiCard
-              title="En línea (Online)"
+              title="En línea (Activo)"
               value={totemsOnline}
-              subtitle="Conexión establecida"
+              subtitle="Operando normalmente"
               icon={<Wifi size={24} />}
               color="bg-white"
               textColor="text-slate-900"
               isActive={kpiFilter === "online"}
               onClick={() => setKpiFilter(prev => prev === "online" ? "all" : "online")}
+            />
+            <KpiCard
+              title="En Reposo"
+              value={totemsEnReposo}
+              subtitle="Sin actividad reciente"
+              icon={<Wifi size={24} className="opacity-50" />}
+              color="bg-amber-400"
+              textColor="text-slate-900"
+              isActive={kpiFilter === "reposo"}
+              onClick={() => setKpiFilter(prev => prev === "reposo" ? "all" : "reposo")}
             />
             <KpiCard
               title="Fuera de línea"
@@ -582,6 +615,7 @@ export function TotemDashboard() {
         totem={statsTotem}
         isPolling={isPolling}
         onClose={() => setStatsTotemId(null)}
+        onCommand={sendTotemCommand}
       />
 
       <ConfirmModal
