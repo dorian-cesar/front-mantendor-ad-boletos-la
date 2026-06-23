@@ -67,25 +67,25 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
         <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 transition-colors">
-          <PlayCircle size={12} className="text-slate-900" />
+          <PlayCircle size={12} className="text-slate-900 dark:text-white" />
           Lista de Reproducción
         </label>
         <div className="flex items-center gap-2">
            {selectedVideos.some(v => v.status === false) && (
-             <span className="flex items-center gap-1.5 px-3 py-1 rounded bg-red-600 text-white text-[10px] font-black uppercase tracking-widest border border-red-700 animate-pulse shadow-lg shadow-red-200">
+             <span className="flex items-center gap-1.5 px-3 py-1 rounded bg-red-600 text-white text-[10px] font-black uppercase tracking-widest border border-red-700 animate-pulse shadow-lg shadow-red-200 dark:shadow-red-900/20">
                <AlertTriangle size={10} /> Videos Inactivos (No se reproducirán)
              </span>
            )}
-           <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full transition-colors">
+           <span className="text-[10px] font-bold text-white bg-slate-800 dark:bg-slate-700 border border-transparent px-2.5 py-0.5 rounded-full transition-colors shadow-sm">
             {selectedVideos.length} Video{selectedVideos.length !== 1 ? 's' : ''}
           </span>
         </div>
       </div>
 
       {selectedVideos.length === 0 ? (
-        <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
-            <Film size={24} className="mx-auto text-slate-300 mb-2" />
-            <p className="text-xs text-slate-400 font-medium text-balance">
+        <div className="bg-slate-50 dark:bg-zinc-800/50 border-2 border-dashed border-slate-200 dark:border-zinc-700 rounded-2xl p-6 text-center">
+            <Film size={24} className="mx-auto text-slate-300 dark:text-slate-600 mb-2" />
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium text-balance">
                 No hay videos asignados actualmente.
             </p>
         </div>
@@ -105,28 +105,28 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDragLeave={() => setDragOverIndex(null)}
                 onDrop={(e) => handleDrop(e, index)}
-                className={`flex items-center justify-between p-3 bg-white border transition-all group ${
+                className={`flex items-center justify-between p-3 bg-white dark:bg-zinc-800 border transition-all group ${
                   !!onReorder ? "cursor-grab active:cursor-grabbing" : ""
                 } ${
-                  isInactive ? "border-red-100 bg-red-50/30 opacity-90" : "border-slate-100 rounded-xl hover:border-slate-900"
+                  isInactive ? "border-red-100 dark:border-red-900/50 bg-red-50/30 dark:bg-red-900/10 opacity-90" : "border-slate-100 dark:border-zinc-700 rounded-xl hover:border-slate-900 dark:hover:border-slate-100"
                 } ${isDragging ? "opacity-50 scale-[0.98]" : ""} ${
                   isDragOver ? "border-t-4 border-t-blue-500" : ""
                 }`}
                 style={isInactive ? { borderRadius: '12px' } : {}}
               >
                 <div className="flex items-center gap-3">
-                  {!!onReorder && <GripVertical size={16} className="text-slate-300 cursor-grab" />}
+                  {!!onReorder && <GripVertical size={16} className="text-slate-300 dark:text-slate-600 cursor-grab" />}
                   
-                  <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-900 text-white font-black text-[11px] shadow-sm shrink-0">
+                  <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-900 dark:bg-zinc-950 text-white font-black text-[11px] shadow-sm shrink-0">
                     {index + 1}
                   </div>
 
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isInactive ? "bg-red-100 text-red-500 shadow-inner" : "bg-slate-50 text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-900"}`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isInactive ? "bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400 shadow-inner" : "bg-slate-50 dark:bg-zinc-900 text-slate-400 dark:text-slate-500 group-hover:bg-slate-100 dark:group-hover:bg-zinc-700 group-hover:text-slate-900 dark:group-hover:text-white"}`}>
                     <Video size={14} />
                   </div>
                   <div className="flex flex-col">
                     <div className="flex items-center gap-2">
-                       <span className={`text-xs font-bold transition-colors ${isInactive ? "text-red-900" : "text-slate-800"}`}>
+                       <span className={`text-xs font-bold transition-colors ${isInactive ? "text-red-900 dark:text-red-400" : "text-slate-800 dark:text-slate-200"}`}>
                         {v.nombre}
                        </span>
                        {isInactive && (
@@ -142,11 +142,11 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       {empresa && (
-                        <span className={`text-[9px] font-black uppercase tracking-tighter ${isInactive ? "text-red-300" : "text-slate-400"}`}>
+                        <span className={`text-[9px] font-black uppercase tracking-tighter ${isInactive ? "text-red-300 dark:text-red-500" : "text-slate-400 dark:text-slate-500"}`}>
                           {empresa.nombre}
                         </span>
                       )}
-                      <span className={`text-[9px] font-black uppercase tracking-tighter ${isInactive ? "text-red-300" : "text-slate-400"}`}>
+                      <span className={`text-[9px] font-black uppercase tracking-tighter ${isInactive ? "text-red-300 dark:text-red-500" : "text-slate-400 dark:text-slate-500"}`}>
                         • {v.resolucion || v.resolution || 'N/A'}
                       </span>
                     </div>
@@ -157,7 +157,7 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setViewingVideo(v); }}
-                    className="p-2 shrink-0 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white transition-all duration-200 opacity-100 md:opacity-0 group-hover:opacity-100"
+                    className="p-2 shrink-0 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500 dark:hover:bg-blue-600 hover:text-white transition-all duration-200 opacity-100 md:opacity-0 group-hover:opacity-100"
                     title="Ver detalles del video"
                   >
                     <Eye size={16} strokeWidth={2.5} />
@@ -168,7 +168,7 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                         type="button"
                         onClick={(e) => { e.stopPropagation(); moveItem(index, 'up'); }}
                         disabled={index === 0}
-                        className="p-1 rounded transition-colors hover:bg-slate-100 text-slate-400 hover:text-blue-600 disabled:opacity-30"
+                        className="p-1 rounded transition-colors hover:bg-slate-100 dark:hover:bg-zinc-700 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30"
                       >
                         <ChevronUp size={14} strokeWidth={3} />
                       </button>
@@ -176,7 +176,7 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                         type="button"
                         onClick={(e) => { e.stopPropagation(); moveItem(index, 'down'); }}
                         disabled={index === selectedVideos.length - 1}
-                        className="p-1 rounded transition-colors hover:bg-slate-100 text-slate-400 hover:text-blue-600 disabled:opacity-30"
+                        className="p-1 rounded transition-colors hover:bg-slate-100 dark:hover:bg-zinc-700 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30"
                       >
                         <ChevronDown size={14} strokeWidth={3} />
                       </button>
@@ -186,7 +186,7 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                     <button 
                       type="button"
                       onClick={(e) => { e.stopPropagation(); removeItem(String(v.id)); }}
-                      className="p-2 shrink-0 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all duration-200 opacity-100 md:opacity-0 group-hover:opacity-100"
+                      className="p-2 shrink-0 rounded-xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500 dark:hover:bg-rose-600 hover:text-white transition-all duration-200 opacity-100 md:opacity-0 group-hover:opacity-100"
                       title="Quitar video del tótem"
                     >
                       <X size={16} strokeWidth={2.5} />
@@ -201,21 +201,21 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
 
       {/* Modal de Detalles del Video */}
       {viewingVideo && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={() => setViewingVideo(null)}>
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={() => setViewingVideo(null)}>
+          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-transparent dark:border-zinc-800" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-950/50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-inner">
+                <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-inner">
                   <Film size={20} />
                 </div>
                 <div>
-                  <h3 className="font-black text-slate-800 leading-tight">Detalles del Video</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">ID: {viewingVideo.id}</p>
+                  <h3 className="font-black text-slate-800 dark:text-slate-100 leading-tight">Detalles del Video</h3>
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">ID: {viewingVideo.id}</p>
                 </div>
               </div>
               <button 
                 onClick={() => setViewingVideo(null)}
-                className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-zinc-700 hover:text-slate-900 dark:hover:text-white transition-colors"
               >
                 <X size={16} />
               </button>
@@ -223,22 +223,22 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
             
             <div className="p-5 space-y-4">
               <div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Nombre del Archivo</span>
-                <p className="text-sm font-bold text-slate-800 break-words">{viewingVideo.nombre || viewingVideo.original_name || 'Desconocido'}</p>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 block mb-1">Nombre del Archivo</span>
+                <p className="text-sm font-bold text-slate-800 dark:text-slate-200 break-words">{viewingVideo.nombre || viewingVideo.original_name || 'Desconocido'}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1.5">
+                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-3 border border-slate-100 dark:border-zinc-700/50">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 flex items-center gap-1.5 mb-1.5">
                     <Monitor size={12} /> Resolución
                   </span>
-                  <p className="text-xs font-bold text-slate-900">{viewingVideo.resolucion || viewingVideo.resolution || 'N/A'}</p>
+                  <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{viewingVideo.resolucion || viewingVideo.resolution || 'N/A'}</p>
                 </div>
-                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1.5">
+                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-3 border border-slate-100 dark:border-zinc-700/50">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 flex items-center gap-1.5 mb-1.5">
                     <HardDrive size={12} /> Tamaño
                   </span>
-                  <p className="text-xs font-bold text-slate-900">
+                  <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
                     {viewingVideo.peso
                       ? (viewingVideo.peso / (1024 * 1024)).toFixed(2) + " MB"
                       : viewingVideo.tamano
@@ -248,19 +248,19 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                       : "N/A"}
                   </p>
                 </div>
-                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1.5">
+                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-3 border border-slate-100 dark:border-zinc-700/50">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 flex items-center gap-1.5 mb-1.5">
                     <FileType size={12} /> Formato
                   </span>
-                  <p className="text-xs font-bold text-slate-900 uppercase">
+                  <p className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase">
                     {viewingVideo.extension || viewingVideo.format || viewingVideo.mimetype || 'MP4'}
                   </p>
                 </div>
-                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1.5">
+                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-3 border border-slate-100 dark:border-zinc-700/50">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 flex items-center gap-1.5 mb-1.5">
                     <Clock size={12} /> Duración
                   </span>
-                  <p className="text-xs font-bold text-slate-900">
+                  <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
                     {viewingVideo.duracion || viewingVideo.duration 
                       ? (() => {
                           const secs = Number(viewingVideo.duracion || viewingVideo.duration);
@@ -274,11 +274,11 @@ export function VideosListDisplay({ videos, empresas, videoIds = [], onReorder, 
                 </div>
               </div>
 
-              <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1.5">
+              <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-3 border border-slate-100 dark:border-zinc-700/50">
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 flex items-center gap-1.5 mb-1.5">
                   <Calendar size={12} /> Fecha de Subida
                 </span>
-                <p className="text-xs font-bold text-slate-900">
+                <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
                   {viewingVideo.createdAt || viewingVideo.created_at 
                     ? new Date(viewingVideo.createdAt || viewingVideo.created_at).toLocaleString('es-CL') 
                     : 'Desconocida'}

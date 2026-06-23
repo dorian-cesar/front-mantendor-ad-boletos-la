@@ -66,24 +66,24 @@ export function ApiKeyModal({ isOpen, onClose, onSubmit, totems, isSaving, initi
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div 
-        className="absolute inset-0 bg-slate-900/40  transition-opacity" 
+        className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 transition-opacity" 
         onClick={onClose}
       />
       
-      <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+      <div className="relative bg-white dark:bg-zinc-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 mx-4 max-h-[90vh] overflow-y-auto transition-colors">
+        <div className="bg-slate-50 dark:bg-zinc-800/50 border-b border-slate-100 dark:border-zinc-800 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg shadow-slate-900/20">
+            <div className="w-10 h-10 bg-slate-900 dark:bg-slate-100 rounded-xl flex items-center justify-center text-white dark:text-slate-900 shadow-lg shadow-slate-900/20 dark:shadow-white/10">
               <Key size={20} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-900">{initialData ? 'Editar API Key' : 'Generar API Key'}</h3>
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">{initialData ? 'Actualizar Credencial' : 'Nueva Credencial'}</p>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">{initialData ? 'Editar API Key' : 'Generar API Key'}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">{initialData ? 'Actualizar Credencial' : 'Nueva Credencial'}</p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-400 hover:text-slate-900"
+            className="p-2 hover:bg-slate-200 dark:hover:bg-zinc-700 rounded-full transition-colors text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white"
           >
             <X size={20} />
           </button>
@@ -91,7 +91,7 @@ export function ApiKeyModal({ isOpen, onClose, onSubmit, totems, isSaving, initi
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {error && (
-            <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm animate-in slide-in-from-top-2">
+            <div className="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30 rounded-xl text-red-600 dark:text-red-400 text-sm animate-in slide-in-from-top-2">
               <AlertCircle size={18} className="flex-shrink-0" />
               <p className="font-medium">{error}</p>
             </div>
@@ -99,7 +99,7 @@ export function ApiKeyModal({ isOpen, onClose, onSubmit, totems, isSaving, initi
 
           <div className="space-y-4">
             <div>
-              <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">
+              <label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block">
                 Descripción
               </label>
               <input
@@ -108,7 +108,7 @@ export function ApiKeyModal({ isOpen, onClose, onSubmit, totems, isSaving, initi
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 placeholder="Ej: Acceso Administrador, Tótem Plaza Central..."
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-slate-900/10 focus:bg-white transition-all shadow-sm"
+                className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 focus:bg-white dark:focus:bg-zinc-900 transition-all shadow-sm"
               />
             </div>
 
@@ -118,11 +118,11 @@ export function ApiKeyModal({ isOpen, onClose, onSubmit, totems, isSaving, initi
                 onClick={() => setForm({ ...form, tipo: "PLATAFORMA", totem_id: "" })}
                 className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all gap-2 ${
                   form.tipo === "PLATAFORMA"
-                    ? "border-slate-900 bg-slate-50 text-slate-900 shadow-md"
-                    : "border-slate-100 bg-white text-slate-400 hover:border-slate-200"
+                    ? "border-slate-900 dark:border-slate-100 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-white shadow-md"
+                    : "border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-400 dark:text-slate-500 hover:border-slate-200 dark:hover:border-zinc-700"
                 }`}
               >
-                <Shield size={24} className={form.tipo === "PLATAFORMA" ? "text-slate-900" : "text-slate-300"} />
+                <Shield size={24} className={form.tipo === "PLATAFORMA" ? "text-slate-900 dark:text-white" : "text-slate-300 dark:text-slate-600"} />
                 <span className="text-xs font-black uppercase tracking-tighter">Plataforma</span>
               </button>
 
@@ -131,28 +131,28 @@ export function ApiKeyModal({ isOpen, onClose, onSubmit, totems, isSaving, initi
                 onClick={() => setForm({ ...form, tipo: "TOTEM" })}
                 className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all gap-2 ${
                   form.tipo === "TOTEM"
-                    ? "border-slate-900 bg-slate-50 text-slate-900 shadow-md"
-                    : "border-slate-100 bg-white text-slate-400 hover:border-slate-200"
+                    ? "border-slate-900 dark:border-slate-100 bg-slate-50 dark:bg-zinc-800 text-slate-900 dark:text-white shadow-md"
+                    : "border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-400 dark:text-slate-500 hover:border-slate-200 dark:hover:border-zinc-700"
                 }`}
               >
-                <TabletSmartphone size={24} className={form.tipo === "TOTEM" ? "text-slate-900" : "text-slate-300"} />
+                <TabletSmartphone size={24} className={form.tipo === "TOTEM" ? "text-slate-900 dark:text-white" : "text-slate-300 dark:text-slate-600"} />
                 <span className="text-xs font-black uppercase tracking-tighter">Tótem</span>
               </button>
             </div>
 
             {form.tipo === "TOTEM" && (
               <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">
+                <label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block">
                   Seleccionar Tótem
                 </label>
                 <select
                   value={form.totem_id}
                   onChange={(e) => setForm({ ...form, totem_id: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-slate-900/10 focus:bg-white transition-all shadow-sm appearance-none"
+                  className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 focus:bg-white dark:focus:bg-zinc-900 transition-all shadow-sm appearance-none"
                 >
                   <option value="">Selecciona un equipo...</option>
                   {totems.map((t) => (
-                    <option key={t.id} value={t.id}>
+                    <option key={t.id} value={t.id} className="dark:bg-zinc-900">
                       {t.identificador} ({t.direccion})
                     </option>
                   ))}
@@ -165,17 +165,17 @@ export function ApiKeyModal({ isOpen, onClose, onSubmit, totems, isSaving, initi
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+              className="flex-1 px-6 py-3.5 rounded-xl text-sm font-bold bg-slate-800 dark:bg-zinc-800 text-white hover:bg-slate-700 dark:hover:bg-zinc-700 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="flex-1 px-6 py-3.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 disabled:opacity-50"
+              className="flex-1 px-6 py-3.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-white transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 dark:shadow-white/10 disabled:opacity-50"
             >
               {isSaving ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-white/30 dark:border-slate-900/30 border-t-white dark:border-t-slate-900 rounded-full animate-spin" />
               ) : (
                 <>
                   <CheckCircle2 size={18} />

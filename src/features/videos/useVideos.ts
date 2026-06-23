@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { apiFetch } from "@/lib/api";
 import { getSocket } from "@/lib/socketClient";
 
@@ -6,14 +6,28 @@ export function useVideos() {
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchVideos = async (silent = false) => {
+    // Abort previous request if it exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Create a new AbortController for this request
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       if (!silent) setLoading(true);
       setError(null);
-      const data = await apiFetch("/videos");
+      const data = await apiFetch("/videos", { signal: controller.signal });
       setVideos(Array.isArray(data) ? data : []);
     } catch (err: any) {
+      if (err.name === 'AbortError') {
+        console.log("Fetch videos aborted");
+        return;
+      }
       console.error("Error fetching videos:", err);
       if (!silent) {
         setError(err.message || "Error al cargar videos");
@@ -26,6 +40,12 @@ export function useVideos() {
 
   useEffect(() => {
     fetchVideos();
+    return () => {
+      // Clean up by aborting any pending request when component unmounts
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, []);
 
   // Escuchar actualizaciones en tiempo real vía WebSockets

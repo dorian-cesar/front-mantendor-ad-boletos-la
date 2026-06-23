@@ -62,9 +62,10 @@ export function useTotems(options?: UseTotemsOptions) {
   
   // Tracks pending local status changes to avoid overwriting optimistic updates
   const pendingStatusRef = useRef<Map<string, number>>(new Map());
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const loadTotemsData = async () => {
-    const data = await apiFetch("/totems");
+  const loadTotemsData = async (signal?: AbortSignal) => {
+    const data = await apiFetch("/totems", { signal });
     const totemList: Totem[] = Array.isArray(data) ? data : (data.totems || []);
     
     if (data.resumen_global) {
@@ -73,7 +74,7 @@ export function useTotems(options?: UseTotemsOptions) {
 
     let salesData: any[] = [];
     try {
-      const salesResponse = await apiFetch("/ventas/auditoria");
+      const salesResponse = await apiFetch("/ventas/auditoria", { signal });
       salesData = salesResponse.ventas || [];
     } catch (salesErr) {
       console.warn("No se pudieron cargar las ventas para el dashboard de tótems", salesErr);
@@ -83,12 +84,22 @@ export function useTotems(options?: UseTotemsOptions) {
   };
 
   const fetchTotems = async () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       setLoading(true);
       setError(null);
-      const totemsWithData = await loadTotemsData();
+      const totemsWithData = await loadTotemsData(controller.signal);
       setTotems(totemsWithData);
     } catch (err: any) {
+      if (err.name === 'AbortError') {
+        console.log("Fetch totems aborted");
+        return;
+      }
       console.error("Error fetching totems:", err);
       setError(err.message || "Error al cargar equipos");
       setTotems([]);

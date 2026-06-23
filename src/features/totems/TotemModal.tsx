@@ -45,9 +45,9 @@ export function TotemModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40  p-4 animate-in fade-in duration-300 overflow-y-auto">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg my-8 overflow-visible animate-in zoom-in-95 duration-200 mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="bg-slate-900 p-6 flex justify-between items-center text-white rounded-t-3xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 overflow-y-auto">
+      <div className="bg-white dark:bg-zinc-950 rounded-3xl shadow-2xl w-full max-w-lg my-8 overflow-visible animate-in zoom-in-95 duration-200 mx-4 max-h-[90vh] overflow-y-auto border border-transparent dark:border-zinc-800">
+        <div className="bg-slate-900 dark:bg-black p-6 flex justify-between items-center text-white rounded-t-3xl border-b border-transparent dark:border-zinc-800">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white/10 rounded-xl">
               <Plus size={24} />
@@ -65,7 +65,7 @@ export function TotemModal({
         <div className="p-8 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-1">
-              <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">
+              <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 px-1">
                 ID (Opcional)
               </label>
               <input
@@ -73,11 +73,11 @@ export function TotemModal({
                 placeholder="Ej: 105"
                 value={form.id || ""}
                 onChange={(e) => setForm({ ...form, id: e.target.value })}
-                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-slate-900/10 focus:border-slate-900 focus:bg-white transition-all shadow-sm outline-none"
+                className="w-full px-5 py-3.5 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-2xl text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-slate-900/10 dark:focus:ring-white/10 focus:border-slate-900 dark:focus:border-white focus:bg-white dark:focus:bg-zinc-950 transition-all shadow-sm outline-none"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">
+              <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 px-1">
                 Identificador del Tótem
               </label>
               <input
@@ -85,13 +85,13 @@ export function TotemModal({
                 placeholder="Ej: Terminal Alameda - Totem 5"
                 value={form.identificador}
                 onChange={(e) => setForm({ ...form, identificador: e.target.value })}
-                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-slate-900/10 focus:border-slate-900 focus:bg-white transition-all shadow-sm outline-none"
+                className="w-full px-5 py-3.5 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-2xl text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-slate-900/10 dark:focus:ring-white/10 focus:border-slate-900 dark:focus:border-white focus:bg-white dark:focus:bg-zinc-950 transition-all shadow-sm outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">
+            <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 px-1">
               Dirección / Ubicación Física
             </label>
             <input
@@ -99,7 +99,7 @@ export function TotemModal({
               placeholder="Ej: Av. Libertador 1234, Local 45"
               value={form.direccion}
               onChange={(e) => setForm({ ...form, direccion: e.target.value })}
-              className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-slate-900/10 focus:border-slate-900 focus:bg-white transition-all shadow-sm outline-none"
+              className="w-full px-5 py-3.5 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-2xl text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-slate-900/10 dark:focus:ring-white/10 focus:border-slate-900 dark:focus:border-white focus:bg-white dark:focus:bg-zinc-950 transition-all shadow-sm outline-none"
             />
           </div>
 
@@ -112,7 +112,7 @@ export function TotemModal({
             />
             
             {form.video_ids && form.video_ids.length > 0 && (
-              <div className="border-t border-slate-100 pt-4">
+              <div className="border-t border-slate-100 dark:border-zinc-800 pt-4">
                 <VideosListDisplay
                   videos={videos}
                   empresas={empresas}
@@ -132,14 +132,14 @@ export function TotemModal({
           <div className="flex gap-4 pt-4">
             <button
               onClick={onClose}
-              className="flex-1 py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold hover:bg-slate-50 transition-all active:scale-[0.98]"
+              className="flex-1 py-4 bg-slate-800 dark:bg-zinc-800 border border-transparent text-white rounded-2xl font-bold hover:bg-slate-700 dark:hover:bg-zinc-700 transition-all active:scale-[0.98]"
             >
               Cancelar
             </button>
             <button
               onClick={onSave}
               disabled={isSaving || !form.identificador || !form.direccion}
-              className="flex-[2] py-4 bg-slate-900 hover:bg-black text-white rounded-2xl font-bold shadow-xl shadow-slate-900/30 transition-all flex items-center justify-center gap-2 transform active:scale-[0.98] disabled:opacity-50"
+              className="flex-[2] py-4 bg-slate-900 dark:bg-slate-100 hover:bg-black dark:hover:bg-white text-white dark:text-slate-900 rounded-2xl font-bold shadow-xl shadow-slate-900/30 dark:shadow-white/10 transition-all flex items-center justify-center gap-2 transform active:scale-[0.98] disabled:opacity-50"
             >
               {isSaving ? <Loader2 size={20} className="animate-spin" /> : <>Registrar Equipo</>}
             </button>

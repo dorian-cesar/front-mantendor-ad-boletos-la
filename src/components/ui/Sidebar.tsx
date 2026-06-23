@@ -1,7 +1,8 @@
-import { LogOut, TabletSmartphone, Building, Video, Key, ShoppingCart, Menu, X, Loader2 } from "lucide-react";
+import { LogOut, TabletSmartphone, Building, Video, Key, ShoppingCart, Menu, X, Loader2, Moon, Sun } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { useTheme } from "next-themes";
 
 interface SidebarItemProps {
   icon: React.ReactNode;
@@ -16,14 +17,14 @@ function SidebarItem({ icon, label, href, active }: SidebarItemProps) {
       href={href}
       className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[15px] font-medium transition-all ${
         active
-          ? "bg-slate-900 text-white shadow-md shadow-slate-900/10"
-          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+          ? "bg-slate-900 dark:bg-zinc-800 text-white shadow-md shadow-slate-900/10 dark:shadow-black/20"
+          : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-slate-200"
       }`}
     >
       {React.isValidElement(icon) &&
         React.cloneElement(icon as React.ReactElement<any>, {
           size: 20,
-          className: active ? "text-white " : "text-slate-400 ",
+          className: active ? "text-white " : "text-slate-400 dark:text-slate-500",
         })}
       {label}
     </Link>
@@ -37,13 +38,19 @@ export function Sidebar() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = () => {
     setIsLoggingOut(true);
     setTimeout(() => {
       localStorage.removeItem("token");
       router.push("/login");
-    }, 500); // Pequeño retraso para que la animación del loader sea visible
+    }, 500);
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -87,7 +94,7 @@ export function Sidebar() {
       {/* Mobile Hamburger Button */}
       <button 
         onClick={() => setIsOpenMobile(true)}
-        className="md:hidden fixed bottom-6 right-6 z-40 bg-slate-900 text-white p-3.5 rounded-full shadow-xl shadow-slate-900/30 hover:scale-105 active:scale-95 transition-all"
+        className="md:hidden fixed bottom-6 right-6 z-40 bg-slate-900 dark:bg-zinc-800 text-white p-3.5 rounded-full shadow-xl shadow-slate-900/30 hover:scale-105 active:scale-95 transition-all"
       >
         <Menu size={24} />
       </button>
@@ -102,7 +109,7 @@ export function Sidebar() {
 
       <aside
         style={{ width: typeof window !== 'undefined' && window.innerWidth < 768 ? '280px' : `${sidebarWidth}px` }}
-        className={`fixed md:relative inset-y-0 left-0 z-50 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 transition-transform duration-300 md:translate-x-0 ${
+        className={`fixed md:relative inset-y-0 left-0 z-50 bg-white dark:bg-zinc-950 border-r border-slate-200 dark:border-zinc-800/60 flex flex-col justify-between flex-shrink-0 transition-transform duration-300 md:translate-x-0 ${
           isOpenMobile ? "translate-x-0" : "-translate-x-full"
         } ${isDragging ? "md:transition-none select-none" : "md:transition-none"}`}
       >
@@ -112,20 +119,20 @@ export function Sidebar() {
         >
         <div
           className={`w-[3px] h-full transition-colors ${
-            isDragging ? "bg-slate-400" : "bg-transparent group-hover:bg-slate-200"
+            isDragging ? "bg-slate-400 dark:bg-zinc-600" : "bg-transparent group-hover:bg-slate-200 dark:group-hover:bg-zinc-800"
           }`}
         />
       </div>
 
       <div className="overflow-hidden whitespace-nowrap w-full">
-        <div className="h-16 flex items-center justify-between px-6 border-b border-slate-100 mb-6">
+        <div className="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-zinc-800/60 mb-6">
           <img 
             src="/assets/logo-wit-mini-dark.png" 
             alt="WIT Logo" 
-            className="h-8 w-auto object-contain"
+            className="h-8 w-auto object-contain dark:invert"
           />
           <button 
-            className="md:hidden text-slate-400 hover:text-slate-700" 
+            className="md:hidden text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300" 
             onClick={() => setIsOpenMobile(false)}
           >
             <X size={24} />
@@ -166,11 +173,29 @@ export function Sidebar() {
         </nav>
       </div>
 
-      <div className="p-4 border-t border-slate-200 overflow-hidden whitespace-nowrap w-full">
+      <div className="p-4 border-t border-slate-200 dark:border-zinc-800/60 overflow-hidden whitespace-nowrap w-full flex flex-col gap-2">
+        <button
+          onClick={() => {
+            console.log("Toggle theme clicked, current:", theme);
+            setTheme(theme === "dark" ? "light" : "dark");
+          }}
+          className="flex items-center gap-3 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors w-full px-2 py-2 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800/50"
+        >
+          {!mounted ? (
+            <div className="w-4 h-4" /> // placeholder
+          ) : theme === "dark" ? (
+            <Sun size={18} />
+          ) : (
+            <Moon size={18} />
+          )}
+          <span className="text-sm font-medium">
+            {!mounted ? "Cargando..." : theme === "dark" ? "Modo Claro" : "Modo Oscuro"}
+          </span>
+        </button>
         <button 
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className="flex items-center gap-3 text-slate-500 hover:text-slate-800 transition-colors w-full px-2 py-2 rounded-md hover:bg-slate-50 disabled:opacity-70 disabled:cursor-not-allowed"
+          className="flex items-center gap-3 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors w-full px-2 py-2 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800/50 disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isLoggingOut ? <Loader2 size={18} className="animate-spin" /> : <LogOut size={18} />}
           <span className="text-sm font-medium">{isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}</span>

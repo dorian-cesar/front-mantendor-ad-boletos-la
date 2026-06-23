@@ -43,32 +43,32 @@ export function ConfirmModal({
 
       {/* Modal */}
       <div
-        className="relative bg-white rounded-2xl shadow-2xl shadow-slate-900/20 max-w-md w-full p-6 animate-in zoom-in-95 duration-200 fade-in"
+        className="relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl shadow-slate-900/20 dark:shadow-black/40 border border-slate-200 dark:border-zinc-800 max-w-md w-full p-6 animate-in zoom-in-95 duration-200 fade-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Icon */}
         <div
           className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 mx-auto ${
             variant === "danger"
-              ? "bg-red-50 border border-red-100"
-              : "bg-amber-50 border border-amber-100"
+              ? "bg-red-500 border border-red-600"
+              : "bg-amber-500 border border-amber-600"
           }`}
         >
           {variant === "danger" ? (
-            <Trash2 size={26} className="text-red-500" />
+            <Trash2 size={26} className="text-white" />
           ) : (
-            <AlertTriangle size={26} className="text-amber-500" />
+            <AlertTriangle size={26} className="text-white" />
           )}
         </div>
 
-        <h3 className="text-lg font-bold text-slate-900 text-center mb-2">{title}</h3>
-        <p className="text-sm text-slate-500 text-center leading-relaxed mb-7">{message}</p>
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white text-center mb-2">{title}</h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400 text-center leading-relaxed mb-7">{message}</p>
 
         <div className="flex gap-3">
           <button
             onClick={onCancel}
             disabled={isLoading}
-            className="flex-1 py-2.5 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-colors disabled:opacity-50"
+            className="flex-1 py-2.5 px-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
           >
             {cancelLabel}
           </button>

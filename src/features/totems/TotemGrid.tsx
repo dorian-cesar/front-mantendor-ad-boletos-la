@@ -75,36 +75,36 @@ export function TotemGrid({
         return (
           <div
             key={t.id}
-            className={`bg-white rounded-2xl border ${
+            className={`bg-white dark:bg-zinc-900 rounded-2xl border ${
               isEditing
-                ? "border-slate-900 ring-4 ring-slate-900/10 scale-[1.02] shadow-xl relative z-10"
-                : "border-slate-200 hover:shadow-md"
+                ? "border-slate-900 dark:border-slate-100 ring-4 ring-slate-900/10 dark:ring-white/10 scale-[1.02] shadow-xl relative z-10"
+                : "border-slate-200 dark:border-zinc-800/60 hover:shadow-md"
             } shadow-sm transition-all flex flex-col overflow-hidden group`}
           >
             {isEditing ? (
               <div className="p-5 flex-1 flex flex-col gap-4">
-                <div className="flex justify-between items-center mb-1 border-b border-slate-100 pb-3">
-                  <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                <div className="flex justify-between items-center mb-1 border-b border-slate-100 dark:border-zinc-800/60 pb-3">
+                  <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <Edit size={16} /> Editando Equipo
                   </h3>
                   <StatusBadge status={editForm.status === true || editForm.status === "Activo" ? "Activo" : "Inactivo"} />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-500 mb-1 block">Identificador</label>
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 block">Identificador</label>
                   <input
                     value={editForm.identificador}
                     onChange={(e) => setEditForm({ ...editForm, identificador: e.target.value })}
-                    className="w-full text-sm font-medium border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-900/40 outline-none bg-slate-50 focus:bg-white transition-colors"
+                    className="w-full text-sm font-medium border border-slate-300 dark:border-zinc-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-900/40 dark:focus:ring-white/20 outline-none bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-zinc-900 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-500 mb-1 block">Dirección / Ubicación</label>
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 block">Dirección / Ubicación</label>
                   <input
                     value={editForm.direccion}
                     onChange={(e) => setEditForm({ ...editForm, direccion: e.target.value })}
-                    className="w-full text-sm font-medium border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-slate-900/40 bg-slate-50 focus:bg-white transition-colors"
+                    className="w-full text-sm font-medium border border-slate-300 dark:border-zinc-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-slate-900/40 dark:focus:ring-white/20 bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-zinc-900 transition-colors"
                   />
                 </div>
 
@@ -129,19 +129,19 @@ export function TotemGrid({
                       // Este botón abrirá el modal simplificado que pidió el usuario
                       (window as any).openVideoPicker(t.id, editForm.video_ids);
                     }}
-                    className="w-full py-5 mt-2 bg-slate-100 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-2 text-slate-800 hover:bg-slate-200 transition-all group"
+                    className="w-full py-5 mt-2 bg-slate-100 dark:bg-zinc-800 border-2 border-dashed border-slate-200 dark:border-zinc-700 rounded-2xl flex flex-col items-center justify-center gap-2 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all group"
                   >
-                    <div className="p-3 bg-white rounded-xl shadow-sm text-slate-900 group-hover:scale-110 transition-transform">
+                    <div className="p-3 bg-white dark:bg-zinc-900 rounded-xl shadow-sm text-slate-900 dark:text-white group-hover:scale-110 transition-transform">
                        <Film size={24} />
                     </div>
                     <span className="text-xs font-black uppercase tracking-widest leading-none">Asignar Contenido Multimedia</span>
-                    <span className="text-[10px] text-slate-400 font-medium">Click para abrir el selector rápido por empresa</span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Click para abrir el selector rápido por empresa</span>
                   </button>
 
-                <div className="flex gap-2 mt-auto pt-4 border-t border-slate-100">
+                <div className="flex gap-2 mt-auto pt-4 border-t border-slate-100 dark:border-zinc-800">
                   <button
                     onClick={onCancelEdit}
-                    className="flex-1 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-lg text-sm font-bold flex justify-center items-center gap-2 hover:bg-slate-50 transition-colors shadow-sm"
+                    className="flex-1 py-2.5 bg-slate-800 dark:bg-zinc-800 border border-transparent text-white rounded-lg text-sm font-bold flex justify-center items-center gap-2 hover:bg-slate-700 dark:hover:bg-zinc-700 transition-colors shadow-sm"
                   >
                     Cancelar
                   </button>
@@ -157,17 +157,17 @@ export function TotemGrid({
               </div>
             ) : (
               <div className="flex h-full min-h-[200px]">
-                <button
-                  onClick={() => onEdit(t)}
-                  className="w-2/5 bg-slate-50 border-r border-slate-100 flex flex-col items-center justify-center gap-3 hover:bg-slate-100 group/icon transition-all duration-300 relative overflow-hidden"
-                  title="Haga clic para modificar el tótem"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-slate-400/0 via-slate-400/0 to-slate-400/0 group-hover/icon:from-slate-400/5 group-hover/icon:to-transparent transition-all duration-500" />
-                  <div className="p-5 rounded-3xl bg-white shadow-sm border border-slate-100 text-slate-400 group-hover/icon:text-slate-900 group-hover/icon:scale-110 group-hover/icon:shadow-md transition-all duration-500 z-10">
-                    <MonitorSmartphone size={44} strokeWidth={1.5} />
-                  </div>
-                </button>
-                <div className="flex-1 p-5 flex flex-col justify-between bg-white">
+                  <button
+                    onClick={() => onEdit(t)}
+                    className="w-2/5 bg-slate-50 dark:bg-zinc-800/30 border-r border-slate-100 dark:border-zinc-800/60 flex flex-col items-center justify-center gap-3 hover:bg-slate-100 dark:hover:bg-zinc-800/70 group/icon transition-all duration-300 relative overflow-hidden"
+                    title="Haga clic para modificar el tótem"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-400/0 via-slate-400/0 to-slate-400/0 group-hover/icon:from-slate-400/5 dark:group-hover/icon:from-white/5 group-hover/icon:to-transparent transition-all duration-500" />
+                    <div className="p-5 rounded-3xl bg-white dark:bg-zinc-800 shadow-sm border border-slate-100 dark:border-zinc-700 text-slate-400 dark:text-slate-500 group-hover/icon:text-slate-900 dark:group-hover/icon:text-white group-hover/icon:scale-110 group-hover/icon:shadow-md transition-all duration-500 z-10">
+                      <MonitorSmartphone size={44} strokeWidth={1.5} />
+                    </div>
+                  </button>
+                  <div className="flex-1 p-5 flex flex-col justify-between bg-white dark:bg-zinc-900">
                   <div>
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex flex-col gap-1.5">
@@ -197,17 +197,17 @@ export function TotemGrid({
                         )}
                       </div>
                     </div>
-                    <h3 className="font-bold text-slate-800 text-[16px] leading-tight mb-4 group-hover:text-slate-900 transition-colors line-clamp-2">
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100 text-[16px] leading-tight mb-4 group-hover:text-slate-900 dark:group-hover:text-white transition-colors line-clamp-2">
                       {t.identificador}
                     </h3>
                   </div>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-end border-b border-slate-50 pb-3">
+                    <div className="flex justify-between items-end border-b border-slate-50 dark:border-zinc-800/50 pb-3">
                       <div>
-                        <span className="text-[9px] font-bold text-slate-400 block mb-0.5 tracking-wider uppercase">
+                        <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-0.5 tracking-wider uppercase">
                           Recaudado
                         </span>
-                        <span className="text-xl font-black text-slate-800 tracking-tight">
+                        <span className="text-xl font-black text-slate-800 dark:text-white tracking-tight">
                           ${(t.revenue || 0).toLocaleString("es-CL")}
                         </span>
                       </div>
@@ -216,23 +216,23 @@ export function TotemGrid({
                     {/* Transacciones y Boletos */}
                     {(t.total_transacciones > 0 || t.boletos_vendidos > 0) && (
                       <div className="grid grid-cols-2 gap-2">
-                        <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-2 text-center">
-                          <p className="text-sm font-black text-emerald-700">{t.total_transacciones || 0}</p>
-                          <p className="text-[8px] font-bold text-emerald-500 uppercase tracking-wider">Transacciones</p>
+                        <div className="bg-emerald-500 rounded-lg p-2 text-center shadow-sm">
+                          <p className="text-sm font-black text-white">{t.total_transacciones || 0}</p>
+                          <p className="text-[8px] font-bold text-emerald-100 uppercase tracking-wider">Transacciones</p>
                         </div>
-                        <div className="bg-blue-50 border border-blue-100 rounded-lg p-2 text-center">
-                          <p className="text-sm font-black text-blue-700">{t.boletos_vendidos || 0}</p>
-                          <p className="text-[8px] font-bold text-blue-500 uppercase tracking-wider">Boletos</p>
+                        <div className="bg-blue-500 rounded-lg p-2 text-center shadow-sm">
+                          <p className="text-sm font-black text-white">{t.boletos_vendidos || 0}</p>
+                          <p className="text-[8px] font-bold text-blue-100 uppercase tracking-wider">Boletos</p>
                         </div>
                       </div>
                     )}
 
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                        <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
                           <Terminal size={10} /> Ubicación
                         </span>
-                        <span className="text-[10px] text-slate-700 font-bold bg-slate-50 px-2 py-0.5 rounded border border-slate-100 max-w-[100px] truncate">
+                        <span className="text-[10px] text-slate-700 dark:text-slate-300 font-bold bg-slate-50 dark:bg-zinc-800/50 px-2 py-0.5 rounded border border-slate-100 dark:border-zinc-700 max-w-[100px] truncate">
                           {t.direccion}
                         </span>
                       </div>
@@ -240,10 +240,10 @@ export function TotemGrid({
                     {/* Video count badge */}
                     {(t.video_ids?.length > 0 || t.videos?.length > 0) && (
                       <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                        <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
                           <Film size={10} /> Videos
                         </span>
-                        <span className="text-[10px] text-white font-bold bg-slate-900 px-2 py-0.5 rounded border border-slate-900">
+                        <span className="text-[10px] text-white font-bold bg-slate-800 dark:bg-slate-700 px-2 py-0.5 rounded border border-transparent shadow-sm">
                           {t.video_ids?.length || t.videos?.length || 0} asignado{(t.video_ids?.length || t.videos?.length || 0) !== 1 ? 's' : ''}
                         </span>
                       </div>
@@ -251,30 +251,30 @@ export function TotemGrid({
                     {/* Empresa count badge */}
                     {(t.empresa_ids?.length > 0 || t.empresas?.length > 0) && (
                       <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                        <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
                           <Building size={10} /> Empresas
                         </span>
-                        <span className="text-[10px] text-slate-900 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                        <span className="text-[10px] text-white font-bold bg-slate-800 dark:bg-slate-700 px-2 py-0.5 rounded border border-transparent shadow-sm">
                           {t.empresa_ids?.length || t.empresas?.length || 0} asignada{(t.empresa_ids?.length || t.empresas?.length || 0) !== 1 ? 's' : ''}
                         </span>
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between py-2 border-t border-slate-50">
-                      <span className="text-[10px] font-bold text-slate-500 flex flex-col">
+                    <div className="flex items-center justify-between py-2 border-t border-slate-100 dark:border-zinc-800">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-300 flex flex-col">
                         <span>Bloquear Protector</span>
-                        <span className="text-[8px] font-normal text-slate-400">Mantener pantalla activa</span>
+                        <span className="text-[8px] font-normal text-slate-400 dark:text-slate-500">Mantener pantalla activa</span>
                       </span>
                       <button
                         onClick={() => onToggleBlockScreenSaver(t.id, t.block_screen_saver || false)}
-                        className={`w-9 h-5 flex items-center rounded-full p-1 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-slate-900/20 ${t.block_screen_saver ? 'bg-emerald-500' : 'bg-slate-200'}`}
+                        className={`w-9 h-5 flex items-center rounded-full p-1 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-slate-900/20 ${t.block_screen_saver ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-700'}`}
                         title="Alternar protector de pantalla"
                       >
                         <div className={`bg-white w-3.5 h-3.5 rounded-full shadow-sm transform transition-transform duration-300 ${t.block_screen_saver ? 'translate-x-[16px]' : 'translate-x-0'}`} />
                       </button>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-50">
+                    <div className="pt-2 border-t border-slate-100 dark:border-zinc-800">
                        <VideosListDisplay 
                          videos={allVideos} 
                          empresas={empresas} 
@@ -286,7 +286,7 @@ export function TotemGrid({
                       {onStats && (
                         <button
                           onClick={() => onStats(t)}
-                          className="flex-1 py-2 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-lg transition-colors flex items-center justify-center gap-2"
+                          className="flex-1 py-2 text-[11px] font-bold text-white bg-emerald-600 border border-emerald-700 hover:bg-emerald-700 rounded-lg transition-colors flex items-center justify-center gap-2"
                         >
                           <BarChart3 size={12} /> Diagnóstico
                         </button>
@@ -294,10 +294,10 @@ export function TotemGrid({
                       {onToggleStatus && (
                         <button
                           onClick={() => onToggleStatus(t.id, t.status === true || t.status === "Activo")}
-                          className={`flex-1 py-2 text-[11px] font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                          className={`flex-1 py-2 text-[11px] font-bold text-white rounded-lg transition-colors flex items-center justify-center gap-2 border ${
                             t.status === true || t.status === "Activo"
-                              ? "text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100"
-                              : "text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100"
+                              ? "bg-amber-600 border-amber-700 hover:bg-amber-700"
+                              : "bg-emerald-600 border-emerald-700 hover:bg-emerald-700"
                           }`}
                         >
                           <Power size={12} />

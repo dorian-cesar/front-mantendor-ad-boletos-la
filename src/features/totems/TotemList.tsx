@@ -71,10 +71,10 @@ export function TotemList({
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto animate-in fade-in duration-300 transition-colors">
+    <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-slate-200 dark:border-zinc-800 overflow-x-auto animate-in fade-in duration-300 transition-colors">
       <table className="w-full min-w-[900px] text-left text-sm border-collapse">
         <thead>
-          <tr className="bg-slate-50  border-b border-slate-200  text-slate-600 ">
+          <tr className="bg-slate-50 dark:bg-zinc-800/80 border-b border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-slate-400">
             <th className="py-3 px-5 font-semibold w-12 text-center"></th>
             <th className="py-3 px-5 font-semibold w-24">ID</th>
             <th className="py-3 px-5 font-semibold">TERMINAL / UBICACIÓN</th>
@@ -95,15 +95,15 @@ export function TotemList({
                 onClick={() => toggleExpand(t.id)}
                 className={`border-b transition-colors cursor-pointer group select-none ${
                   expandedId === t.id 
-                    ? "bg-slate-50  border-slate-200 " 
-                    : "border-slate-100  hover:bg-slate-50 "
+                    ? "bg-slate-50 dark:bg-zinc-800/50 border-slate-200 dark:border-zinc-700" 
+                    : "border-slate-100 dark:border-zinc-800/60 hover:bg-slate-50 dark:hover:bg-zinc-800/30"
                 }`}
               >
-                <td className="py-3.5 px-5 text-slate-400 group-hover:text-slate-900 transition-colors">
+                <td className="py-3.5 px-5 text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
                   {expandedId === t.id ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </td>
-                <td className="py-3.5 px-5 font-bold text-slate-950  flex items-center gap-2 text-xs">
-                  <Hash size={10} className="text-slate-900 " />
+                <td className="py-3.5 px-5 font-bold text-slate-950 dark:text-slate-100 flex items-center gap-2 text-xs">
+                  <Hash size={10} className="text-slate-900 dark:text-slate-300" />
                   {t.id.toString().substring(0, 8)}
                   {t.ultimo_error_critico && (
                     <div title={`Error Crítico: ${t.ultimo_error_critico}`} className="text-red-500 animate-pulse ml-1">
@@ -113,27 +113,27 @@ export function TotemList({
                 </td>
                 <td className="py-3.5 px-5">
                   <div className="flex flex-col">
-                    <span className="font-bold text-slate-800 ">{t.identificador}</span>
-                    <span className="text-[10px] text-slate-400  font-bold uppercase">{t.direccion}</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{t.identificador}</span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">{t.direccion}</span>
                   </div>
                 </td>
                 <td className="py-3.5 px-5">
                   {t.ultima_telemetria ? (
                     <div className="flex flex-col items-center gap-1.5">
                       <div className="flex items-center justify-center gap-2.5 text-[10px] font-bold">
-                        <div className="flex items-center gap-1 text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded shadow-sm" title="Uso de CPU">
-                          <Cpu size={12} className="text-slate-400" /> 
+                        <div className="flex items-center gap-1 bg-slate-600 dark:bg-zinc-800 text-white px-1.5 py-0.5 rounded shadow-sm border border-transparent dark:border-zinc-700" title="Uso de CPU">
+                          <Cpu size={12} className="text-slate-200 dark:text-slate-400" /> 
                           {t.ultima_telemetria.hardware?.cpu_usage_percent !== undefined ? `${t.ultima_telemetria.hardware.cpu_usage_percent}%` : '--'}
                         </div>
-                        <div className="flex items-center gap-1 text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded shadow-sm" title="Uso de RAM">
-                          <Database size={12} className="text-slate-400" />
+                        <div className="flex items-center gap-1 bg-slate-600 dark:bg-zinc-800 text-white px-1.5 py-0.5 rounded shadow-sm border border-transparent dark:border-zinc-700" title="Uso de RAM">
+                          <Database size={12} className="text-slate-200 dark:text-slate-400" />
                           {t.ultima_telemetria.hardware?.ram_total_mb && t.ultima_telemetria.hardware?.ram_available_mb 
                             ? `${Math.round(((t.ultima_telemetria.hardware.ram_total_mb - t.ultima_telemetria.hardware.ram_available_mb) / t.ultima_telemetria.hardware.ram_total_mb) * 100)}%` 
                             : '--'}
                         </div>
                       </div>
                       <div className="flex items-center justify-between w-full gap-1">
-                        <div className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-sm w-full text-center tracking-wider ${t.ultima_telemetria.perifericos?.printer_connected === false ? 'bg-red-50 text-red-500 border border-red-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
+                        <div className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-sm w-full text-center tracking-wider text-white ${t.ultima_telemetria.perifericos?.printer_connected === false ? 'bg-red-500 border border-red-600' : 'bg-emerald-500 border border-emerald-600'}`}>
                           {t.ultima_telemetria.perifericos?.printer_connected === false ? '⚠️ Impresora Error' : '🖨️ Impresora OK'}
                         </div>
                         {t.ultima_telemetria_ts && (
@@ -178,19 +178,19 @@ export function TotemList({
                     )}
                   </div>
                 </td>
-                <td className="py-3.5 px-5 font-semibold text-slate-600  text-right pr-6 transition-colors">
-                  {t.sales || 0} <span className="text-xs text-slate-400  font-normal ml-0.5">uni.</span>
+                <td className="py-3.5 px-5 font-semibold text-slate-600 dark:text-slate-300 text-right pr-6 transition-colors">
+                  {t.sales || 0} <span className="text-xs text-slate-400 dark:text-slate-500 font-normal ml-0.5">uni.</span>
                 </td>
                 <td className="py-3.5 px-5 font-semibold text-emerald-600 text-right pr-6">
                   ${(t.revenue || 0).toLocaleString("es-CL")}
                 </td>
                 <td className="py-3.5 px-5 text-center">
-                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-100 rounded-lg text-xs font-black text-emerald-700">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-500 border border-emerald-600 rounded-lg text-xs font-black text-white shadow-sm">
                     {t.total_transacciones || 0}
                   </span>
                 </td>
                 <td className="py-3.5 px-5 text-center">
-                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-100 rounded-lg text-xs font-black text-blue-700">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500 border border-blue-600 rounded-lg text-xs font-black text-white shadow-sm">
                     {t.boletos_vendidos || 0}
                   </span>
                 </td>
@@ -199,7 +199,7 @@ export function TotemList({
                   {onStats && (
                     <button
                       onClick={(e) => { e.stopPropagation(); onStats(t); }}
-                      className="p-1.5 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-lg transition-colors text-emerald-600"
+                      className="p-1.5 bg-emerald-600 border border-emerald-700 hover:bg-emerald-700 rounded-lg transition-colors text-white"
                       title="Ver diagnóstico"
                     >
                       <BarChart3 size={14} />
@@ -208,47 +208,47 @@ export function TotemList({
                 </td>
               </tr>
               {expandedId === t.id && (
-                <tr className="bg-slate-50/50 border-b border-slate-200">
+                <tr className="bg-slate-50/50 dark:bg-zinc-950/50 border-b border-slate-200 dark:border-zinc-800">
                   <td colSpan={10} className="p-0">
                     {editingId === t.id ? (
                       <div className="px-4 md:px-16 py-8 animate-in slide-in-from-top-2 duration-200 fade-in">
-                        <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-4 md:p-6 max-w-4xl mx-auto flex flex-col gap-6">
-                          <div className="flex justify-between items-center border-b border-slate-100 pb-4">
-                            <h3 className="font-bold text-slate-900 flex items-center gap-2 text-lg">
+                        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xl p-4 md:p-6 max-w-4xl mx-auto flex flex-col gap-6">
+                          <div className="flex justify-between items-center border-b border-slate-100 dark:border-zinc-800/60 pb-4">
+                            <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-lg">
                               <Edit size={20} /> Editando Configuración: {t.id}
                             </h3>
                             <StatusBadge status={editForm.status === true || editForm.status === "Activo" ? "Activo" : "Inactivo"} />
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="md:col-span-2">
-                              <label className="text-xs font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">
+                              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block uppercase tracking-wider">
                                 Identificador del Equipo
                               </label>
                               <input
                                 value={editForm.identificador}
                                 onChange={(e) => setEditForm({ ...editForm, identificador: e.target.value })}
-                                className="w-full text-sm font-medium border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 outline-none bg-slate-50 focus:bg-white transition-all shadow-sm"
+                                className="w-full text-sm font-medium border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 focus:border-slate-900 dark:focus:border-zinc-500 outline-none bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-zinc-900 transition-all shadow-sm"
                               />
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">Estado Operativo</label>
+                                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block uppercase tracking-wider">Estado Operativo</label>
                                 <select 
                                     value={editForm.status}
                                     onChange={e => setEditForm({...editForm, status: e.target.value})}
-                                    className="w-full text-sm font-medium border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-slate-900/10 bg-slate-50 focus:bg-white transition-all shadow-sm cursor-pointer"
+                                    className="w-full text-sm font-medium border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-zinc-900 transition-all shadow-sm cursor-pointer"
                                 >
                                     <option value="Activo">Activo</option>
                                     <option value="Inactivo">Inactivo</option>
                                 </select>
                             </div>
                             <div className="md:col-span-3">
-                              <label className="text-xs font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">
+                              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block uppercase tracking-wider">
                                 Dirección / Ubicación Física
                               </label>
                               <input
                                 value={editForm.direccion}
                                 onChange={(e) => setEditForm({ ...editForm, direccion: e.target.value })}
-                                className="w-full text-sm font-medium border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-slate-900/10 bg-slate-50 focus:bg-white transition-all shadow-sm"
+                                className="w-full text-sm font-medium border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-zinc-900 transition-all shadow-sm"
                               />
                             </div>
                             <div className="md:col-span-3">
@@ -270,26 +270,26 @@ export function TotemList({
                                   onClick={() => {
                                     (window as any).openVideoPicker(t.id, editForm.video_ids);
                                   }}
-                                  className="w-full py-5 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-2 text-slate-600 hover:bg-slate-100/50 hover:border-slate-300 transition-all group"
+                                  className="w-full py-5 bg-slate-50 dark:bg-zinc-800 border-2 border-dashed border-slate-200 dark:border-zinc-700 rounded-2xl flex flex-col items-center justify-center gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-zinc-800/80 hover:border-slate-300 dark:hover:border-zinc-600 transition-all group"
                                 >
-                                  <div className="p-3 bg-white rounded-xl shadow-sm text-slate-800 group-hover:scale-110 transition-transform">
+                                  <div className="p-3 bg-white dark:bg-zinc-900 rounded-xl shadow-sm text-slate-800 dark:text-white group-hover:scale-110 transition-transform">
                                     <Film size={28} />
                                   </div>
                                   <span className="text-xs font-black uppercase tracking-widest leading-none">Asignar Contenido Multimedia</span>
-                                  <span className="text-[10px] text-slate-400 font-medium">Click para abrir el selector rápido por empresa</span>
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Click para abrir el selector rápido por empresa</span>
                                 </button>
                           </div>
-                          <div className="flex gap-3 mt-6 border-t border-slate-100 pt-6">
+                          <div className="flex gap-3 mt-6 border-t border-slate-100 dark:border-zinc-800/60 pt-6">
                             <button
                               onClick={onCancelEdit}
-                              className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-bold flex justify-center items-center gap-2 hover:bg-slate-50 transition-colors shadow-sm"
+                              className="px-6 py-2.5 bg-slate-800 dark:bg-zinc-800 border border-transparent text-white rounded-xl text-sm font-bold flex justify-center items-center gap-2 hover:bg-slate-700 dark:hover:bg-zinc-700 transition-colors shadow-sm"
                             >
                               Cancelar
                             </button>
                             <button
                               onClick={() => onSave(t.id)}
                               disabled={isSaving}
-                              className="flex-1 py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition-all active:scale-[0.98] shadow-md shadow-slate-900/20 disabled:opacity-50"
+                              className="flex-1 py-2.5 bg-slate-900 dark:bg-slate-100 hover:bg-black dark:hover:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition-all active:scale-[0.98] shadow-md shadow-slate-900/20 dark:shadow-white/10 disabled:opacity-50"
                             >
                               {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
                               Guardar Cambios
@@ -300,24 +300,24 @@ export function TotemList({
                     ) : (
                       <div className="px-6 md:px-16 py-6 flex flex-col md:flex-row gap-6 md:gap-10 md:items-start animate-in slide-in-from-top-2 duration-200 fade-in">
                         <div className="flex items-start gap-3 w-full md:w-1/4">
-                          <div className="bg-white p-2 rounded-xl border border-slate-200 shadow-sm text-slate-700 mt-1">
+                          <div className="bg-white dark:bg-zinc-900 p-2 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm text-slate-700 dark:text-slate-300 mt-1">
                             <Terminal size={18} strokeWidth={2.5} />
                           </div>
                           <div>
-                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                            <h4 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
                               Información Técnica
                             </h4>
-                            <p className="text-sm text-slate-800 font-medium">Dir: {t.direccion}</p>
-                            <p className="text-xs text-slate-500 mt-0.5">ID: {t.id}</p>
+                            <p className="text-sm text-slate-800 dark:text-slate-200 font-medium">Dir: {t.direccion}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">ID: {t.id}</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-3 w-full md:w-1/4">
-                            <div className="bg-white p-2 rounded-xl border border-slate-200 shadow-sm text-slate-700 mt-1">
+                            <div className="bg-white dark:bg-zinc-900 p-2 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm text-slate-700 dark:text-slate-300 mt-1">
                                 <DollarSign size={18} strokeWidth={2.5}/>
                             </div>
                             <div>
-                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Transacciones</h4>
-                                <p className="text-sm text-slate-800 font-medium">Recaudado: ${(t.revenue || 0).toLocaleString('es-CL')}</p>
+                                <h4 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Transacciones</h4>
+                                <p className="text-sm text-slate-800 dark:text-slate-200 font-medium">Recaudado: ${(t.revenue || 0).toLocaleString('es-CL')}</p>
                             </div>
                         </div>
                         {/* Videos assigned section */}
@@ -331,7 +331,7 @@ export function TotemList({
                         <div className="w-full md:w-1/4 flex flex-row md:flex-col gap-2">
                           <button
                             onClick={() => onEdit(t)}
-                            className="text-xs font-semibold px-4 py-2.5 border border-slate-200 bg-white hover:bg-slate-50 hover:text-slate-900 text-slate-700 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
+                            className="text-xs font-semibold px-4 py-2.5 border border-transparent bg-slate-800 dark:bg-zinc-800 hover:bg-slate-700 dark:hover:bg-zinc-700 text-white rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
                           >
                             <Edit size={14} /> Modificar Tótem
                           </button>
@@ -340,8 +340,8 @@ export function TotemList({
                               onClick={() => onToggleStatus(t.id, t.status === true || t.status === "Activo")}
                               className={`text-xs font-semibold px-4 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 ${
                                 t.status === true || t.status === "Activo"
-                                  ? "text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100"
-                                  : "text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100"
+                                  ? "text-white bg-amber-600 border border-amber-700 hover:bg-amber-700"
+                                  : "text-white bg-emerald-600 border border-emerald-700 hover:bg-emerald-700"
                               }`}
                             >
                               <Power size={14} />

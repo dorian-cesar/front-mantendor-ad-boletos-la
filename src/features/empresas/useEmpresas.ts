@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { apiFetch } from "@/lib/api";
 import { getSocket } from "@/lib/socketClient";
 
@@ -6,14 +6,28 @@ export function useEmpresas() {
   const [empresas, setEmpresas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchEmpresas = async (silent = false) => {
+    // Abort previous request if it exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Create a new AbortController for this request
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       if (!silent) setLoading(true);
       setError(null);
-      const data = await apiFetch("/empresas");
+      const data = await apiFetch("/empresas", { signal: controller.signal });
       setEmpresas(Array.isArray(data) ? data : []);
     } catch (err: any) {
+      if (err.name === 'AbortError') {
+        console.log("Fetch empresas aborted");
+        return;
+      }
       console.error("Error fetching empresas:", err);
       if (!silent) {
         setError(err.message || "Error al cargar empresas");

@@ -58,22 +58,22 @@ export function CompanyVideoPickerModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60  animate-in fade-in duration-300">
-      <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300 mx-4">
+      <div className="bg-white dark:bg-zinc-950 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300 mx-4 border border-transparent dark:border-zinc-800">
         
         {/* Header */}
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
+        <div className="p-6 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between bg-gradient-to-r from-slate-50 dark:from-zinc-900 to-white dark:to-zinc-950">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-lg shadow-slate-900/20">
+            <div className="w-10 h-10 rounded-2xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/20 dark:shadow-white/10">
               <Building size={20} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Gestionar por Empresa</h3>
-              <p className="text-xs text-slate-500 font-medium tracking-tight">Agrega o quita contenido de un socio específico.</p>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-white">Gestionar por Empresa</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">Agrega o quita contenido de un socio específico.</p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 transition-colors"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl text-slate-400 transition-colors"
           >
             <X size={20} />
           </button>
@@ -84,10 +84,10 @@ export function CompanyVideoPickerModal({
           {/* Step 1: Select Company */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+               <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                 Paso 1: Selecciona la Empresa
               </label>
-              <span className="text-[10px] font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+              <span className="text-[10px] font-bold text-white bg-slate-500 px-2 py-0.5 rounded-full border border-transparent">
                 {tempSelection.length} videos en total
               </span>
             </div>
@@ -100,16 +100,16 @@ export function CompanyVideoPickerModal({
                     onClick={() => setSelectedEmpresaId(String(e.id))}
                     className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all relative ${
                       selectedEmpresaId === String(e.id)
-                        ? "bg-slate-900 border-slate-900 ring-4 ring-slate-900/10 text-white"
-                        : "bg-white border-slate-200 text-slate-600 hover:border-slate-400 hover:bg-slate-50/50"
+                        ? "bg-slate-900 dark:bg-white border-slate-900 dark:border-white ring-4 ring-slate-900/10 dark:ring-white/10 text-white dark:text-slate-900"
+                        : "bg-white dark:bg-zinc-950 border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-zinc-600 hover:bg-slate-50/50 dark:hover:bg-zinc-900"
                     }`}
                   >
                     {countInSelection > 0 && (
-                      <span className={`absolute top-2 right-2 w-4 h-4 rounded-full ${selectedEmpresaId === String(e.id) ? 'bg-white text-slate-900' : 'bg-slate-900 text-white'} text-[8px] flex items-center justify-center font-bold shadow-sm`}>
+                      <span className={`absolute top-2 right-2 w-4 h-4 rounded-full ${selectedEmpresaId === String(e.id) ? 'bg-white text-slate-900 dark:bg-slate-900 dark:text-white' : 'bg-slate-500 text-white'} text-[8px] flex items-center justify-center font-bold shadow-sm`}>
                         {countInSelection}
                       </span>
                     )}
-                    <Building size={16} className={selectedEmpresaId === String(e.id) ? "text-white" : "text-slate-400"} />
+                    <Building size={16} className={selectedEmpresaId === String(e.id) ? "text-white dark:text-slate-900" : "text-slate-400 dark:text-slate-500"} />
                     <span className="text-[11px] font-bold mt-2 truncate w-full px-1">{e.nombre}</span>
                   </button>
                 );
@@ -120,9 +120,9 @@ export function CompanyVideoPickerModal({
           {/* Step 2: Select Videos */}
           {selectedEmpresaId && (
             <div className="flex-1 flex flex-col gap-4 min-h-0 animate-in slide-in-from-bottom-2 duration-300">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-t border-slate-100 pt-5 gap-3">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-t border-slate-100 dark:border-zinc-800 pt-5 gap-3">
                 <div className="flex flex-col">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                  <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                     Paso 2: Gestionar Videos ({filteredVideos.length} disponibles)
                   </label>
                   <p className="text-[10px] text-slate-400 ml-1 mt-0.5 flex items-center gap-1">
@@ -130,18 +130,18 @@ export function CompanyVideoPickerModal({
                   </p>
                 </div>
                 <div className="relative w-full md:w-48">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                   <input 
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Filtrar por nombre..."
-                    className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-slate-900 outline-none transition-all"
+                    className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-slate-900 dark:focus:ring-white outline-none transition-all text-slate-900 dark:text-white"
                   />
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2 scrollbar-thin scrollbar-thumb-slate-200">
+              <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-zinc-800">
                 {filteredVideos.map(v => {
                   const isChecked = tempSelection.includes(String(v.id));
                   const isInactive = v.status === false;
@@ -152,32 +152,32 @@ export function CompanyVideoPickerModal({
                       onClick={() => toggleVideo(String(v.id))}
                       className={`flex items-center gap-3 p-3 rounded-2xl border transition-all text-left group ${
                         isChecked
-                          ? "bg-slate-900 border-slate-900 ring-2 ring-slate-900/10 shadow-sm"
-                          : "bg-white border-slate-200 hover:border-slate-400"
+                          ? "bg-slate-900 dark:bg-white border-slate-900 dark:border-white ring-2 ring-slate-900/10 dark:ring-white/10 shadow-sm"
+                          : "bg-white dark:bg-zinc-950 border-slate-200 dark:border-zinc-800 hover:border-slate-400 dark:hover:border-zinc-600"
                       } ${isInactive && !isChecked ? "opacity-60" : ""}`}
                     >
                       <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
                         isChecked
-                          ? "bg-white text-slate-900 border-white"
-                          : "border-slate-200 group-hover:border-slate-400"
+                          ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-white dark:border-slate-900"
+                          : "border-slate-200 dark:border-zinc-700 group-hover:border-slate-400 dark:group-hover:border-zinc-500"
                       }`}>
-                        {isChecked ? <CheckCircle2 size={14} strokeWidth={3} /> : <Film size={12} className="text-slate-300" />}
+                        {isChecked ? <CheckCircle2 size={14} strokeWidth={3} /> : <Film size={12} className="text-slate-300 dark:text-slate-600" />}
                       </div>
                       <div className="flex-1">
                          <div className="flex items-center gap-2">
-                            <p className={`text-xs font-bold ${isChecked ? "text-white" : "text-slate-700"}`}>
+                            <p className={`text-xs font-bold ${isChecked ? "text-white dark:text-slate-900" : "text-slate-700 dark:text-slate-300"}`}>
                               {v.nombre}
                             </p>
                             {isInactive && (
-                              <span className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm ${isChecked ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>
+                              <span className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm bg-slate-500 text-white`}>
                                 <AlertTriangle size={8} /> Inactivo
                               </span>
                             )}
                          </div>
-                         <p className="text-[10px] text-slate-400">ID: {v.id}</p>
+                         <p className={`text-[10px] ${isChecked ? "text-slate-300 dark:text-slate-600" : "text-slate-400"}`}>ID: {v.id}</p>
                       </div>
                       {isChecked && (
-                        <span className={`text-[9px] font-black uppercase tracking-tighter px-2 py-1 rounded ${isChecked ? "bg-white/10 text-white" : "bg-slate-100 text-slate-800"}`}>
+                        <span className={`text-[9px] font-black uppercase tracking-tighter px-2 py-1 rounded bg-slate-600 text-white`}>
                           En Playlist
                         </span>
                       )}
@@ -196,8 +196,8 @@ export function CompanyVideoPickerModal({
           )}
 
           {!selectedEmpresaId && (
-            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-slate-300 py-10 opacity-30">
-               <div className="p-6 rounded-full border-4 border-dashed border-slate-200">
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-slate-300 dark:text-slate-600 py-10 opacity-50 dark:opacity-30">
+               <div className="p-6 rounded-full border-4 border-dashed border-slate-200 dark:border-zinc-800">
                   <PlusCircle size={48} />
                </div>
                <p className="font-bold">Selecciona una empresa arriba para ver sus videos</p>
@@ -206,22 +206,22 @@ export function CompanyVideoPickerModal({
         </div>
 
         {/* Footer */}
-        <div className="p-4 md:p-6 bg-slate-50 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-slate-500">
-            <span className="text-xs font-bold bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">
+        <div className="p-4 md:p-6 bg-slate-50 dark:bg-zinc-950 border-t border-slate-100 dark:border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-bold bg-slate-600 text-white px-3 py-1 rounded-full border border-transparent shadow-sm">
                {tempSelection.length} videos en total para el equipo
             </span>
           </div>
           <div className="flex gap-3 w-full md:w-auto">
              <button
                onClick={onClose}
-               className="flex-1 md:flex-none px-6 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-800 transition-colors"
+               className="flex-1 md:flex-none px-6 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
              >
                Cancelar
              </button>
              <button
                onClick={handleConfirm}
-               className="flex-1 md:flex-none px-8 py-2.5 bg-slate-900 hover:bg-black text-white rounded-2xl text-sm font-bold shadow-xl shadow-slate-900/20 transition-all flex items-center justify-center gap-2 transform active:scale-[0.98]"
+               className="flex-1 md:flex-none px-8 py-2.5 bg-slate-900 dark:bg-slate-100 hover:bg-black dark:hover:bg-white text-white dark:text-slate-900 rounded-2xl text-sm font-bold shadow-xl shadow-slate-900/20 dark:shadow-white/10 transition-all flex items-center justify-center gap-2 transform active:scale-[0.98]"
              >
                Actualizar Playlist
                <ChevronRight size={18} />

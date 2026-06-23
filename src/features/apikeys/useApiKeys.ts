@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { apiFetch } from "@/lib/api";
 import { getSocket } from "@/lib/socketClient";
 
@@ -7,14 +7,28 @@ export function useApiKeys() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchApiKeys = async (silent = false) => {
+    // Abort previous request if it exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Create a new AbortController for this request
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       if (!silent) setLoading(true);
       setError(null);
-      const data = await apiFetch("/api-keys");
+      const data = await apiFetch("/api-keys", { signal: controller.signal });
       setApiKeys(Array.isArray(data) ? data : []);
     } catch (err: any) {
+      if (err.name === 'AbortError') {
+        console.log("Fetch api keys aborted");
+        return;
+      }
       console.error("Error fetching API keys:", err);
       if (!silent) {
         setError(err.message || "Error al cargar las llaves");

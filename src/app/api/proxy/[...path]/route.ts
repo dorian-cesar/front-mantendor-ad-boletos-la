@@ -106,6 +106,17 @@ async function handleRequest(request: NextRequest, path: string[]) {
     // Implementar un timeout de 60 segundos
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 60000);
+    
+    // Si el cliente (navegador) cancela la petición, abortamos la conexión al backend
+    if (request.signal) {
+      request.signal.addEventListener('abort', () => {
+        controller.abort();
+      });
+      if (request.signal.aborted) {
+        controller.abort();
+      }
+    }
+    
     fetchOptions.signal = controller.signal;
 
     let response: Response | null = null;
