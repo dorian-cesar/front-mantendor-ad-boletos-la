@@ -345,6 +345,49 @@ export function SalesDashboard() {
               </div>
             </div>
 
+            {/* Pagination Controls */}
+            <div className="px-8 py-4 border-b border-slate-100 dark:border-zinc-800 bg-slate-50/30 dark:bg-zinc-800/30 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3 text-xs font-bold text-slate-500 dark:text-slate-400">
+                  <span>Mostrar</span>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => {
+                      setPageSize(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-lg outline-none cursor-pointer hover:border-slate-300 dark:hover:border-zinc-600 transition-colors"
+                  >
+                    <option value={100}>100</option>
+                    <option value={200}>200</option>
+                    <option value={300}>300</option>
+                    <option value={400}>400</option>
+                  </select>
+                  <span>registros por página</span>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-zinc-700 hover:text-slate-900 dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-zinc-700 hover:text-slate-900 dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                </div>
+            </div>
+
             <div className="overflow-x-auto w-full">
               <table className="w-full text-left border-collapse min-w-[800px]">
                 <thead>
@@ -469,51 +512,6 @@ export function SalesDashboard() {
                 </tbody>
               </table>
             </div>
-
-            {/* Pagination Controls */}
-            {sortedSales.length > 0 && (
-              <div className="px-8 py-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50/30 dark:bg-zinc-800/30 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3 text-xs font-bold text-slate-500 dark:text-slate-400">
-                  <span>Mostrar</span>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => {
-                      setPageSize(Number(e.target.value));
-                      setCurrentPage(1);
-                    }}
-                    className="px-2 py-1.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-lg outline-none cursor-pointer hover:border-slate-300 dark:hover:border-zinc-600 transition-colors"
-                  >
-                    <option value={100}>100</option>
-                    <option value={200}>200</option>
-                    <option value={300}>300</option>
-                    <option value={400}>400</option>
-                  </select>
-                  <span>registros por página</span>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                    Página {currentPage} de {totalPages}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-zinc-700 hover:text-slate-900 dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <ChevronLeft size={18} />
-                    </button>
-                    <button
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-zinc-700 hover:text-slate-900 dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <ChevronRight size={18} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </main>
