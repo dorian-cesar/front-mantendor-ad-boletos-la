@@ -370,6 +370,14 @@ export function SalesDashboard() {
                         <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Cargando transacciones...</p>
                       </td>
                     </tr>
+                  ) : error ? (
+                    <tr>
+                      <td colSpan={6} className="py-20 text-center">
+                        <XCircle className="mx-auto text-red-500 mb-4" size={48} />
+                        <p className="text-sm font-bold text-red-500 uppercase tracking-widest">Error al cargar datos</p>
+                        <p className="text-xs font-medium text-slate-500 mt-2">{error}</p>
+                      </td>
+                    </tr>
                   ) : sortedSales.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-20 text-center">
