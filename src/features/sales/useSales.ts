@@ -53,8 +53,14 @@ export function useSales() {
 
       const { startDate, endDate, totem_id } = currentFilters;
       const params = new URLSearchParams();
-      if (startDate) params.append("fecha_inicio", startDate);
-      if (endDate) params.append("fecha_fin", endDate);
+      if (startDate) {
+        // Enviar fecha de inicio a las 00:00
+        params.append("fecha_inicio", `${startDate}T00:00:00.000Z`);
+      }
+      if (endDate) {
+        // Enviar fecha de fin a las 23:59:59 para incluir todo el día
+        params.append("fecha_fin", `${endDate}T23:59:59.999Z`);
+      }
       if (totem_id) params.append("totem_id", totem_id);
       
       const queryStr = params.toString() ? `?${params.toString()}` : "";
