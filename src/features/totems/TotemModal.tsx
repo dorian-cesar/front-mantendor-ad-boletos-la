@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, Plus, Loader2, Building, Film } from "lucide-react";
+import { X, Plus, Edit, Loader2, Building, Film } from "lucide-react";
 import { useEmpresas } from '@/features/empresas/useEmpresas';
 import { VideoSelector } from "./VideoSelector";
 import { VideosListDisplay } from "./VideosListDisplay";
@@ -50,11 +50,11 @@ export function TotemModal({
         <div className="bg-slate-900 dark:bg-black p-6 flex justify-between items-center text-white rounded-t-3xl border-b border-transparent dark:border-zinc-800">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white/10 rounded-xl">
-              <Plus size={24} />
+              {form.id ? <Edit size={24} /> : <Plus size={24} />}
             </div>
             <div>
-              <h3 className="text-xl font-bold">Nuevo Terminal</h3>
-              <p className="text-slate-300 text-xs font-medium tracking-tight">Registrar equipo en la red</p>
+              <h3 className="text-xl font-bold">{form.id ? "Editar Terminal" : "Nuevo Terminal"}</h3>
+              <p className="text-slate-300 text-xs font-medium tracking-tight">{form.id ? `Modificando equipo ${form.identificador || form.id}` : "Registrar equipo en la red"}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">

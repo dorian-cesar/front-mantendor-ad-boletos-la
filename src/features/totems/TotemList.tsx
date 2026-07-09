@@ -10,6 +10,7 @@ interface TotemListProps {
   expandedId: string | null;
   toggleExpand: (id: string) => void;
   editingId: string | null;
+  loadingEditId?: string | null;
   editForm: any;
   setEditForm: (form: any) => void;
   onEdit: (totem: any) => void;
@@ -31,6 +32,7 @@ export function TotemList({
   expandedId,
   toggleExpand,
   editingId,
+  loadingEditId,
   editForm,
   setEditForm,
   onEdit,
@@ -236,94 +238,6 @@ export function TotemList({
               {expandedId === t.id && (
                 <tr className="bg-slate-50/50 dark:bg-zinc-950/50 border-b border-slate-200 dark:border-zinc-800">
                   <td colSpan={10} className="p-0">
-                    {editingId === t.id ? (
-                      <div className="px-4 md:px-16 py-8 animate-in slide-in-from-top-2 duration-200 fade-in">
-                        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xl p-4 md:p-6 max-w-4xl mx-auto flex flex-col gap-6">
-                          <div className="flex justify-between items-center border-b border-slate-100 dark:border-zinc-800/60 pb-4">
-                            <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-lg">
-                              <Edit size={20} /> Editando Configuración: {t.id}
-                            </h3>
-                            <StatusBadge status={editForm.status === true || editForm.status === "Activo" ? "Activo" : "Inactivo"} />
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="md:col-span-2">
-                              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block uppercase tracking-wider">
-                                Identificador del Equipo
-                              </label>
-                              <input
-                                value={editForm.identificador}
-                                onChange={(e) => setEditForm({ ...editForm, identificador: e.target.value })}
-                                className="w-full text-sm font-medium border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 focus:border-slate-900 dark:focus:border-zinc-500 outline-none bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-zinc-900 transition-all shadow-sm"
-                              />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block uppercase tracking-wider">Estado Operativo</label>
-                                <select 
-                                    value={editForm.status}
-                                    onChange={e => setEditForm({...editForm, status: e.target.value})}
-                                    className="w-full text-sm font-medium border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-zinc-900 transition-all shadow-sm cursor-pointer"
-                                >
-                                    <option value="Activo">Activo</option>
-                                    <option value="Inactivo">Inactivo</option>
-                                </select>
-                            </div>
-                            <div className="md:col-span-3">
-                              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 block uppercase tracking-wider">
-                                Dirección / Ubicación Física
-                              </label>
-                              <input
-                                value={editForm.direccion}
-                                onChange={(e) => setEditForm({ ...editForm, direccion: e.target.value })}
-                                className="w-full text-sm font-medium border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-zinc-900 transition-all shadow-sm"
-                              />
-                            </div>
-                            <div className="md:col-span-3">
-                              <VideosListDisplay
-                                videos={allVideos}
-                                empresas={empresas}
-                                videoIds={editForm.video_ids || []}
-                                onReorder={(newOrder) => setEditForm((prev: any) => ({ ...prev, video_ids: newOrder }))}
-                                onRemove={(videoId) => {
-                                  const newIds = (editForm.video_ids || []).filter((id: string) => String(id) !== String(videoId));
-                                  const remainingVideos = allVideos.filter(v => newIds.includes(String(v.id)));
-                                  const newEmpresaIds = Array.from(new Set(remainingVideos.map(v => String(v.empresa_id))));
-                                  setEditForm((prev: any) => ({ ...prev, video_ids: newIds, empresa_ids: newEmpresaIds }));
-                                }}
-                              />
-                            </div>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    (window as any).openVideoPicker(t.id, editForm.video_ids);
-                                  }}
-                                  className="w-full py-5 bg-slate-50 dark:bg-zinc-800 border-2 border-dashed border-slate-200 dark:border-zinc-700 rounded-2xl flex flex-col items-center justify-center gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-zinc-800/80 hover:border-slate-300 dark:hover:border-zinc-600 transition-all group"
-                                >
-                                  <div className="p-3 bg-white dark:bg-zinc-900 rounded-xl shadow-sm text-slate-800 dark:text-white group-hover:scale-110 transition-transform">
-                                    <Film size={28} />
-                                  </div>
-                                  <span className="text-xs font-black uppercase tracking-widest leading-none">Asignar Contenido Multimedia</span>
-                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Click para abrir el selector rápido por empresa</span>
-                                </button>
-                          </div>
-                          <div className="flex gap-3 mt-6 border-t border-slate-100 dark:border-zinc-800/60 pt-6">
-                            <button
-                              onClick={onCancelEdit}
-                              className="px-6 py-2.5 bg-slate-800 dark:bg-zinc-800 border border-transparent text-white rounded-xl text-sm font-bold flex justify-center items-center gap-2 hover:bg-slate-700 dark:hover:bg-zinc-700 transition-colors shadow-sm"
-                            >
-                              Cancelar
-                            </button>
-                            <button
-                              onClick={() => onSave(t.id)}
-                              disabled={isSaving}
-                              className="flex-1 py-2.5 bg-slate-900 dark:bg-slate-100 hover:bg-black dark:hover:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition-all active:scale-[0.98] shadow-md shadow-slate-900/20 dark:shadow-white/10 disabled:opacity-50"
-                            >
-                              {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                              Guardar Cambios
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
                       <div className="px-6 md:px-16 py-6 flex flex-col md:flex-row gap-6 md:gap-10 md:items-start animate-in slide-in-from-top-2 duration-200 fade-in">
                         <div className="flex items-start gap-3 w-full md:w-1/4">
                           <div className="bg-white dark:bg-zinc-900 p-2 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm text-slate-700 dark:text-slate-300 mt-1">
@@ -357,9 +271,22 @@ export function TotemList({
                         <div className="w-full md:w-1/4 flex flex-row md:flex-col gap-2">
                           <button
                             onClick={() => onEdit(t)}
-                            className="text-xs font-semibold px-4 py-2.5 border border-transparent bg-slate-800 dark:bg-zinc-800 hover:bg-slate-700 dark:hover:bg-zinc-700 text-white rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
+                            disabled={loadingEditId === t.id}
+                            className={`text-xs font-semibold px-4 py-2.5 border border-transparent rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2 ${
+                              loadingEditId === t.id 
+                                ? "bg-slate-300 dark:bg-zinc-700/50 text-slate-500 dark:text-slate-400 cursor-not-allowed" 
+                                : "bg-slate-800 dark:bg-zinc-800 hover:bg-slate-700 dark:hover:bg-zinc-700 text-white"
+                            }`}
                           >
-                            <Edit size={14} /> Modificar Tótem
+                            {loadingEditId === t.id ? (
+                              <>
+                                <Loader2 size={14} className="animate-spin" /> Cargando...
+                              </>
+                            ) : (
+                              <>
+                                <Edit size={14} /> Modificar Tótem
+                              </>
+                            )}
                           </button>
                           {onToggleStatus && (
                             <button
@@ -376,7 +303,6 @@ export function TotemList({
                           )}
                         </div>
                       </div>
-                    )}
                   </td>
                 </tr>
               )}

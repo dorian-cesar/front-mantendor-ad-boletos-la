@@ -78,6 +78,7 @@ export function TotemDashboard() {
 
   // States for Edit Mode
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [loadingEditId, setLoadingEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ 
     identificador: "", 
     direccion: "", 
@@ -198,30 +199,35 @@ export function TotemDashboard() {
   }, [videos, totems, editingId, editForm.video_ids]);
 
   const onEditClick = async (t: any) => {
-    const backendEmpresaIds = t.empresa_ids?.map(String) || t.empresas?.map((e: any) => String(e.id)) || [];
+    setLoadingEditId(t.id);
+    try {
+      const backendEmpresaIds = t.empresa_ids?.map(String) || t.empresas?.map((e: any) => String(e.id)) || [];
 
-    // Intentar obtener la playlist ordenada del servidor
-    const playlist = await fetchPlaylist(String(t.id));
-    
-    let activeVideoIds: string[];
-    if (playlist.length > 0) {
-      // Ordenar por el campo 'orden' y extraer los IDs
-      const sorted = [...playlist].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
-      activeVideoIds = sorted.map((p: any) => String(p.id || p.video_id));
-    } else {
-      activeVideoIds = t.video_ids?.map(String) || t.videos?.map((v: any) => String(v.id)) || [];
+      // Intentar obtener la playlist ordenada del servidor
+      const playlist = await fetchPlaylist(String(t.id));
+      
+      let activeVideoIds: string[];
+      if (playlist.length > 0) {
+        // Ordenar por el campo 'orden' y extraer los IDs
+        const sorted = [...playlist].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+        activeVideoIds = sorted.map((p: any) => String(p.id || p.video_id));
+      } else {
+        activeVideoIds = t.video_ids?.map(String) || t.videos?.map((v: any) => String(v.id)) || [];
+      }
+
+      setEditingId(t.id);
+      setEditForm({
+        identificador: t.identificador || "",
+        direccion: t.direccion || "",
+        latitud: t.latitud || 0,
+        longitud: t.longitud || 0,
+        status: t.status || "Activo",
+        video_ids: activeVideoIds,
+        empresa_ids: backendEmpresaIds
+      });
+    } finally {
+      setLoadingEditId(null);
     }
-
-    setEditingId(t.id);
-    setEditForm({
-      identificador: t.identificador || "",
-      direccion: t.direccion || "",
-      latitud: t.latitud || 0,
-      longitud: t.longitud || 0,
-      status: t.status || "Activo",
-      video_ids: activeVideoIds,
-      empresa_ids: backendEmpresaIds
-    });
   };
 
   const onSaveEdit = async (id: string) => {
@@ -542,6 +548,7 @@ export function TotemDashboard() {
               expandedId={expandedTotemId}
               toggleExpand={(id) => setExpandedTotemId(expandedTotemId === id ? null : id)}
               editingId={editingId}
+              loadingEditId={loadingEditId}
               editForm={editForm}
               setEditForm={setEditForm}
               onEdit={onEditClick}
@@ -561,6 +568,7 @@ export function TotemDashboard() {
               totems={filteredTotems}
               loading={loading}
               editingId={editingId}
+              loadingEditId={loadingEditId}
               editForm={editForm}
               setEditForm={setEditForm}
               onEdit={onEditClick}
@@ -585,6 +593,16 @@ export function TotemDashboard() {
         form={createForm}
         setForm={setCreateForm}
         onSave={onCreateNew}
+        isSaving={isSaving}
+        videos={videos}
+      />
+
+      <TotemModal
+        isOpen={editingId !== null}
+        onClose={() => setEditingId(null)}
+        form={{ ...editForm, id: editingId || undefined }}
+        setForm={setEditForm}
+        onSave={() => editingId && onSaveEdit(editingId)}
         isSaving={isSaving}
         videos={videos}
       />
