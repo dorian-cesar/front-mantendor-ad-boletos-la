@@ -74,7 +74,7 @@ export function TotemDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedTotemId, setExpandedTotemId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
-  const [kpiFilter, setKpiFilter] = useState<"all" | "activos" | "inactivos" | "online" | "offline">("all");
+  const [kpiFilter, setKpiFilter] = useState<"all" | "activos" | "inactivos" | "online" | "offline" | "reposo">("all");
 
   // States for Edit Mode
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -120,7 +120,7 @@ export function TotemDashboard() {
       if (kpiFilter === "activos") return t.status === "Activo" || t.status === true;
       if (kpiFilter === "inactivos") return t.status !== "Activo" && t.status !== true;
       
-      const getIsTotemSleepingFilter = (t: Totem) => {
+      const getIsTotemSleepingFilter = (t: any) => {
         if (!t.is_online) return false;
         let telem;
         try {
@@ -141,7 +141,7 @@ export function TotemDashboard() {
   const totemsActivos = totems.filter(t => t.status === "Activo" || t.status === true).length;
   const totemsInactivos = totems.length - totemsActivos;
 
-  const getIsTotemSleeping = (t: Totem) => {
+  const getIsTotemSleeping = (t: any) => {
     if (!t.is_online) return false;
     let telem;
     try {
