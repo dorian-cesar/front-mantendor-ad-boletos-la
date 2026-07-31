@@ -17,6 +17,7 @@ interface TotemListProps {
   onSave: (id: string) => void;
   onDelete: (id: string) => void;
   onToggleBlockScreenSaver: (id: string, currentValue: boolean) => void;
+  onToggleModoPrueba?: (id: string, currentValue: boolean) => void;
   isSaving: boolean;
   onCancelEdit: () => void;
   allVideos: any[];
@@ -39,6 +40,7 @@ export function TotemList({
   onSave,
   onDelete,
   onToggleBlockScreenSaver,
+  onToggleModoPrueba,
   isSaving,
   onCancelEdit,
   allVideos,
@@ -82,6 +84,7 @@ export function TotemList({
             <th className="py-3 px-5 font-semibold">TERMINAL / UBICACIÓN</th>
             <th className="py-3 px-5 font-semibold w-44 text-center">TELEMETRÍA (HW)</th>
             <th className="py-3 px-5 font-semibold w-24 text-center text-[10px] uppercase leading-tight">Bloquear<br/>Protector</th>
+            <th className="py-3 px-5 font-semibold w-24 text-center text-[10px] uppercase leading-tight">Modo<br/>Prueba</th>
             <th className="py-3 px-5 font-semibold w-40 text-center">CONEXIÓN</th>
             <th className="py-3 px-5 font-semibold w-40 text-right pr-6">TICKETS HOY</th>
             <th className="py-3 px-5 font-semibold w-40 text-right pr-6">RECAUDACIÓN</th>
@@ -162,6 +165,22 @@ export function TotemList({
                       title="Mantener pantalla activa"
                     >
                       <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${t.block_screen_saver ? 'translate-x-[16px]' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+                </td>
+                <td className="py-3.5 px-5">
+                  <div className="flex justify-center items-center">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onToggleModoPrueba) {
+                          onToggleModoPrueba(t.id, t.modo_prueba || false);
+                        }
+                      }}
+                      className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-slate-900/20 shadow-inner ${t.modo_prueba ? 'bg-indigo-500' : 'bg-slate-200'}`}
+                      title="Activar Modo Prueba"
+                    >
+                      <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${t.modo_prueba ? 'translate-x-[16px]' : 'translate-x-0'}`} />
                     </button>
                   </div>
                 </td>

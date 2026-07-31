@@ -15,6 +15,7 @@ interface TotemGridProps {
   onSave: (id: string) => void;
   onDelete: (id: string) => void;
   onToggleBlockScreenSaver: (id: string, currentValue: boolean) => void;
+  onToggleModoPrueba?: (id: string, currentValue: boolean) => void;
   isSaving: boolean;
   onCancelEdit: () => void;
   allVideos: any[];
@@ -35,6 +36,7 @@ export function TotemGrid({
   onSave,
   onDelete,
   onToggleBlockScreenSaver,
+  onToggleModoPrueba,
   isSaving,
   onCancelEdit,
   allVideos,
@@ -233,6 +235,24 @@ export function TotemGrid({
                         title="Alternar protector de pantalla"
                       >
                         <div className={`bg-white w-3.5 h-3.5 rounded-full shadow-sm transform transition-transform duration-300 ${t.block_screen_saver ? 'translate-x-[16px]' : 'translate-x-0'}`} />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between py-2 border-t border-slate-100 dark:border-zinc-800">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-300 flex flex-col">
+                        <span>Modo Prueba</span>
+                        <span className="text-[8px] font-normal text-slate-400 dark:text-slate-500">Activar modo de prueba</span>
+                      </span>
+                      <button
+                        onClick={() => {
+                          if (onToggleModoPrueba) {
+                            onToggleModoPrueba(t.id, t.modo_prueba || false)
+                          }
+                        }}
+                        className={`w-9 h-5 flex items-center rounded-full p-1 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-slate-900/20 ${t.modo_prueba ? 'bg-indigo-500' : 'bg-slate-200 dark:bg-zinc-700'}`}
+                        title="Alternar modo de prueba"
+                      >
+                        <div className={`bg-white w-3.5 h-3.5 rounded-full shadow-sm transform transition-transform duration-300 ${t.modo_prueba ? 'translate-x-[16px]' : 'translate-x-0'}`} />
                       </button>
                     </div>
 

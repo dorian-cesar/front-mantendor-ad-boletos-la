@@ -21,6 +21,7 @@ export interface Totem {
   total_transacciones?: number;
   boletos_vendidos?: number;
   block_screen_saver?: boolean;
+  modo_prueba?: boolean;
   playlist?: TotemVideo[];
   videos?: TotemVideo[];
   video_ids?: (string | number)[];

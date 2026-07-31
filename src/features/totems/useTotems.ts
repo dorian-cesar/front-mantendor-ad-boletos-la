@@ -315,6 +315,25 @@ export function useTotems(options?: UseTotemsOptions) {
     }
   };
 
+  const toggleModoPrueba = async (id: string, currentValue: boolean) => {
+    const newValue = !currentValue;
+    setTotems((prev) => 
+      prev.map(t => String(t.id) === String(id) ? { ...t, modo_prueba: newValue } : t)
+    );
+
+    try {
+      await apiFetch(`/totems/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ modo_prueba: newValue }),
+      });
+    } catch (error) {
+      setTotems((prev) => 
+        prev.map(t => String(t.id) === String(id) ? { ...t, modo_prueba: currentValue } : t)
+      );
+      alert("Error al actualizar el modo de prueba");
+    }
+  };
+
   // ============================================================================
   // WebSocket Listeners
   // ============================================================================
@@ -434,6 +453,7 @@ export function useTotems(options?: UseTotemsOptions) {
     handleCreate,
     handleDelete,
     toggleBlockScreenSaver,
+    toggleModoPrueba,
     toggleStatus,
     sendTotemCommand: (totemId: string | number, command: string) => {
       const socket = getSocket();

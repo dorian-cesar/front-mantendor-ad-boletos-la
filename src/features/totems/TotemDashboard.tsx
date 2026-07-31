@@ -9,6 +9,7 @@ import { useEmpresas } from "../empresas/useEmpresas";
 import dynamic from "next/dynamic";
 import { TotemList } from "./TotemList";
 import { TotemGrid } from "./TotemGrid";
+import { Totem } from "./types";
 
 // Lazy Load de Modales para reducir el tamaño del bundle inicial (Performance Optimization)
 const TotemModal = dynamic(() => import("./TotemModal").then(m => m.TotemModal), { ssr: false });
@@ -44,6 +45,7 @@ export function TotemDashboard() {
     handleCreate,
     handleDelete,
     toggleBlockScreenSaver,
+    toggleModoPrueba,
     toggleStatus,
     sendTotemCommand
   } = useTotems({
@@ -556,6 +558,7 @@ export function TotemDashboard() {
               onDelete={(id) => setDeleteTarget(id)}
               onToggleStatus={toggleStatus}
               onToggleBlockScreenSaver={toggleBlockScreenSaver}
+              onToggleModoPrueba={toggleModoPrueba}
               isSaving={isSaving}
               onCancelEdit={() => setEditingId(null)}
               allVideos={videos}
@@ -576,6 +579,7 @@ export function TotemDashboard() {
               onDelete={(id) => setDeleteTarget(id)}
               onToggleStatus={toggleStatus}
               onToggleBlockScreenSaver={toggleBlockScreenSaver}
+              onToggleModoPrueba={toggleModoPrueba}
               isSaving={isSaving}
               onCancelEdit={() => setEditingId(null)}
               allVideos={videos}
