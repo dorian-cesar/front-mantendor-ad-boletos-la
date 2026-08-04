@@ -128,6 +128,7 @@ export function SalesDashboard() {
       "Tótem ID": sale.totem_id,
       "Tickets": (sale.ticket_numbers || []).join(" | "),
       "Monto (Gs)": sale.total_amount || 0,
+      "Tipo POS": (sale.tipo_pos || "pos").toUpperCase(),
       "Estado": sale.status,
       "Operación": sale.operation || "",
       "Proveedor": sale.provider || "",
@@ -435,6 +436,7 @@ export function SalesDashboard() {
                     <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">ID Operación</th>
                     <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Tótem</th>
                     <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Tickets</th>
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Tipo POS</th>
                     <SortableHeader
                       label="Monto"
                       field="total_amount"
@@ -512,6 +514,15 @@ export function SalesDashboard() {
                               </span>
                             ))}
                           </div>
+                        </td>
+                        <td className="px-8 py-5 text-center">
+                          <span className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest border shadow-sm ${
+                            (sale.tipo_pos || "").toLowerCase() === "vpos" 
+                              ? "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800" 
+                              : "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800"
+                          }`}>
+                            {sale.tipo_pos || "POS"}
+                          </span>
                         </td>
                         <td className="px-8 py-5">
                           <span className="text-sm font-black text-slate-900 dark:text-slate-100">

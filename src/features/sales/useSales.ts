@@ -19,6 +19,7 @@ export interface Sale {
   status: string;
   operation: string;
   provider: string;
+  tipo_pos?: string;
   timestamp_operacion: string;
   totem?: {
     identificador: string;
