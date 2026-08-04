@@ -7,6 +7,10 @@ export interface SalesSummary {
   monto_total: number;
   exitosas: number;
   fallidas: number;
+  ventas_vpos?: number;
+  ventas_pos?: number;
+  monto_vpos?: number;
+  monto_pos?: number;
 }
 
 export interface Sale {

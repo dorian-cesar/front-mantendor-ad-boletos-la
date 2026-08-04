@@ -245,6 +245,38 @@ export function SalesDashboard() {
               color="bg-red-500"
               textColor="text-white"
             />
+            <KpiCard
+              title="Monto VPOS"
+              value={`$${(summary?.monto_vpos || 0).toLocaleString("es-CL")}`}
+              subtitle="Ingresos por VPOS"
+              icon={<TrendingUp size={24} />}
+              color="bg-blue-600"
+              textColor="text-white"
+            />
+            <KpiCard
+              title="Transacc. VPOS"
+              value={summary?.ventas_vpos || 0}
+              subtitle="Ventas por VPOS"
+              icon={<ShoppingCart size={24} />}
+              color="bg-white"
+              textColor="text-slate-900"
+            />
+            <KpiCard
+              title="Monto POS"
+              value={`$${(summary?.monto_pos || 0).toLocaleString("es-CL")}`}
+              subtitle="Ingresos por POS Físico"
+              icon={<TrendingUp size={24} />}
+              color="bg-purple-600"
+              textColor="text-white"
+            />
+            <KpiCard
+              title="Transacc. POS"
+              value={summary?.ventas_pos || 0}
+              subtitle="Ventas por POS Físico"
+              icon={<ShoppingCart size={24} />}
+              color="bg-white"
+              textColor="text-slate-900"
+            />
           </div>
 
           {/* Filters Section */}
