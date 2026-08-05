@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 interface LoginResponse {
     token: string;
     message?: string;
-    user?: {
+    usuario?: {
         id: number | string;
         email: string;
         rol?: string;
@@ -59,7 +59,11 @@ export default function LoginView() {
 
             if (data.token) {
                 localStorage.setItem("token", data.token);
-                router.push("/totems");
+                if (data.usuario?.rol === "FINANZAS") {
+                    router.push("/finanzas");
+                } else {
+                    router.push("/totems");
+                }
             } else {
                 throw new Error("Respuesta inválida del servidor: Token no recibido");
             }

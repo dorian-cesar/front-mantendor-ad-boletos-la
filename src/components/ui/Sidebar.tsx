@@ -143,36 +143,40 @@ export function Sidebar() {
         </div>
 
         <nav className="px-4 space-y-1.5">
-          <SidebarItem
-            icon={<TabletSmartphone />} 
-            label="Totem"
-            href="/totems"
-            active={pathname === "/totems"}
-          />
-          <SidebarItem
-            icon={<Building />}
-            label="Empresa"
-            href="/empresas"
-            active={pathname === "/empresas"}
-          />
-          <SidebarItem
-            icon={<Video />}
-            label="Videos"
-            href="/videos"
-            active={pathname === "/videos"}
-          />
-          <SidebarItem
-            icon={<ShoppingCart />}
-            label="Ventas"
-            href="/ventas"
-            active={pathname === "/ventas"}
-          />
-          <SidebarItem
-            icon={<Key />}
-            label="API Keys"
-            href="/api-keys"
-            active={pathname === "/api-keys"}
-          />
+          {userRole !== 'FINANZAS' && (
+            <>
+              <SidebarItem
+                icon={<TabletSmartphone />} 
+                label="Totem"
+                href="/totems"
+                active={pathname === "/totems"}
+              />
+              <SidebarItem
+                icon={<Building />}
+                label="Empresa"
+                href="/empresas"
+                active={pathname === "/empresas"}
+              />
+              <SidebarItem
+                icon={<Video />}
+                label="Videos"
+                href="/videos"
+                active={pathname === "/videos"}
+              />
+              <SidebarItem
+                icon={<ShoppingCart />}
+                label="Ventas"
+                href="/ventas"
+                active={pathname === "/ventas"}
+              />
+              <SidebarItem
+                icon={<Key />}
+                label="API Keys"
+                href="/api-keys"
+                active={pathname === "/api-keys"}
+              />
+            </>
+          )}
           {(userRole === 'ADMIN' || userRole === 'FINANZAS') && (
             <SidebarItem
               icon={<DollarSign />}
