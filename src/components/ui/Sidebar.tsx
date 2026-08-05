@@ -1,8 +1,9 @@
-import { LogOut, TabletSmartphone, Building, Video, Key, ShoppingCart, Menu, X, Loader2, Moon, Sun } from "lucide-react";
+import { LogOut, TabletSmartphone, Building, Video, Key, ShoppingCart, Menu, X, Loader2, Moon, Sun, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { getUserRole } from "@/lib/jwt";
 
 interface SidebarItemProps {
   icon: React.ReactNode;
@@ -40,9 +41,11 @@ export function Sidebar() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setMounted(true);
+    setUserRole(getUserRole());
   }, []);
 
   const handleLogout = () => {
@@ -170,6 +173,14 @@ export function Sidebar() {
             href="/api-keys"
             active={pathname === "/api-keys"}
           />
+          {(userRole === 'ADMIN' || userRole === 'FINANZAS') && (
+            <SidebarItem
+              icon={<DollarSign />}
+              label="Finanzas"
+              href="/finanzas"
+              active={pathname === "/finanzas"}
+            />
+          )}
         </nav>
       </div>
 
