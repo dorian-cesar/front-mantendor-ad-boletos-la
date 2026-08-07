@@ -181,7 +181,7 @@ export function FinanzasDashboard() {
                         </td>
                         <td className="py-4 px-6">
                           <div className="text-sm font-semibold text-slate-900 dark:text-white">{dev.ticket_number}</div>
-                          <div className="text-xs text-slate-500">{dev.pais} • {dev.origen}</div>
+                          <div className="text-xs font-bold text-slate-600 bg-slate-200 dark:bg-zinc-700 w-fit px-2 py-0.5 rounded mt-1">País: {dev.pais} • {dev.origen}</div>
                           {dev.datos_boleto && (
                             <div className="text-xs font-bold text-blue-600 dark:text-blue-400 mt-1">
                               {dev.datos_boleto.origen} ➔ {dev.datos_boleto.destino}
@@ -201,8 +201,11 @@ export function FinanzasDashboard() {
                           <div className="text-xs text-slate-500">
                             Cta. {dev.datos_bancarios?.tipo_cuenta} {dev.datos_bancarios?.numero_cuenta}
                           </div>
-                          <div className="text-xs text-slate-400 mt-1">
-                            Beneficiario: {dev.datos_bancarios?.nombre_beneficiario}
+                          <div className="text-xs text-slate-500 mt-1">
+                            Beneficiario: <span className="font-bold">{dev.datos_bancarios?.nombre_beneficiario}</span>
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            Doc: {dev.datos_bancarios?.tipo_documento_beneficiario || 'N/A'} {dev.datos_bancarios?.documento_beneficiario || ''}
                           </div>
                         </td>
                         <td className="py-4 px-6 hidden md:table-cell">
