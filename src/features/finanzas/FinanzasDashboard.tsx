@@ -154,14 +154,14 @@ export function FinanzasDashboard() {
                       <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800">Banco / Beneficiario</th>
                       <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800 hidden md:table-cell">Motivo</th>
                       <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800">Estado</th>
+                      <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800 text-right">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/50">
                     {filteredDevoluciones.map((dev) => (
                       <tr 
                         key={dev.id} 
-                        className="hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors cursor-pointer"
-                        onClick={() => openPanel(dev)}
+                        className="hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors"
                       >
                         <td className="py-4 px-6 text-sm text-slate-600 dark:text-slate-400">
                           {new Date(dev.createdAt).toLocaleDateString()}
@@ -207,6 +207,14 @@ export function FinanzasDashboard() {
                               <XCircle size={14} /> RECHAZADA
                             </span>
                           )}
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <button
+                            onClick={() => openPanel(dev)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-lg shadow-md transition-all"
+                          >
+                            {dev.estado === 'PENDIENTE' ? 'Resolver' : 'Ver Detalles'}
+                          </button>
                         </td>
                       </tr>
                     ))}
