@@ -177,7 +177,12 @@ export function FinanzasDashboard() {
                         className="hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors"
                       >
                         <td className="py-4 px-6 text-sm text-slate-600 dark:text-slate-400">
-                          {new Date(dev.createdAt).toLocaleDateString()}
+                          <div className="font-semibold text-slate-800 dark:text-slate-200">Solicitud: {new Date(dev.createdAt).toLocaleDateString()}</div>
+                          {dev.datos_boleto?.fecha_compra && (
+                            <div className="text-xs text-slate-500 mt-0.5">
+                              Compra: {new Date(dev.datos_boleto.fecha_compra).toLocaleDateString()}
+                            </div>
+                          )}
                         </td>
                         <td className="py-4 px-6">
                           <div className="text-sm font-semibold text-slate-900 dark:text-white">{dev.ticket_number}</div>
