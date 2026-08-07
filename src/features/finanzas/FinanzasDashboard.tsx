@@ -151,6 +151,8 @@ export function FinanzasDashboard() {
                       <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800">Ticket / País</th>
                       <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800">Pasajero</th>
                       <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800">Monto</th>
+                      <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800">Banco / Beneficiario</th>
+                      <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800 hidden md:table-cell">Motivo</th>
                       <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800">Estado</th>
                     </tr>
                   </thead>
@@ -174,6 +176,20 @@ export function FinanzasDashboard() {
                         </td>
                         <td className="py-4 px-6 text-sm font-semibold text-slate-800 dark:text-slate-200">
                           {formatCurrency(dev.monto)}
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="text-sm font-semibold text-slate-900 dark:text-white">{dev.datos_bancarios?.banco || 'No indicado'}</div>
+                          <div className="text-xs text-slate-500">
+                            Cta. {dev.datos_bancarios?.tipo_cuenta} {dev.datos_bancarios?.numero_cuenta}
+                          </div>
+                          <div className="text-xs text-slate-400 mt-1">
+                            Beneficiario: {dev.datos_bancarios?.nombre_beneficiario}
+                          </div>
+                        </td>
+                        <td className="py-4 px-6 hidden md:table-cell">
+                          <div className="text-xs text-slate-500 max-w-[200px] truncate" title={dev.motivo || ''}>
+                            {dev.motivo || 'Sin motivo'}
+                          </div>
                         </td>
                         <td className="py-4 px-6">
                           {dev.estado === 'PENDIENTE' && (
