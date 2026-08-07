@@ -149,6 +149,7 @@ export function FinanzasDashboard() {
                     <tr>
                       <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800">Fecha</th>
                       <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800">Ticket / País</th>
+                      <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800">Pasajero</th>
                       <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800">Monto</th>
                       <th className="py-4 px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-800">Estado</th>
                     </tr>
@@ -166,6 +167,10 @@ export function FinanzasDashboard() {
                         <td className="py-4 px-6">
                           <div className="text-sm font-semibold text-slate-900 dark:text-white">{dev.ticket_number}</div>
                           <div className="text-xs text-slate-500">{dev.pais} • {dev.origen}</div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="text-sm font-semibold text-slate-900 dark:text-white">{dev.datos_pasajero?.nombre || 'Desconocido'}</div>
+                          <div className="text-xs text-slate-500">{dev.datos_pasajero?.documento || 'S/D'}</div>
                         </td>
                         <td className="py-4 px-6 text-sm font-semibold text-slate-800 dark:text-slate-200">
                           {formatCurrency(dev.monto)}
