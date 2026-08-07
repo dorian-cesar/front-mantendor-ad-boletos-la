@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { DollarSign, AlertCircle, CheckCircle2, XCircle, Clock, Search, X, Loader2, User, Building, Landmark, Save, FileText } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { getSocket } from "@/lib/socketClient";
 
 interface Devolucion {
   id: number;
@@ -36,6 +37,18 @@ export function FinanzasDashboard() {
 
   useEffect(() => {
     fetchDevoluciones();
+
+    const socket = getSocket();
+    const refreshData = () => fetchDevoluciones();
+
+    // Escuchar actualizaciones en tiempo real
+    socket.on("nueva_devolucion", refreshData);
+    socket.on("devolucion_actualizada", refreshData);
+
+    return () => {
+      socket.off("nueva_devolucion", refreshData);
+      socket.off("devolucion_actualizada", refreshData);
+    };
   }, []);
 
   const fetchDevoluciones = async () => {
