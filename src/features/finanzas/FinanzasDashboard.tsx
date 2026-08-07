@@ -382,9 +382,26 @@ export function FinanzasDashboard() {
                     </h3>
                     <div className={`p-4 rounded-xl border ${selectedDevolucion.estado === 'APROBADA' ? 'bg-emerald-50 border-emerald-100 dark:bg-emerald-900/10 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-300' : 'bg-red-50 border-red-100 dark:bg-red-900/10 dark:border-red-900/50 text-red-800 dark:text-red-300'}`}>
                       {selectedDevolucion.estado === 'APROBADA' && (
-                        <p className="font-bold mb-2">Porcentaje devuelto: {selectedDevolucion.porcentaje_devolucion}%</p>
+                        <div className="mb-4 space-y-1 bg-white/50 dark:bg-black/20 p-3 rounded-lg border border-emerald-200/50 dark:border-emerald-800/30">
+                          <div className="flex justify-between text-sm">
+                            <span>Monto Original:</span>
+                            <span className="font-semibold">{formatCurrency(selectedDevolucion.monto)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Porcentaje Devuelto:</span>
+                            <span className="font-semibold">{selectedDevolucion.porcentaje_devolucion}%</span>
+                          </div>
+                          <div className="flex justify-between text-sm text-red-600 dark:text-red-400 font-medium">
+                            <span>Descuento / Retención ({100 - (selectedDevolucion.porcentaje_devolucion || 0)}%):</span>
+                            <span>-{formatCurrency(selectedDevolucion.monto * (1 - (selectedDevolucion.porcentaje_devolucion || 0)/100))}</span>
+                          </div>
+                          <div className="flex justify-between text-base font-black pt-2 mt-2 border-t border-emerald-200 dark:border-emerald-800/50">
+                            <span>A Transferir al Cliente:</span>
+                            <span>{formatCurrency(selectedDevolucion.monto * ((selectedDevolucion.porcentaje_devolucion || 0)/100))}</span>
+                          </div>
+                        </div>
                       )}
-                      <p className="text-sm">"{selectedDevolucion.resolucion_descripcion}"</p>
+                      <p className="text-sm font-medium italic">"{selectedDevolucion.resolucion_descripcion}"</p>
                     </div>
                   </div>
                 )}
