@@ -1,4 +1,4 @@
-import { LogOut, TabletSmartphone, Building, Video, Key, ShoppingCart, Menu, X, Loader2, Moon, Sun, DollarSign } from "lucide-react";
+import { LogOut, TabletSmartphone, Building, Video, Key, ShoppingCart, Menu, X, Loader2, Moon, Sun, DollarSign, ActivitySquare } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
@@ -183,6 +183,14 @@ export function Sidebar() {
               label="Finanzas"
               href="/finanzas"
               active={pathname === "/finanzas"}
+            />
+          )}
+          {userRole === 'ADMIN' && (
+            <SidebarItem
+              icon={<ActivitySquare />}
+              label="Logs del Sistema"
+              href="/logs-integracion"
+              active={pathname === "/logs-integracion"}
             />
           )}
         </nav>
