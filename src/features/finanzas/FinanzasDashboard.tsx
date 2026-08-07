@@ -287,18 +287,30 @@ export function FinanzasDashboard() {
                   </div>
                 </div>
 
-                {/* Grid 2 columnas para Pasajero y Banco */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Grid 3 columnas para Pasajero, Boleto y Banco */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   
                   <div className="border border-slate-200 dark:border-zinc-800 rounded-xl p-4">
                     <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-3">
                       <User size={14}/> Pasajero
                     </h3>
                     <div className="space-y-2 text-sm">
-                      <p><span className="text-slate-500">Nombre:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_pasajero?.nombre || '-'}</span></p>
+                      <p><span className="text-slate-500">Nombre:</span> <span className="font-medium dark:text-slate-200 block truncate">{selectedDevolucion.datos_pasajero?.nombre || '-'}</span></p>
                       <p><span className="text-slate-500">Documento:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_pasajero?.tipo_documento || selectedDevolucion.datos_pasajero?.Doctip || selectedDevolucion.datos_bancarios?.tipo_documento_beneficiario || ''} {selectedDevolucion.datos_pasajero?.documento || selectedDevolucion.datos_pasajero?.DocNro || '-'}</span></p>
-                      <p><span className="text-slate-500">Email:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_pasajero?.email || '-'}</span></p>
+                      <p><span className="text-slate-500">Email:</span> <span className="font-medium dark:text-slate-200 block truncate">{selectedDevolucion.datos_pasajero?.email || '-'}</span></p>
                       <p><span className="text-slate-500">País Residencia:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_pasajero?.pais || selectedDevolucion.pais || '-'}</span></p>
+                    </div>
+                  </div>
+
+                  <div className="border border-slate-200 dark:border-zinc-800 rounded-xl p-4">
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-3">
+                      <FileText size={14}/> Boleto / Viaje
+                    </h3>
+                    <div className="space-y-2 text-sm">
+                      <p><span className="text-slate-500">Ruta:</span> <span className="font-medium dark:text-slate-200 block truncate">{selectedDevolucion.datos_boleto?.origen || '-'} ➔ {selectedDevolucion.datos_boleto?.destino || '-'}</span></p>
+                      <p><span className="text-slate-500">Fecha Solicitud:</span> <span className="font-medium dark:text-slate-200">{new Date(selectedDevolucion.createdAt).toLocaleDateString()}</span></p>
+                      <p><span className="text-slate-500">Fecha Viaje:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_boleto?.fecha_viaje ? new Date(selectedDevolucion.datos_boleto.fecha_viaje).toLocaleDateString() : '-'}</span></p>
+                      <p><span className="text-slate-500">Fecha Compra:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_boleto?.fecha_compra ? new Date(selectedDevolucion.datos_boleto.fecha_compra).toLocaleDateString() : '-'}</span></p>
                     </div>
                   </div>
 
@@ -307,10 +319,10 @@ export function FinanzasDashboard() {
                       <Landmark size={14}/> Datos Bancarios
                     </h3>
                     <div className="space-y-2 text-sm">
-                      <p><span className="text-slate-500">Banco:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_bancarios?.banco || '-'}</span></p>
+                      <p><span className="text-slate-500">Banco:</span> <span className="font-medium dark:text-slate-200 block truncate">{selectedDevolucion.datos_bancarios?.banco || '-'}</span></p>
                       <p><span className="text-slate-500">Tipo:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_bancarios?.tipo_cuenta || '-'}</span></p>
                       <p><span className="text-slate-500">N° Cta:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_bancarios?.numero_cuenta || '-'}</span></p>
-                      <p><span className="text-slate-500">Beneficiario:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_bancarios?.nombre_beneficiario || '-'}</span></p>
+                      <p><span className="text-slate-500">Beneficiario:</span> <span className="font-medium dark:text-slate-200 block truncate">{selectedDevolucion.datos_bancarios?.nombre_beneficiario || '-'}</span></p>
                       <p><span className="text-slate-500">Doc Ben:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_bancarios?.tipo_documento_beneficiario || ''} {selectedDevolucion.datos_bancarios?.documento_beneficiario || '-'}</span></p>
                     </div>
                   </div>
