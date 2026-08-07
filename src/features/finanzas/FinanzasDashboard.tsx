@@ -190,7 +190,9 @@ export function FinanzasDashboard() {
                         </td>
                         <td className="py-4 px-6">
                           <div className="text-sm font-semibold text-slate-900 dark:text-white">{dev.datos_pasajero?.nombre || 'Desconocido'}</div>
-                          <div className="text-xs text-slate-500">{dev.datos_pasajero?.documento || 'S/D'}</div>
+                          <div className="text-xs text-slate-500">
+                            {dev.datos_pasajero?.tipo_documento || 'Doc:'} {dev.datos_pasajero?.documento || 'S/D'}
+                          </div>
                           <div className="text-xs text-slate-400">{dev.datos_pasajero?.email || ''}</div>
                         </td>
                         <td className="py-4 px-6 text-sm font-semibold text-slate-800 dark:text-slate-200">
@@ -294,8 +296,9 @@ export function FinanzasDashboard() {
                     </h3>
                     <div className="space-y-2 text-sm">
                       <p><span className="text-slate-500">Nombre:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_pasajero?.nombre || '-'}</span></p>
-                      <p><span className="text-slate-500">Documento:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_pasajero?.documento || '-'}</span></p>
+                      <p><span className="text-slate-500">Documento:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_pasajero?.tipo_documento || ''} {selectedDevolucion.datos_pasajero?.documento || '-'}</span></p>
                       <p><span className="text-slate-500">Email:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_pasajero?.email || '-'}</span></p>
+                      <p><span className="text-slate-500">País Residencia:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_pasajero?.pais || selectedDevolucion.pais || '-'}</span></p>
                     </div>
                   </div>
 
