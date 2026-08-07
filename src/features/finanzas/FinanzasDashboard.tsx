@@ -191,7 +191,7 @@ export function FinanzasDashboard() {
                         <td className="py-4 px-6">
                           <div className="text-sm font-semibold text-slate-900 dark:text-white">{dev.datos_pasajero?.nombre || 'Desconocido'}</div>
                           <div className="text-xs text-slate-500">
-                            {dev.datos_pasajero?.tipo_documento || 'Doc:'} {dev.datos_pasajero?.documento || 'S/D'}
+                            {dev.datos_pasajero?.tipo_documento ? `${dev.datos_pasajero.tipo_documento} ` : ''}{dev.datos_pasajero?.documento || 'S/D'}
                           </div>
                           <div className="text-xs text-slate-400">{dev.datos_pasajero?.email || ''}</div>
                         </td>
@@ -206,8 +206,8 @@ export function FinanzasDashboard() {
                           <div className="text-xs text-slate-500 mt-1">
                             Beneficiario: <span className="font-bold">{dev.datos_bancarios?.nombre_beneficiario}</span>
                           </div>
-                          <div className="text-xs text-slate-500">
-                            Doc: {dev.datos_bancarios?.tipo_documento_beneficiario || 'N/A'} {dev.datos_bancarios?.documento_beneficiario || ''}
+                          <div className="text-xs text-slate-500 font-medium">
+                            {dev.datos_bancarios?.tipo_documento_beneficiario || ''} {dev.datos_bancarios?.documento_beneficiario || ''}
                           </div>
                         </td>
                         <td className="py-4 px-6 hidden md:table-cell">
@@ -311,7 +311,7 @@ export function FinanzasDashboard() {
                       <p><span className="text-slate-500">Tipo:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_bancarios?.tipo_cuenta || '-'}</span></p>
                       <p><span className="text-slate-500">N° Cta:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_bancarios?.numero_cuenta || '-'}</span></p>
                       <p><span className="text-slate-500">Beneficiario:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_bancarios?.nombre_beneficiario || '-'}</span></p>
-                      <p><span className="text-slate-500">Doc Ben:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_bancarios?.tipo_documento_beneficiario} {selectedDevolucion.datos_bancarios?.documento_beneficiario}</span></p>
+                      <p><span className="text-slate-500">Doc Ben:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_bancarios?.tipo_documento_beneficiario || ''} {selectedDevolucion.datos_bancarios?.documento_beneficiario || '-'}</span></p>
                     </div>
                   </div>
 
