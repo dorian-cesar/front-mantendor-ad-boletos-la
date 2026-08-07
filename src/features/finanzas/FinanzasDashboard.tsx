@@ -182,10 +182,16 @@ export function FinanzasDashboard() {
                         <td className="py-4 px-6">
                           <div className="text-sm font-semibold text-slate-900 dark:text-white">{dev.ticket_number}</div>
                           <div className="text-xs text-slate-500">{dev.pais} • {dev.origen}</div>
+                          {dev.datos_boleto && (
+                            <div className="text-xs font-bold text-blue-600 dark:text-blue-400 mt-1">
+                              {dev.datos_boleto.origen} ➔ {dev.datos_boleto.destino}
+                            </div>
+                          )}
                         </td>
                         <td className="py-4 px-6">
                           <div className="text-sm font-semibold text-slate-900 dark:text-white">{dev.datos_pasajero?.nombre || 'Desconocido'}</div>
                           <div className="text-xs text-slate-500">{dev.datos_pasajero?.documento || 'S/D'}</div>
+                          <div className="text-xs text-slate-400">{dev.datos_pasajero?.email || ''}</div>
                         </td>
                         <td className="py-4 px-6 text-sm font-semibold text-slate-800 dark:text-slate-200">
                           {formatCurrency(dev.monto)}
