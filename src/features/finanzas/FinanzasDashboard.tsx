@@ -38,6 +38,7 @@ export function FinanzasDashboard() {
   // Filtro por Estado (Tarjeta seleccionada)
   const [selectedEstadoFilter, setSelectedEstadoFilter] = useState<string>("TODAS");
   const [copied, setCopied] = useState(false);
+  const [copiedRowId, setCopiedRowId] = useState<number | null>(null);
 
   // Paginación State
   const [itemsPerPage, setItemsPerPage] = useState<number>(100);
@@ -235,6 +236,38 @@ export function FinanzasDashboard() {
     navigator.clipboard.writeText(tsvText).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
+    }).catch(console.error);
+  };
+
+  // Copiar un registro individual al portapapeles
+  const handleCopySingleRow = (dev: Devolucion) => {
+    const rowText = [
+      `ID: ${dev.id}`,
+      `Fecha Solicitud: ${new Date(dev.createdAt).toLocaleDateString()}`,
+      `Fecha Viaje: ${getFechaViaje(dev) || 'N/A'}`,
+      `Fecha Compra: ${getFechaCompra(dev) || 'N/A'}`,
+      `N° Ticket: ${dev.ticket_number}`,
+      `País: ${dev.pais}`,
+      `Origen: ${dev.origen}`,
+      `Ruta: ${dev.datos_boleto ? `${dev.datos_boleto.origen || ''} -> ${dev.datos_boleto.destino || ''}` : 'N/A'}`,
+      `Pasajero: ${dev.datos_pasajero?.nombre || 'N/A'}`,
+      `Doc Pasajero: ${dev.datos_pasajero?.tipo_documento || dev.datos_pasajero?.Doctip || ''} ${dev.datos_pasajero?.documento || dev.datos_pasajero?.DocNro || ''}`.trim(),
+      `Email: ${dev.datos_pasajero?.email || 'N/A'}`,
+      `Monto Solicitado: ${formatCurrency(dev.monto)}`,
+      `Banco: ${dev.datos_bancarios?.banco || 'N/A'}`,
+      `Tipo Cuenta: ${dev.datos_bancarios?.tipo_cuenta || 'N/A'}`,
+      `N° Cuenta: ${dev.datos_bancarios?.numero_cuenta || 'N/A'}`,
+      `Beneficiario: ${dev.datos_bancarios?.nombre_beneficiario || 'N/A'}`,
+      `Doc Beneficiario: ${dev.datos_bancarios?.tipo_documento_beneficiario || ''} ${dev.datos_bancarios?.documento_beneficiario || ''}`.trim(),
+      `Motivo: ${dev.motivo || 'N/A'}`,
+      `Estado: ${dev.estado}`,
+      `Porcentaje Devuelto: ${dev.porcentaje_devolucion ? dev.porcentaje_devolucion + '%' : 'N/A'}`,
+      `Resolución: ${dev.resolucion_descripcion || 'N/A'}`
+    ].join("\n");
+
+    navigator.clipboard.writeText(rowText).then(() => {
+      setCopiedRowId(dev.id);
+      setTimeout(() => setCopiedRowId(null), 2000);
     }).catch(console.error);
   };
 
@@ -483,12 +516,22 @@ export function FinanzasDashboard() {
                           )}
                         </td>
                         <td className="py-4 px-6 text-right">
-                          <button
-                            onClick={() => openPanel(dev)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-lg shadow-md transition-all"
-                          >
-                            {dev.estado === 'PENDIENTE' ? 'Resolver' : 'Ver Detalles'}
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleCopySingleRow(dev)}
+                              title="Copiar datos de este registro"
+                              className={`p-2 rounded-lg border transition-all ${copiedRowId === dev.id ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-zinc-700 border-slate-200 dark:border-zinc-700'}`}
+                            >
+                              {copiedRowId === dev.id ? <Check size={16} /> : <Copy size={16} />}
+                            </button>
+
+                            <button
+                              onClick={() => openPanel(dev)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-lg shadow-md transition-all"
+                            >
+                              {dev.estado === 'PENDIENTE' ? 'Resolver' : 'Ver Detalles'}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
