@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Sidebar } from "@/components/ui/Sidebar";
-import { DollarSign, AlertCircle, CheckCircle2, XCircle, Clock, Search, X, Loader2, User, Building, Landmark, Save, FileText } from "lucide-react";
+import { DollarSign, AlertCircle, CheckCircle2, XCircle, Clock, Search, X, Loader2, User, Building, Landmark, Save, FileText, Copy, Check, Filter, Layers } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { getSocket } from "@/lib/socketClient";
 
@@ -35,6 +35,10 @@ export function FinanzasDashboard() {
   const [resolucionDescripcion, setResolucionDescripcion] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
+  // Filtro por Estado (Tarjeta seleccionada)
+  const [selectedEstadoFilter, setSelectedEstadoFilter] = useState<string>("TODAS");
+  const [copied, setCopied] = useState(false);
+
   // Paginación State
   const [itemsPerPage, setItemsPerPage] = useState<number>(100);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -55,13 +59,22 @@ export function FinanzasDashboard() {
       socket.off("nueva_devolucion", refreshData);
       socket.off("devolucion_actualizada", refreshData);
     };
-  }, [currentPage, itemsPerPage]);
+  }, [currentPage, itemsPerPage, selectedEstadoFilter, searchTerm]);
 
   const fetchDevoluciones = async () => {
     try {
       setLoading(true);
-      const query = itemsPerPage > 0 ? `?page=${currentPage}&limit=${itemsPerPage}` : `?paginate=true`;
-      const data = await apiFetch(`/devoluciones${query}`);
+      const params = new URLSearchParams();
+      params.set('page', String(currentPage));
+      params.set('limit', String(itemsPerPage));
+      if (selectedEstadoFilter && selectedEstadoFilter !== 'TODAS') {
+        params.set('estado', selectedEstadoFilter);
+      }
+      if (searchTerm.trim()) {
+        params.set('search', searchTerm.trim());
+      }
+
+      const data = await apiFetch(`/devoluciones?${params.toString()}`);
 
       if (Array.isArray(data)) {
         setDevoluciones(data);
@@ -162,6 +175,69 @@ export function FinanzasDashboard() {
     return formatDateVal(raw);
   };
 
+  // Copiar todo el contenido de la tabla filtrada al portapapeles en formato TSV (para Excel/Google Sheets)
+  const handleCopyTable = () => {
+    if (devoluciones.length === 0) return;
+
+    const headers = [
+      "ID",
+      "Fecha Solicitud",
+      "Fecha Viaje",
+      "Fecha Compra",
+      "N° Ticket",
+      "País",
+      "Origen",
+      "Ruta Boleto",
+      "Pasajero Nombre",
+      "Pasajero Documento",
+      "Pasajero Email",
+      "Monto Solicitado",
+      "Banco",
+      "Tipo Cuenta",
+      "N° Cuenta",
+      "Beneficiario",
+      "Doc Beneficiario",
+      "Motivo",
+      "Estado",
+      "Porcentaje Devuelto",
+      "Resolución Descripcion"
+    ];
+
+    const rows = devoluciones.map(dev => [
+      dev.id,
+      new Date(dev.createdAt).toLocaleDateString(),
+      getFechaViaje(dev) || "",
+      getFechaCompra(dev) || "",
+      dev.ticket_number || "",
+      dev.pais || "",
+      dev.origen || "",
+      dev.datos_boleto ? `${dev.datos_boleto.origen || ''} -> ${dev.datos_boleto.destino || ''}` : "",
+      dev.datos_pasajero?.nombre || "",
+      `${dev.datos_pasajero?.tipo_documento || dev.datos_pasajero?.Doctip || ''} ${dev.datos_pasajero?.documento || dev.datos_pasajero?.DocNro || ''}`.trim(),
+      dev.datos_pasajero?.email || "",
+      dev.monto || 0,
+      dev.datos_bancarios?.banco || "",
+      dev.datos_bancarios?.tipo_cuenta || "",
+      dev.datos_bancarios?.numero_cuenta || "",
+      dev.datos_bancarios?.nombre_beneficiario || "",
+      `${dev.datos_bancarios?.tipo_documento_beneficiario || ''} ${dev.datos_bancarios?.documento_beneficiario || ''}`.trim(),
+      dev.motivo || "",
+      dev.estado || "",
+      dev.porcentaje_devolucion ? `${dev.porcentaje_devolucion}%` : "",
+      dev.resolucion_descripcion || ""
+    ]);
+
+    const tsvText = [
+      headers.join("\t"),
+      ...rows.map(r => r.map(c => String(c).replace(/[\t\n\r]/g, " ")).join("\t"))
+    ].join("\n");
+
+    navigator.clipboard.writeText(tsvText).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }).catch(console.error);
+  };
+
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-zinc-950 transition-colors">
       <Sidebar />
@@ -188,10 +264,125 @@ export function FinanzasDashboard() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-hidden p-4 md:p-6 lg:p-10 flex gap-6 relative">
+        <div className="flex-1 overflow-hidden p-4 md:p-6 lg:p-10 flex flex-col gap-6 relative">
           
+          {/* Tarjetas de Métricas e Interactivas de Filtro */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-shrink-0">
+            <button
+              onClick={() => {
+                setSelectedEstadoFilter("TODAS");
+                setCurrentPage(1);
+              }}
+              className={`p-4 rounded-xl border text-left transition-all flex flex-col justify-between ${selectedEstadoFilter === 'TODAS' ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 shadow-md ring-2 ring-slate-400' : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-slate-200 hover:border-slate-400'}`}
+            >
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider opacity-70">Todas</span>
+                <Layers size={18} />
+              </div>
+              <div className="text-2xl font-black">{totalItems}</div>
+            </button>
+
+            <button
+              onClick={() => {
+                setSelectedEstadoFilter("PENDIENTE");
+                setCurrentPage(1);
+              }}
+              className={`p-4 rounded-xl border text-left transition-all flex flex-col justify-between ${selectedEstadoFilter === 'PENDIENTE' ? 'bg-amber-500 text-white border-amber-500 shadow-md ring-2 ring-amber-400' : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-slate-200 hover:border-amber-400'}`}
+            >
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 group-hover:text-amber-500">Pendientes</span>
+                <Clock size={18} className="text-amber-500" />
+              </div>
+              <div className="text-2xl font-black text-amber-600 dark:text-amber-400">{selectedEstadoFilter === 'PENDIENTE' ? totalItems : devoluciones.filter(d => d.estado === 'PENDIENTE').length}</div>
+            </button>
+
+            <button
+              onClick={() => {
+                setSelectedEstadoFilter("APROBADA");
+                setCurrentPage(1);
+              }}
+              className={`p-4 rounded-xl border text-left transition-all flex flex-col justify-between ${selectedEstadoFilter === 'APROBADA' ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-400' : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-slate-200 hover:border-emerald-400'}`}
+            >
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Aprobadas</span>
+                <CheckCircle2 size={18} className="text-emerald-500" />
+              </div>
+              <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{selectedEstadoFilter === 'APROBADA' ? totalItems : devoluciones.filter(d => d.estado === 'APROBADA').length}</div>
+            </button>
+
+            <button
+              onClick={() => {
+                setSelectedEstadoFilter("RECHAZADA");
+                setCurrentPage(1);
+              }}
+              className={`p-4 rounded-xl border text-left transition-all flex flex-col justify-between ${selectedEstadoFilter === 'RECHAZADA' ? 'bg-red-600 text-white border-red-600 shadow-md ring-2 ring-red-400' : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-slate-200 hover:border-red-400'}`}
+            >
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-red-600 dark:text-red-400">Rechazadas</span>
+                <XCircle size={18} className="text-red-500" />
+              </div>
+              <div className="text-2xl font-black text-red-600 dark:text-red-400">{selectedEstadoFilter === 'RECHAZADA' ? totalItems : devoluciones.filter(d => d.estado === 'RECHAZADA').length}</div>
+            </button>
+          </div>
+
           {/* Tabla de Devoluciones */}
           <div className={`flex-1 flex flex-col bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl overflow-hidden transition-all duration-300 ${selectedDevolucion ? 'hidden xl:flex opacity-50 pointer-events-none' : 'flex'}`}>
+            
+            {/* Barra de Paginación y Botón Copiar Tabla (ARRIBA) */}
+            <div className="p-4 bg-slate-50 dark:bg-zinc-800/50 border-b border-slate-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-slate-600 dark:text-slate-400 flex-shrink-0">
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  onClick={handleCopyTable}
+                  disabled={devoluciones.length === 0}
+                  className={`px-3 py-2 rounded-lg font-bold flex items-center gap-2 transition-all shadow-sm ${copied ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-zinc-800'}`}
+                >
+                  {copied ? <Check size={15} /> : <Copy size={15} />}
+                  {copied ? '¡Copiado en Portapapeles!' : 'Copiar Tabla al Portapapeles'}
+                </button>
+
+                <div className="h-4 w-px bg-slate-300 dark:bg-zinc-700 hidden sm:block"></div>
+
+                <span>Registros por página:</span>
+                <select 
+                  value={itemsPerPage} 
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded px-2.5 py-1.5 outline-none font-bold text-slate-800 dark:text-slate-200"
+                >
+                  <option value={100}>100</option>
+                  <option value={200}>200</option>
+                  <option value={300}>300</option>
+                  <option value={400}>400</option>
+                  <option value={500}>500</option>
+                </select>
+                <span className="ml-1 text-slate-500">
+                  (Mostrando {filteredDevoluciones.length} de {totalItems})
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  className="px-3 py-1.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md font-bold disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  Anterior
+                </button>
+                <span className="font-bold px-2">
+                  Página {currentPage} de {totalPages}
+                </span>
+                <button
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  className="px-3 py-1.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md font-bold disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </div>
+
             <div className="overflow-y-auto flex-1 custom-scrollbar">
               {loading ? (
                 <div className="flex flex-col items-center justify-center h-64 text-slate-400">
