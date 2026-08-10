@@ -1,6 +1,6 @@
 import { io, Socket } from "socket.io-client";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_WS_URL;
+const BACKEND_URL = process.env.NEXT_PUBLIC_WS_URL || "https://backend-boletos-publicidad.dev-wit.com";
 
 let socket: Socket | null = null;
 
@@ -20,10 +20,10 @@ export function getSocket(): Socket {
       extraHeaders: {
         Authorization: token ? `Bearer ${token}` : "",
       },
-      transports: ["websocket"], // FORZAR WEBSOCKET para evitar fallos de polling POST con Apache
+      transports: ["polling", "websocket"], // Permite fallback automático si WebSocket puro falla por proxy/SSL
       reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 2000,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
     });
 
     socket.on("connect", () => {
