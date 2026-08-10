@@ -226,6 +226,11 @@ export function FinanzasDashboard() {
                       >
                         <td className="py-4 px-6 text-sm text-slate-600 dark:text-slate-400">
                           <div className="font-semibold text-slate-800 dark:text-slate-200">Solicitud: {new Date(dev.createdAt).toLocaleDateString()}</div>
+                          {getFechaViaje(dev) && (
+                            <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-0.5">
+                              Viaje: {getFechaViaje(dev)}
+                            </div>
+                          )}
                           {getFechaCompra(dev) && (
                             <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
                               Compra: {getFechaCompra(dev)}
@@ -234,7 +239,9 @@ export function FinanzasDashboard() {
                         </td>
                         <td className="py-4 px-6">
                           <div className="text-sm font-semibold text-slate-900 dark:text-white">{dev.ticket_number}</div>
-                          <div className="text-xs font-bold text-slate-600 bg-slate-200 dark:bg-zinc-700 w-fit px-2 py-0.5 rounded mt-1">País: {dev.pais} • {dev.origen}</div>
+                          <div className="text-xs font-extrabold text-white dark:text-slate-100 bg-slate-800 dark:bg-zinc-800 w-fit px-2.5 py-0.5 rounded-md mt-1 shadow-sm">
+                            País: {dev.pais} • {dev.origen}
+                          </div>
                           {dev.datos_boleto && (
                             <div className="text-xs font-bold text-blue-600 dark:text-blue-400 mt-1">
                               {dev.datos_boleto.origen} ➔ {dev.datos_boleto.destino}
