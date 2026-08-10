@@ -135,10 +135,18 @@ export function FinanzasDashboard() {
     setErrorMsg("");
   };
 
-  const filteredDevoluciones = devoluciones.filter(d => 
-    d.ticket_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    d.pais.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredDevoluciones = devoluciones.filter(d => {
+    const term = searchTerm.toLowerCase().trim();
+    const matchesSearch = !term || 
+      d.ticket_number?.toLowerCase().includes(term) ||
+      d.pais?.toLowerCase().includes(term) ||
+      d.datos_pasajero?.nombre?.toLowerCase().includes(term) ||
+      d.motivo?.toLowerCase().includes(term);
+
+    const matchesEstado = !selectedEstadoFilter || selectedEstadoFilter === "TODAS" || d.estado === selectedEstadoFilter;
+
+    return matchesSearch && matchesEstado;
+  });
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(val);
