@@ -35,6 +35,12 @@ export function FinanzasDashboard() {
   const [resolucionDescripcion, setResolucionDescripcion] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
+  // Paginación State
+  const [itemsPerPage, setItemsPerPage] = useState<number>(100);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+
   useEffect(() => {
     fetchDevoluciones();
 
@@ -49,13 +55,23 @@ export function FinanzasDashboard() {
       socket.off("nueva_devolucion", refreshData);
       socket.off("devolucion_actualizada", refreshData);
     };
-  }, []);
+  }, [currentPage, itemsPerPage]);
 
   const fetchDevoluciones = async () => {
     try {
       setLoading(true);
-      const data = await apiFetch('/devoluciones');
-      setDevoluciones(data);
+      const query = itemsPerPage > 0 ? `?page=${currentPage}&limit=${itemsPerPage}` : `?paginate=true`;
+      const data = await apiFetch(`/devoluciones${query}`);
+
+      if (Array.isArray(data)) {
+        setDevoluciones(data);
+        setTotalItems(data.length);
+        setTotalPages(1);
+      } else if (data && data.devoluciones) {
+        setDevoluciones(data.devoluciones);
+        setTotalItems(data.total || data.devoluciones.length);
+        setTotalPages(data.totalPages || 1);
+      }
     } catch (error) {
       console.error("Error fetching devoluciones:", error);
     } finally {
@@ -112,6 +128,38 @@ export function FinanzasDashboard() {
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(val);
+  };
+
+  // Auxiliares robustos para parsear fechas de compra/viaje independientemente de la propiedad usada
+  const formatDateVal = (val: any) => {
+    if (!val) return null;
+    if (typeof val === 'string' && val.trim()) {
+      const s = val.trim();
+      if (s.match(/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/)) {
+        return s;
+      }
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleDateString();
+      }
+      return s;
+    }
+    if (val instanceof Date) return val.toLocaleDateString();
+    return null;
+  };
+
+  const getFechaCompra = (dev: Devolucion) => {
+    const b = dev.datos_boleto;
+    if (!b) return null;
+    const raw = b.fecha_compra || b.fechaCompra || b.fecCompra || b.FecCompra || b.fecha_emision || b.fechaEmision || b.fec_compra || b.date_purchase;
+    return formatDateVal(raw);
+  };
+
+  const getFechaViaje = (dev: Devolucion) => {
+    const b = dev.datos_boleto;
+    if (!b) return null;
+    const raw = b.fecha_viaje || b.fechaViaje || b.fecViaje || b.FecViaje || b.fecha_salida || b.fechaSalida || b.fec_viaje || b.date_travel;
+    return formatDateVal(raw);
   };
 
   return (
@@ -178,9 +226,9 @@ export function FinanzasDashboard() {
                       >
                         <td className="py-4 px-6 text-sm text-slate-600 dark:text-slate-400">
                           <div className="font-semibold text-slate-800 dark:text-slate-200">Solicitud: {new Date(dev.createdAt).toLocaleDateString()}</div>
-                          {dev.datos_boleto?.fecha_compra && (
-                            <div className="text-xs text-slate-500 mt-0.5">
-                              Compra: {new Date(dev.datos_boleto.fecha_compra).toLocaleDateString()}
+                          {getFechaCompra(dev) && (
+                            <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+                              Compra: {getFechaCompra(dev)}
                             </div>
                           )}
                         </td>
@@ -251,6 +299,51 @@ export function FinanzasDashboard() {
                 </table>
               )}
             </div>
+
+            {/* Bar de Paginación */}
+            <div className="p-4 bg-slate-50 dark:bg-zinc-800/50 border-t border-slate-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-slate-600 dark:text-slate-400">
+              <div className="flex items-center gap-2">
+                <span>Registros por página:</span>
+                <select 
+                  value={itemsPerPage} 
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded px-2 py-1 outline-none font-bold text-slate-800 dark:text-slate-200"
+                >
+                  <option value={100}>100</option>
+                  <option value={200}>200</option>
+                  <option value={300}>300</option>
+                  <option value={400}>400</option>
+                  <option value={500}>500</option>
+                </select>
+                <span className="ml-2">
+                  Mostrando {filteredDevoluciones.length} de {totalItems} registros
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  className="px-3 py-1.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md font-bold disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  Anterior
+                </button>
+                <span className="font-bold px-2">
+                  Página {currentPage} de {totalPages}
+                </span>
+                <button
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  className="px-3 py-1.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md font-bold disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </div>
+
           </div>
 
           {/* Panel Lateral Flotante de Resolución */}
@@ -314,8 +407,8 @@ export function FinanzasDashboard() {
                     <div className="space-y-2 text-sm">
                       <p><span className="text-slate-500">Ruta:</span> <span className="font-medium dark:text-slate-200 block truncate">{selectedDevolucion.datos_boleto?.origen || '-'} ➔ {selectedDevolucion.datos_boleto?.destino || '-'}</span></p>
                       <p><span className="text-slate-500">Fecha Solicitud:</span> <span className="font-medium dark:text-slate-200">{new Date(selectedDevolucion.createdAt).toLocaleDateString()}</span></p>
-                      <p><span className="text-slate-500">Fecha Viaje:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_boleto?.fecha_viaje ? new Date(selectedDevolucion.datos_boleto.fecha_viaje).toLocaleDateString() : '-'}</span></p>
-                      <p><span className="text-slate-500">Fecha Compra:</span> <span className="font-medium dark:text-slate-200">{selectedDevolucion.datos_boleto?.fecha_compra ? new Date(selectedDevolucion.datos_boleto.fecha_compra).toLocaleDateString() : '-'}</span></p>
+                      <p><span className="text-slate-500">Fecha Viaje:</span> <span className="font-medium dark:text-slate-200">{getFechaViaje(selectedDevolucion) || '-'}</span></p>
+                      <p><span className="text-slate-500">Fecha Compra:</span> <span className="font-medium dark:text-slate-200">{getFechaCompra(selectedDevolucion) || '-'}</span></p>
                     </div>
                   </div>
 
