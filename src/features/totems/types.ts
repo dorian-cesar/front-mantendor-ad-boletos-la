@@ -22,6 +22,7 @@ export interface Totem {
   boletos_vendidos?: number;
   block_screen_saver?: boolean;
   modo_prueba?: boolean;
+  busqueda_inteligente?: boolean;
   playlist?: TotemVideo[];
   videos?: TotemVideo[];
   video_ids?: (string | number)[];
@@ -43,6 +44,7 @@ export interface TotemForm {
   latitud: number;
   longitud: number;
   status?: string | boolean;
+  busqueda_inteligente?: boolean;
   video_ids: string[];
   empresa_ids: string[];
 }

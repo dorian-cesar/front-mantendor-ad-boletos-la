@@ -46,6 +46,7 @@ export function TotemDashboard() {
     handleDelete,
     toggleBlockScreenSaver,
     toggleModoPrueba,
+    toggleBusquedaInteligenteBulk,
     toggleStatus,
     sendTotemCommand
   } = useTotems({
@@ -86,7 +87,8 @@ export function TotemDashboard() {
     direccion: "", 
     latitud: 0,
     longitud: 0,
-    status: "Activo", 
+    status: "Activo",
+    busqueda_inteligente: false,
     video_ids: [] as string[], 
     empresa_ids: [] as string[]
   });
@@ -99,6 +101,7 @@ export function TotemDashboard() {
     direccion: "", 
     latitud: 0,
     longitud: 0,
+    busqueda_inteligente: false,
     empresa_ids: [] as string[],
     video_ids: [] as string[]
   });
@@ -224,6 +227,7 @@ export function TotemDashboard() {
         latitud: t.latitud || 0,
         longitud: t.longitud || 0,
         status: t.status || "Activo",
+        busqueda_inteligente: t.busqueda_inteligente || false,
         video_ids: activeVideoIds,
         empresa_ids: backendEmpresaIds
       });
@@ -249,7 +253,7 @@ export function TotemDashboard() {
       const success = await handleCreate(createForm);
       if (success) {
         setIsCreateModalOpen(false);
-        setCreateForm({ id: "", identificador: "", direccion: "", latitud: 0, longitud: 0, empresa_ids: [], video_ids: [] });
+        setCreateForm({ id: "", identificador: "", direccion: "", latitud: 0, longitud: 0, busqueda_inteligente: false, empresa_ids: [], video_ids: [] });
         showToast("Tótem creado correctamente", "success");
       }
     } catch (error) {
@@ -342,6 +346,34 @@ export function TotemDashboard() {
                 <Plus size={18} strokeWidth={2.5} />
                 Nuevo Tótem
               </button>
+              
+              <div className="w-full sm:w-auto flex items-center gap-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-1 rounded-xl shadow-sm">
+                <button
+                  onClick={() => {
+                    if(confirm("¿Estás seguro de habilitar la búsqueda inteligente en TODOS los tótems?")) {
+                      toggleBusquedaInteligenteBulk(true);
+                      showToast("Activando búsqueda inteligente...", "info");
+                    }
+                  }}
+                  className="px-3 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors whitespace-nowrap flex items-center gap-1"
+                  title="Habilitar en todos"
+                >
+                  <Search size={14} /> + Búsqueda
+                </button>
+                <div className="w-px h-4 bg-slate-200 dark:bg-zinc-700"></div>
+                <button
+                  onClick={() => {
+                    if(confirm("¿Estás seguro de deshabilitar la búsqueda inteligente en TODOS los tótems?")) {
+                      toggleBusquedaInteligenteBulk(false);
+                      showToast("Desactivando búsqueda inteligente...", "info");
+                    }
+                  }}
+                  className="px-3 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors whitespace-nowrap flex items-center gap-1"
+                  title="Deshabilitar en todos"
+                >
+                   - Búsqueda
+                </button>
+              </div>
               <div className="w-full sm:w-auto flex items-center gap-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-1 rounded-xl shadow-sm">
                 <button
                   onClick={() => setViewMode("list")}

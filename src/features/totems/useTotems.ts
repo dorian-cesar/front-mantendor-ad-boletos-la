@@ -184,6 +184,7 @@ export function useTotems(options?: UseTotemsOptions) {
         direccion: editForm.direccion,
         latitud: editForm.latitud || 0,
         longitud: editForm.longitud || 0,
+        busqueda_inteligente: editForm.busqueda_inteligente,
       };
 
       await apiFetch(`/totems/${id}`, {
@@ -250,6 +251,7 @@ export function useTotems(options?: UseTotemsOptions) {
           direccion: createForm.direccion,
           latitud: createForm.latitud || 0,
           longitud: createForm.longitud || 0,
+          busqueda_inteligente: createForm.busqueda_inteligente,
           video_ids: videoIds,
         }),
       });
@@ -331,6 +333,41 @@ export function useTotems(options?: UseTotemsOptions) {
         prev.map(t => String(t.id) === String(id) ? { ...t, modo_prueba: currentValue } : t)
       );
       alert("Error al actualizar el modo de prueba");
+    }
+  };
+
+  const toggleBusquedaInteligente = async (id: string, currentValue: boolean) => {
+    const newValue = !currentValue;
+    setTotems((prev) => 
+      prev.map(t => String(t.id) === String(id) ? { ...t, busqueda_inteligente: newValue } : t)
+    );
+
+    try {
+      await apiFetch(`/totems/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ busqueda_inteligente: newValue }),
+      });
+    } catch (error) {
+      setTotems((prev) => 
+        prev.map(t => String(t.id) === String(id) ? { ...t, busqueda_inteligente: currentValue } : t)
+      );
+      alert("Error al actualizar la Búsqueda Inteligente");
+    }
+  };
+
+  const toggleBusquedaInteligenteBulk = async (newValue: boolean) => {
+    // Optimistic update
+    setTotems((prev) => prev.map(t => ({ ...t, busqueda_inteligente: newValue })));
+
+    try {
+      await apiFetch(`/totems/busqueda-inteligente/bulk`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: newValue }),
+      });
+    } catch (error) {
+      // Revertir (idealmente recargar los datos del servidor porque cada uno podría tener estados diferentes antes)
+      await fetchTotems();
+      alert("Error al actualizar la Búsqueda Inteligente globalmente");
     }
   };
 
@@ -454,6 +491,8 @@ export function useTotems(options?: UseTotemsOptions) {
     handleDelete,
     toggleBlockScreenSaver,
     toggleModoPrueba,
+    toggleBusquedaInteligente,
+    toggleBusquedaInteligenteBulk,
     toggleStatus,
     sendTotemCommand: (totemId: string | number, command: string) => {
       const socket = getSocket();

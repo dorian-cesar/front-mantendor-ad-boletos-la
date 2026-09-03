@@ -13,6 +13,7 @@ interface TotemModalProps {
     direccion: string; 
     empresa_ids?: string[];
     video_ids?: string[];
+    busqueda_inteligente?: boolean;
   };
   setForm: (form: any) => void;
   onSave: () => void;
@@ -101,6 +102,26 @@ export function TotemModal({
               onChange={(e) => setForm({ ...form, direccion: e.target.value })}
               className="w-full px-5 py-3.5 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-2xl text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-slate-900/10 dark:focus:ring-white/10 focus:border-slate-900 dark:focus:border-white focus:bg-white dark:focus:bg-zinc-950 transition-all shadow-sm outline-none"
             />
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-2xl">
+            <div>
+              <label className="block text-sm font-bold text-slate-900 dark:text-white mb-1">
+                Búsqueda Inteligente
+              </label>
+              <p className="text-xs text-slate-500">
+                Habilitar funcionalidad avanzada de búsqueda en el tótem
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                className="sr-only peer"
+                checked={form.busqueda_inteligente || false}
+                onChange={(e) => setForm({ ...form, busqueda_inteligente: e.target.checked })}
+              />
+              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            </label>
           </div>
 
           <div className="pt-2 space-y-4">
